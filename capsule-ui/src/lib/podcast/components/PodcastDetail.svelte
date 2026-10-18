@@ -76,6 +76,8 @@
 						disabled={!podcast?.episodes}><img src={rewind} alt="Rewind icon" /></button
 					>
 
+					<!-- TODO: make into button group for better a11y -->
+					<!-- TODO: also make the space bar toggle these buttons -->
 					{#if playing}
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
@@ -129,13 +131,18 @@
 <style lang="scss">
 	article {
 		img.podcast-cover {
-			min-height: 10rem;
-			max-height: 10rem;
+			min-height: 8rem;
+			max-height: 8rem;
+			min-width: 8rem;
+			max-width: 8rem;
+			border-radius: 8rem;
+			margin: auto;
 		}
 
 		div.audio-buttons {
 			display: flex;
 			align-items: center;
+			justify-content: center;
 			gap: 1rem;
 
 			button {
@@ -143,6 +150,9 @@
 				height: 2rem;
 				min-width: 2rem;
 				width: 2rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 
 				&:nth-of-type(3) {
 					min-height: 3.5rem;

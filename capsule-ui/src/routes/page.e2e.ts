@@ -9,13 +9,17 @@ test('Document has title "Capsule"', async ({ page }) => {
 	await expect(page).toHaveTitle(/Capsule/);
 });
 
-test('Page has title "Capsule"', async ({ page }) => {
+test('Page has sr-only title: "Capsule"', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'Capsule' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Capsule' })).toContainClass('sr-only');
 });
 
 test('Page has search form', async ({ page }) => {
 	await page.goto('/');
+	await expect(page.locator('p')).toBeVisible();
+	await expect(page.locator('p')).toContainText('Capsule');
+	await expect(page.locator('p')).toHaveAttribute('aria-hidden', 'true');
 	expect(page.getByRole('form', { name: 'search-podcasts' })).toBeDefined();
 });
 
