@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LoadingIndicator from '#lib/loading/component/LoadingIndicator.svelte';
+	import PodcastSearchCard from '#lib/podcast/components/PodcastSearchCard.svelte';
 	import type { Podcast } from '#lib/podcast/model/podcast.ts';
 	import { debounceTime, Subject, Subscription, tap } from 'rxjs';
 	import { onDestroy, onMount } from 'svelte';
@@ -15,27 +16,48 @@
 
 	let searching = $state(false);
 
-	function handleSearch(e: Event): void {
-		e.preventDefault();
+	function handleInput(e: Event): void {
+		const value = (e.target as HTMLInputElement)?.value;
 
+		search(value);
+	}
+
+	function search(value: string): void {
 		hasSearched = true;
 
 		searching = true;
 
-		const value = (e.target as HTMLInputElement)?.value;
 		search$.next(value);
+	}
+
+	function handleSearch(e: Event): void {
+		e.preventDefault();
+
+		const form = new FormData(e.target as HTMLFormElement);
+
+		const searchText = (form.get('search') as string | null) ?? '';
+
+		search(searchText);
 	}
 
 	function listenForSearchChanges(): Subscription {
 		return search$$
 			.pipe(
 				debounceTime(500),
-				tap((text) => {
+				tap(async (text) => {
 					console.log(`User searching for: ${text}`);
 
-					setTimeout(() => {
+					try {
+						const response = await fetch(`/api/podcasts?q=${text}`);
+
+						if (response.ok) {
+							searchResults = (await response.json()) as Podcast[];
+						}
+					} catch (e) {
+						console.log(`Error occurred fetching podcats for query: ${text}\n${JSON.stringify(e)}`);
+					} finally {
 						searching = false;
-					}, 250);
+					}
 				})
 			)
 			.subscribe();
@@ -57,20 +79,20 @@
 			name="search"
 			type="search"
 			class="h-10 rounded-md border border-slate-700 px-2"
-			oninput={handleSearch}
+			oninput={handleInput}
 			autocomplete="off"
 		/>
 	</label>
 </form>
 
-<div>
+<div class="h-10/12 max-h-10/12">
 	{#if hasSearched && searching}
 		<LoadingIndicator />
 	{:else}
-		<ul class="text-center">
-			{#each searchResults as s (s.name)}
-				<li>
-					<p>{s.name}</p>
+		<ul class="flex h-full flex-col overflow-auto px-4 text-center">
+			{#each searchResults as podcast (podcast.name)}
+				<li class="mb-4 shadow-md">
+					<PodcastSearchCard {podcast} />
 				</li>
 			{:else}
 				{#if hasSearched}

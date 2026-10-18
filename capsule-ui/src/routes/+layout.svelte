@@ -1,5 +1,8 @@
 <script lang="ts">
 	import favicon from '#lib/assets/favicon.svg';
+	import Footer from '#lib/layout/footer/Footer.svelte';
+	import Header from '#lib/layout/header/Header.svelte';
+	import Main from '#lib/layout/main/Main.svelte';
 	import type { LayoutProps } from './$types';
 	import './layout.css';
 
@@ -10,4 +13,18 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children()}
+<div class="capsule">
+	<Header />
+
+	<Main {children} />
+
+	<Footer />
+</div>
+
+<style lang="scss">
+	.capsule {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+</style>
