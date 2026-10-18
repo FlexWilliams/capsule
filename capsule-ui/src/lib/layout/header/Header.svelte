@@ -2,10 +2,10 @@
 	import { resolve } from '$app/paths';
 </script>
 
-<header>
-	<a href={resolve('/')}>
-		<h1 class="text-center text-3xl">Capsule</h1>
+<header
+	class="flex h-1/12 max-h-1/12 w-full items-center rounded-b-md bg-slate-200 shadow-sm shadow-slate-300"
+>
+	<a href={resolve('/')} class="w-full">
+		<h1 class="w-full text-center text-3xl">Capsule</h1>
 	</a>
-
-	<h2 class="text-center text-xl">Podcasts Your Way</h2>
 </header>

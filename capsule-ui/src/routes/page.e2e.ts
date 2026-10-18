@@ -14,11 +14,6 @@ test('Page has title "Capsule"', async ({ page }) => {
 	await expect(page.getByRole('heading', { name: 'Capsule' })).toBeVisible();
 });
 
-test('Page has title "Podcasts Your Way"', async ({ page }) => {
-	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Podcasts Your Way' })).toBeVisible();
-});
-
 test('Page has search form', async ({ page }) => {
 	await page.goto('/');
 	expect(page.getByRole('form', { name: 'search-podcasts' })).toBeDefined();
