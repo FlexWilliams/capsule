@@ -2,7 +2,7 @@
 	let { children } = $props();
 </script>
 
-<main class="m-h-8/12 m-auto flex h-8/12 flex-col items-center">
+<main class="m-h-10/12 m-auto flex h-10/12 flex-col items-center">
 	<noscript>
 		<p class="mx-auto mt-2 flex w-100 rounded-md bg-amber-200 p-2 text-center">
 			Unfortunately to run this app you need to enable JavaScript.

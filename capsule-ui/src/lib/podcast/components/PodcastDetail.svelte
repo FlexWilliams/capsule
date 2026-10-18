@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { Podcast } from '../model/podcast';
+	import PodcastEpisodeCard from './PodcastEpisodeCard.svelte';
 
 	let podcast: Podcast | null = $state(null);
 
@@ -37,13 +38,21 @@
 		<LoadingIndicator />
 	{:else}
 		{#if podcast}
-			<h2 class="text-2xl">{podcast?.name}</h2>
+			<h2 class="text-center text-2xl">{podcast?.name}</h2>
 
 			<img
 				src={podcast?.imageUrl}
 				alt={`Podcast cover for "${podcast?.name}"`}
 				class="rounded-md shadow-xl"
 			/>
+
+			<ul class="max-w-full flex-2 overflow-auto">
+				{#each podcast?.episodes as episode (episode?.guid)}
+					<li class="mb-4 h-32 overflow-hidden rounded-md bg-slate-100">
+						<PodcastEpisodeCard {episode} />
+					</li>
+				{/each}
+			</ul>
 		{:else}
 			<p class="rounded-sm bg-amber-200 px-4 py-2 text-center">Podcast not found!</p>
 			<a href={resolve('/')} class="underline">Go back Home?</a>
