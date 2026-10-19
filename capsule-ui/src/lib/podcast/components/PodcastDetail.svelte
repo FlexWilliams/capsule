@@ -112,7 +112,7 @@
 
 			<ul class="max-w-full flex-1 overflow-auto sm:flex-2">
 				{#each podcast?.episodes as episode (episode?.guid)}
-					<li class="mb-4 h-32 overflow-hidden rounded-md bg-slate-100">
+					<li class="mb-4 h-40 rounded-md bg-slate-100">
 						<PodcastEpisodeCard {episode} />
 					</li>
 				{:else}

@@ -11,6 +11,7 @@ export interface PodcastEpisode {
 	isExplicit: boolean;
 	publishDate?: string;
 	contentLength?: number;
+	contentLengthInMb?: number;
 	episode?: number;
 	tags: string[];
 }

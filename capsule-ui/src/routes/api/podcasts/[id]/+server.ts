@@ -66,6 +66,9 @@ export const GET: RequestHandler = async ({ params }) => {
 			isExplicit: e.isExplicit,
 			publishDate: e.publishDate,
 			contentLength: e.contentLength,
+			contentLengthInMb: e.contentLength
+				? Number(Math.fround(e.contentLength / 1024 / 1024).toFixed(2))
+				: 0,
 			episode: e.episode,
 			tags: e.tags
 		}));
