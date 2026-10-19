@@ -1,1 +1,1 @@
-# Capsule Podcasts - UI
+# Capsule Podcasts
