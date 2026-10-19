@@ -71,6 +71,10 @@
 				overflow: hidden;
 			}
 
+			summary {
+				cursor: pointer;
+			}
+
 			dl {
 				padding: 1rem;
 				/**

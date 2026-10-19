@@ -1,3 +1,9 @@
+export type PodcastIndexPodcast = {
+	podcastGuid: string;
+	title: string;
+	image: string;
+};
+
 export const mockPodcasts = [
 	{
 		popularity: 194,
@@ -10599,3 +10605,58 @@ export const mockPodcasts = [
 		recommenderHost: 'thesonarnetwork.com'
 	}
 ];
+
+// TODO: get working with api mocks
+// See: https://validator.w3.org/feed/#validate_by_input
+export const mockRssResponse = `
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet href="https://rss.buzzsprout.com/styles.xsl" type="text/xsl"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:psc="http://podlove.org/simple-chapters" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <atom:link href="https://rss.buzzsprout.com/1039483.rss" rel="self" type="application/rss+xml" />
+  <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" xmlns="http://www.w3.org/2005/Atom" />
+  <title>Diva Tonight with Carlene Humphrey</title>
+
+  <lastBuildDate>Sun, 18 Oct 2026 15:21:34 -0400</lastBuildDate>
+  <link>http://divatonight.buzzsprout.com</link>
+  <language>en-us</language>
+  <copyright>© 2026 Diva Tonight with Carlene Humphrey</copyright>
+  <podcast:locked>yes</podcast:locked>
+  <podcast:funding url="https://www.patreon.com/diivaontheradio">Support this Podcast</podcast:funding>
+  <podcast:guid>d0fc14e6-81c0-5b96-9a1a-edfecc5fc9f0</podcast:guid>
+  <podcast:txt purpose="verify">divaontheradio@gmail.com</podcast:txt>
+<podcast:podroll>
+    <podcast:remoteItem feedGuid="82421610-30bc-5211-9fee-5b788bc86012" feedUrl="https://feeds.megaphone.fm/thediaryofaceo" />
+    <podcast:remoteItem feedGuid="101bb2fc-805e-5852-8608-115f99b54f7f" feedUrl="https://www.spreaker.com/show/6317216/episodes/feed" />
+    <podcast:remoteItem feedGuid="c99ae6aa-2b9a-5ef3-8bfd-d83a45418b38" feedUrl="https://feeds.simplecast.com/AAvup9Zz" />
+    <podcast:remoteItem feedGuid="323cdba9-cf7c-54cc-bee0-dd0cd1859736" feedUrl="https://feeds.acast.com/public/shows/668af2849bf81dc06a286b51" />
+    <podcast:remoteItem feedGuid="3b61f2c5-0177-5957-b22e-d3d176e30766" feedUrl="https://feeds.buzzsprout.com/1980721.rss" />
+    <podcast:remoteItem feedGuid="b0f75750-919e-5882-ae23-6eb032108721" feedUrl="https://feeds.soundcloud.com/users/soundcloud:users:388266863/sounds.rss" />
+    <podcast:remoteItem feedGuid="efc7cac2-4bed-5a0b-864a-3c06609ce02c" feedUrl="https://www.spreaker.com/show/6509436/episodes/feed" />
+    <podcast:remoteItem feedGuid="d964754f-ac35-5a2c-931c-e7ac94237be8" feedUrl="https://feeds.simplecast.com/rpKQEwel" />
+    <podcast:remoteItem feedGuid="f2023d43-d2fc-5c80-833c-89b5d787576d" feedUrl="https://rss.buzzsprout.com/1562981.rss" />
+  </podcast:podroll>
+   <item>
+    <itunes:title>2021 Year in Review: Our Biggest Moments</itunes:title>
+    <title>2021 Year in Review: Our Biggest Moments</title>
+    <itunes:summary></itunes:summary>
+    <description></description>
+    <content:encoded></content:encoded>
+    <enclosure url="https://www.buzzsprout.com/1039483/episodes/9782499-2021-year-in-review-our-biggest-moments.mp3" length="35302082" type="audio/mpeg" />
+    <itunes:author>Carlene Humphrey</itunes:author>
+    <guid isPermaLink="false">Buzzsprout-9782499</guid>
+    <pubDate>Wed, 01 Jan 2020 18:00:00 -0500</pubDate>
+    <podcast:transcript url="https://www.buzzsprout.com/1039483/9782499/transcript" type="text/html" />
+    <podcast:transcript url="https://www.buzzsprout.com/1039483/9782499/transcript.json" type="application/json" />
+    <podcast:transcript url="https://www.buzzsprout.com/1039483/9782499/transcript.srt" type="application/x-subrip" />
+    <podcast:transcript url="https://www.buzzsprout.com/1039483/9782499/transcript.vtt" type="text/vtt" />
+    <podcast:soundbite startTime="0.0" duration="60.0" />
+    <itunes:duration>2938</itunes:duration>
+    <itunes:keywords></itunes:keywords>
+    <itunes:season>1</itunes:season>
+    <itunes:episode>22</itunes:episode>
+    <itunes:episodeType>full</itunes:episodeType>
+    <itunes:explicit>false</itunes:explicit>
+  </item>
+</channel>
+</rss>`;

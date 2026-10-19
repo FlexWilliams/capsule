@@ -16,12 +16,12 @@ type PodcastIndexPodcast = {
 	sources: PodcastIndexPodcastSource[];
 };
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, fetch }) => {
 	const id = params.id;
 
 	if (!id) {
 		return new Response(null, {
-			status: 400,
+			status: 200,
 			statusText: 'No id provided!'
 		});
 	}
@@ -45,33 +45,38 @@ export const GET: RequestHandler = async ({ params }) => {
 			});
 		}
 
-		const response = await fetch(firstSource);
+		let episodes: PodcastEpisode[] = [];
 
-		const xmlString = await response.text();
+		try {
+			const response = await fetch(firstSource);
 
-		const podcastFeed = await parseFeedToJson(xmlString);
+			const xmlString = await response.text();
 
-		const sesamyPodcastFeed = parseFeedToSesamy(podcastFeed);
+			const podcastFeed = await parseFeedToJson(xmlString);
 
-		const episodes: PodcastEpisode[] = sesamyPodcastFeed.episodes.map((e) => ({
-			guid: e.guid,
-			title: e.title,
-			subtitle: e.subtitle,
-			description: e.description,
-			summary: e.summary,
-			url: e.url,
-			link: e.link,
-			image: e.image,
-			duration: e.duration,
-			isExplicit: e.isExplicit,
-			publishDate: e.publishDate,
-			contentLength: e.contentLength,
-			contentLengthInMb: e.contentLength
-				? Number(Math.fround(e.contentLength / 1024 / 1024).toFixed(2))
-				: 0,
-			episode: e.episode,
-			tags: e.tags
-		}));
+			const sesamyPodcastFeed = parseFeedToSesamy(podcastFeed);
+			episodes = sesamyPodcastFeed.episodes.map((e) => ({
+				guid: e.guid,
+				title: e.title,
+				subtitle: e.subtitle,
+				description: e.description,
+				summary: e.summary,
+				url: e.url,
+				link: e.link,
+				image: e.image,
+				duration: e.duration,
+				isExplicit: e.isExplicit,
+				publishDate: e.publishDate,
+				contentLength: e.contentLength,
+				contentLengthInMb: e.contentLength
+					? Number(Math.fround(e.contentLength / 1024 / 1024).toFixed(2))
+					: 0,
+				episode: e.episode,
+				tags: e.tags
+			}));
+		} catch (e) {
+			console.error(`Error fetching rss fedd for source: ${firstSource}.\n${JSON.stringify(e)}`);
+		}
 
 		const podcast = {
 			id: rawPodcast.podcastGuid,
@@ -84,6 +89,6 @@ export const GET: RequestHandler = async ({ params }) => {
 	} catch (e) {
 		console.error(`Error fetching podcasts from "podcastindex.org".\n${JSON.stringify(e)}`);
 
-		return new Response(JSON.stringify([]), { status: 200 });
+		return new Response(null, { status: 404 });
 	}
 };
