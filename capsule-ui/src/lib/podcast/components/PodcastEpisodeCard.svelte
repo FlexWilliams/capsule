@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { audioState, audioState$$setIsPlaying } from '#lib/audio/state/audio.state.svelte.ts';
 	import type { PodcastEpisode } from '../model/podcast';
+	import { podcastState, podcastState$$setSelectedPodcastUrl } from '../state/podcast.state.svelte';
 
 	interface PodcastEpisodeCardProps {
 		episode: PodcastEpisode;
@@ -7,9 +9,29 @@
 
 	let { episode }: PodcastEpisodeCardProps = $props();
 
+	let isSelectedPodcast = $derived(podcastState.selectedPodcastUrl === episode?.url);
+
+	let isPlaying = $derived(audioState.isPlaying);
+
 	let pubDate = $derived(
 		`${new Date(episode?.publishDate || new Date().getTime()).toLocaleDateString()} ${new Date(episode?.publishDate || new Date().getTime()).toLocaleTimeString()}`
 	);
+
+	function handlePlayButtonClick(episodeUrl?: string): void {
+		// TODO: vibrartion svc
+		if (!episodeUrl) {
+			return;
+		}
+
+		// TODO: REVIEW: should this go up to the parent component to handle $state change
+		// or leave here....
+		if (isPlaying && isSelectedPodcast) {
+			audioState$$setIsPlaying(false);
+		} else {
+			podcastState$$setSelectedPodcastUrl(episodeUrl);
+			audioState$$setIsPlaying(true);
+		}
+	}
 </script>
 
 <article class="relative mb-6 h-full overflow-hidden rounded-sm p-4 shadow-md">
@@ -35,7 +57,20 @@
 
 	<footer>
 		<p class="text-sm">{pubDate}</p>
-		<button class="w-20 rounded-sm bg-slate-400 py-1 shadow-md">Play</button>
+		<button
+			class="w-20 rounded-sm bg-slate-400 py-1 shadow-md"
+			onclick={() => handlePlayButtonClick(episode?.url)}
+		>
+			{#if isSelectedPodcast}
+				{#if isPlaying}
+					<span>Playing</span>
+				{:else}
+					<span>Paused</span>
+				{/if}
+			{:else}
+				<span>Play</span>
+			{/if}
+		</button>
 	</footer>
 </article>
 

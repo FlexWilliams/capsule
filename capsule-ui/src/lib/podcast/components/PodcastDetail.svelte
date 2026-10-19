@@ -6,6 +6,7 @@
 	import previous from '#lib/assets/icons/at-icons--previous.svg';
 	import rewind from '#lib/assets/icons/at-icons--rewind.svg';
 	import mic from '#lib/assets/images/pexels-mic-1867121_1280.jpg';
+	import { audioState, audioState$$setIsPlaying } from '#lib/audio/state/audio.state.svelte.ts';
 	import LoadingIndicator from '#lib/loading/component/LoadingIndicator.svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -17,9 +18,9 @@
 
 	let loading = $state(true);
 
-	let playing = $state(false);
-
 	let defaultCover = $state(mic);
+
+	let isPlaying = $derived(audioState.isPlaying);
 
 	async function fetchPodcast(): Promise<void> {
 		const podcastId = page.params.id;
@@ -78,12 +79,12 @@
 
 					<!-- TODO: make into button group for better a11y -->
 					<!-- TODO: also make the space bar toggle these buttons -->
-					{#if playing}
+					{#if isPlaying}
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Pause"
 							onclick={() => {
-								playing = !playing;
+								audioState$$setIsPlaying(false);
 							}}
 							disabled={!podcast?.episodes}><img src={pause} alt="Pause icon" /></button
 						>
@@ -92,7 +93,7 @@
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Play"
 							onclick={() => {
-								playing = !playing;
+								audioState$$setIsPlaying(true);
 							}}
 							disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
 						>

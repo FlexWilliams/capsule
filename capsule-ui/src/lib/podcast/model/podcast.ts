@@ -5,7 +5,6 @@ export interface PodcastEpisode {
 	description?: string;
 	summary?: string;
 	url?: string;
-	link?: string;
 	image?: string;
 	duration?: number;
 	isExplicit: boolean;
