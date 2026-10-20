@@ -23,8 +23,6 @@
 
 			return;
 		}
-
-		console.log(audioPlayer);
 	}
 
 	async function handleCanPlay(e: Event): Promise<void> {
@@ -84,13 +82,9 @@
 	$effect(() => {
 		if (selectedPodcastUrl) {
 			untrack(() => {
-				console.log(`selectedPodcastUrl updated: ${selectedPodcastUrl}`);
+				console.log(`Request for new podcast URL: ${selectedPodcastUrl}`);
 
 				loadPodcast(selectedPodcastUrl);
-			});
-		} else {
-			untrack(() => {
-				console.log(`selectedPodcastUrl empty`);
 			});
 		}
 	});

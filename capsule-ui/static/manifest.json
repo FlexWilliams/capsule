@@ -1,0 +1,44 @@
+{
+  "theme_color": "#30374b",
+  "background_color": "#fcfcfc",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "images/icons/icon512_maskable.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "images/icons/icon512_rounded.png",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshots/capsule.gif",
+      "sizes": "374x668",
+      "type": "image/gif",
+      "form_factor": "wide",
+      "label": "Capsule Podcasts"
+    },
+    {
+      "src": "images/screenshots/capsule.gif",
+      "sizes": "374x668",
+      "type": "image/gif",
+      "form_factor": "narrow",
+      "label": "Capsule Podcasts"
+    }
+  ],
+  "orientation": "any",
+  "display": "standalone",
+  "dir": "auto",
+  "lang": "en-US",
+  "name": "capsule",
+  "short_name": "capsule",
+  "start_url": "/",
+  "scope": "/",
+  "description": "Minimal Podcast App",
+  "id": "capsule-podcasts"
+}

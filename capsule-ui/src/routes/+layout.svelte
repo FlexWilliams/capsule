@@ -1,5 +1,5 @@
 <script lang="ts">
-	import favicon from '#lib/assets/favicon.svg';
+	import favicon from '#lib/assets/favicon.ico';
 	import AudioPlayer from '#lib/audio/component/AudioPlayer.svelte';
 	import Footer from '#lib/layout/footer/Footer.svelte';
 	import Header from '#lib/layout/header/Header.svelte';
