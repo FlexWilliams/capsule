@@ -18,6 +18,14 @@ export interface PodcastEpisode {
 export interface Podcast {
 	id: string;
 	name: string;
-	imageUrl: string;
+	imageUrl?: string;
+	rssUrl: string;
 	episodes?: PodcastEpisode[];
+}
+
+export interface PodcastRssMeta {
+	name: string;
+	id: string;
+	rssUrl: string;
+	imageUrl?: string;
 }

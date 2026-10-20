@@ -1,5 +1,6 @@
 export type PodcastIndexPodcast = {
 	podcastGuid: string;
+	sourceFeedUrl: string;
 	title: string;
 	image: string;
 };

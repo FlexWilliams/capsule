@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { podcastState } from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { onMount, untrack } from 'svelte';
-	import { audioState } from '../state/audio.state.svelte';
+	import { audioState, audioState$$setLoading } from '../state/audio.state.svelte';
 
 	const audioPlayerId = 'audio-player';
 
@@ -35,6 +35,8 @@
 		}
 
 		await audioPlayer.play();
+
+		audioState$$setLoading(false);
 
 		console.log(`Podcast now playing...`);
 	}
@@ -73,6 +75,8 @@
 		}
 
 		audioPlayer.pause();
+
+		audioState$$setLoading(true);
 
 		audioPlayer.src = url;
 
