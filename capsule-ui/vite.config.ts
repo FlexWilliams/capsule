@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-cloudflare';
 import { enhancedImages } from '@sveltejs/enhanced-img';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
@@ -18,7 +19,13 @@ export default defineConfig({
 			},
 			adapter: adapter(),
 			// See below for an explanation of these options
-			experimental: { remoteFunctions: true }
+			experimental: { remoteFunctions: true },
+
+			// See: https://svelte.dev/docs/kit/integrations#vitePreprocess
+			preprocess: vitePreprocess({
+				style: true, // default value
+				script: false // default value
+			})
 		})
 	],
 	test: {

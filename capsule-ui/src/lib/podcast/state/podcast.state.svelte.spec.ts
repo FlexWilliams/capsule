@@ -1,5 +1,10 @@
 import { expect, test } from 'vitest';
-import { podcastState, podcastState$$setSelectedPodcastUrl } from './podcast.state.svelte';
+import type { Podcast } from '../model/podcast';
+import {
+	podcastState,
+	podcastState$$setSelectedPodcast,
+	podcastState$$setSelectedPodcastUrl
+} from './podcast.state.svelte';
 
 test('state should be defined', () => {
 	const state = podcastState;
@@ -10,7 +15,24 @@ test('state should be defined', () => {
 test('initial state should contain correct default values', () => {
 	const state = podcastState;
 
+	expect(state.selectedPodcast).toEqual(null);
 	expect(state.selectedPodcastUrl).toEqual(null);
+});
+
+test('podcastState$$setSelectedPodcast', () => {
+	const state = podcastState;
+
+	expect(state.selectedPodcast).toEqual(null);
+
+	const podcast: Podcast = {
+		id: 'id',
+		name: 'name',
+		rssUrl: ''
+	};
+	podcastState$$setSelectedPodcast(podcast);
+	expect(state.selectedPodcast).toEqual(podcast);
+	podcastState$$setSelectedPodcast(null);
+	expect(state.selectedPodcast).toEqual(null);
 });
 
 test('podcastState$$setSelectedPodcastUrl', () => {

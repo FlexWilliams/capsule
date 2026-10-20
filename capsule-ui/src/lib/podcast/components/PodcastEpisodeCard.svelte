@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { audioState, audioState$$setIsPlaying } from '#lib/audio/state/audio.state.svelte.ts';
+	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
+	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
 	import type { PodcastEpisode } from '../model/podcast';
-	import { podcastState, podcastState$$setSelectedPodcastUrl } from '../state/podcast.state.svelte';
+	import { PodcastService } from '../service/podcast.service.svelte';
+	import { podcastState } from '../state/podcast.state.svelte';
 
 	interface PodcastEpisodeCardProps {
 		episode: PodcastEpisode;
@@ -23,13 +25,12 @@
 			return;
 		}
 
-		// TODO: REVIEW: should this go up to the parent component to handle $state change
-		// or leave here....
 		if (isPlaying && isSelectedPodcast) {
-			audioState$$setIsPlaying(false);
+			AudioService.pause();
 		} else {
-			podcastState$$setSelectedPodcastUrl(episodeUrl);
-			audioState$$setIsPlaying(true);
+			PodcastService.setSelectedPodcastUrl(episodeUrl);
+
+			AudioService.play();
 		}
 	}
 </script>

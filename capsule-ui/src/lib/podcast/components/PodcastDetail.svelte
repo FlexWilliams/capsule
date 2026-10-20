@@ -7,16 +7,18 @@
 	import previous from '#lib/assets/icons/at-icons--previous.svg';
 	import rewind from '#lib/assets/icons/at-icons--rewind.svg';
 	import mic from '#lib/assets/images/pexels-mic-1867121_1280.jpg';
-	import { audioState, audioState$$setIsPlaying } from '#lib/audio/state/audio.state.svelte.ts';
+	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
+	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
 	import LoadingIndicator from '#lib/loading/component/LoadingIndicator.svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { Podcast, PodcastRssMeta } from '../model/podcast';
-	import { podcastState, podcastState$$setSelectedPodcastUrl } from '../state/podcast.state.svelte';
+	import { PodcastService } from '../service/podcast.service.svelte';
+	import { podcastState } from '../state/podcast.state.svelte';
 	import PodcastEpisodeCard from './PodcastEpisodeCard.svelte';
 
-	let podcast: Podcast | null = $state(null);
+	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
 
 	let loading = $state(true);
 
@@ -27,6 +29,12 @@
 	let podcastLoading = $derived(audioState.loading);
 
 	let selectedPodcastUrl = $derived(podcastState.selectedPodcastUrl);
+
+	let currentTime = $derived(audioState.currentTime);
+
+	let duration = $derived(audioState.duration);
+
+	// let progress = $derived(duration > 0 ? Math.floor(currentTime / duration) * 100 : 0);
 
 	async function fetchPodcastViaRss(podcastId: string): Promise<void> {
 		// TODO: update to use localforage
@@ -63,7 +71,7 @@
 			if (!response.ok) {
 				console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}`);
 			} else {
-				podcast = (await response.json()) as Podcast;
+				PodcastService.setSelectedPodcast((await response.json()) as Podcast);
 			}
 		} catch (e) {
 			console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}.\n${JSON.stringify(e)}`);
@@ -92,7 +100,7 @@
 			if (!response.ok) {
 				console.error(`Unable to fetch podcast with id: ${podcastId}`);
 			} else {
-				podcast = (await response.json()) as Podcast;
+				PodcastService.setSelectedPodcast((await response.json()) as Podcast);
 			}
 		} catch (e) {
 			console.error(`Unable to fetch podcast with id: ${podcastId}.\n${JSON.stringify(e)}`);
@@ -106,6 +114,33 @@
 		img.src = defaultCover;
 	}
 
+	function formatTime(timeInSeconds: number): string {
+		timeInSeconds = Math.floor(timeInSeconds);
+
+		const seconds = timeInSeconds % 60;
+		const minutes = Math.floor(timeInSeconds / 60) % 60;
+		const hours = Math.floor(timeInSeconds / 60 / 60);
+
+		const secondsStr = seconds > 10 ? seconds : `0${seconds}`;
+		const minutesStr = minutes > 10 ? minutes : `0${minutes}`;
+		const hoursStr = hours > 10 ? hours : `0${hours}`;
+
+		return `${hoursStr}:${minutesStr}:${secondsStr}`;
+	}
+
+	// TODO: add easing to the progress bar value, too immediate!
+	function handleProgressBarClick(e: MouseEvent): void {
+		const totalWidth = (e.target as HTMLButtonElement)?.clientWidth;
+
+		const percentage = Math.fround(e.offsetX / totalWidth);
+
+		const seekTo = Math.floor(duration * percentage);
+
+		console.log(`Seeking to: ${percentage}% ~= ${seekTo}`);
+
+		AudioService.seek(seekTo);
+	}
+
 	onMount(async () => {
 		await fetchPodcast();
 	});
@@ -116,25 +151,31 @@
 		<LoadingIndicator />
 	{:else}
 		{#if podcast}
-			<div class="flex flex-1 flex-col items-center justify-center gap-4">
-				<h2 class="text-center text-xl">{podcast?.name || `Unknown Podcast`}</h2>
+			<div class="flex w-full flex-1 flex-col items-center justify-center gap-4">
+				<!-- TODO: make into component! -->
+				<div class="podcast-header flex flex-1 flex-col items-center justify-center gap-4">
+					<h2 class="text-center text-xl">{podcast?.name || `Unknown Podcast`}</h2>
 
-				<img
-					src={podcast?.imageUrl || defaultCover}
-					alt={`Podcast cover for "${podcast?.name}"`}
-					class="podcast-cover rounded-md shadow-xl"
-					onerror={handleImageLoadError}
-				/>
+					<img
+						src={podcast?.imageUrl || defaultCover}
+						alt={`Podcast cover for "${podcast?.name}"`}
+						class="podcast-cover rounded-md shadow-xl"
+						onerror={handleImageLoadError}
+					/>
+				</div>
 
+				<!-- TODO: make into component! -->
 				<div class="audio-buttons">
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Previous episode"
+						onclick={AudioService.previous}
 						disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
 					>
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Rewind audio"
+						onclick={AudioService.rewind}
 						disabled={!podcast?.episodes}><img src={rewind} alt="Rewind icon" /></button
 					>
 
@@ -144,9 +185,7 @@
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Pause"
-							onclick={() => {
-								audioState$$setIsPlaying(false);
-							}}
+							onclick={AudioService.pause}
 							disabled={!podcast?.episodes}
 						>
 							{#if podcastLoading}
@@ -166,9 +205,10 @@
 										return;
 									}
 
-									podcastState$$setSelectedPodcastUrl(episode.url);
+									PodcastService.setSelectedPodcastUrl(episode.url);
 								}
-								audioState$$setIsPlaying(true);
+
+								AudioService.play();
 							}}
 							disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
 						>
@@ -176,16 +216,39 @@
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Fast forward audio"
+						onclick={AudioService.fastForward}
 						disabled={!podcast?.episodes}><img src={fastForward} alt="Fast forward icon" /></button
 					>
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Next episode"
+						onclick={AudioService.next}
 						disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button
 					>
 				</div>
+
+				<!-- TODO: make into component! -->
+				<div class="progress-bar w-full">
+					<div class="progress-wrapper relative flex">
+						<progress id="progress-bar" max={duration} value={currentTime} class="w-full rounded-md"
+						></progress>
+						<button
+							class="absolute h-full w-full"
+							aria-label="Seek to"
+							onclick={handleProgressBarClick}
+						></button>
+					</div>
+
+					<label for="progress-bar" class="flex min-h-8 items-center justify-between">
+						{#if selectedPodcastUrl}
+							<span class="text-xs">{formatTime(currentTime)}</span>
+							<span class="text-xs">{formatTime(duration)}</span>
+						{/if}
+					</label>
+				</div>
 			</div>
 
+			<!-- TODO: make into component! -->
 			<ul class="max-w-full flex-1 overflow-auto sm:flex-2">
 				{#each podcast?.episodes as episode (episode?.guid)}
 					<li class="mb-4 h-40 rounded-md bg-slate-100">
@@ -222,10 +285,10 @@
 			gap: 1rem;
 
 			button {
-				min-height: 2rem;
-				height: 2rem;
-				min-width: 2rem;
-				width: 2rem;
+				min-height: 2.5rem;
+				height: 2.5rem;
+				min-width: 2.5rem;
+				width: 2.5rem;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -265,5 +328,38 @@
 		animation-duration: 5000ms;
 		animation-iteration-count: infinite;
 		animation-timing-function: linear;
+	}
+
+	div.progress-wrapper {
+		width: 100%;
+		height: 8px;
+		border-radius: 16px;
+	}
+
+	@mixin progressbar {
+		width: 100%;
+		height: 8px;
+		border-radius: 16px;
+		cursor: pointer;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		background-color: rgb(218, 222, 230);
+	}
+
+	// See: https://stackoverflow.com/a/34798353
+	progress {
+		@include progressbar;
+	}
+
+	progress::-webkit-progress-bar {
+		@include progressbar;
+	}
+	progress::-webkit-progress-value {
+		@include progressbar;
+		background-color: #30374b;
+	}
+	progress::-moz-progress-bar {
+		@include progressbar;
 	}
 </style>

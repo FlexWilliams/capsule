@@ -1,5 +1,11 @@
 import { expect, test } from 'vitest';
-import { audioState, audioState$$setIsPlaying, audioState$$setLoading } from './audio.state.svelte';
+import {
+	audioState,
+	audioState$$setCurrentTime,
+	audioState$$setDuration,
+	audioState$$setIsPlaying,
+	audioState$$setLoading
+} from './audio.state.svelte';
 
 test('state should be defined', () => {
 	const state = audioState;
@@ -33,4 +39,26 @@ test('audioState$$setLoading', () => {
 	expect(state.loading).toEqual(true);
 	audioState$$setLoading(false);
 	expect(state.loading).toEqual(false);
+});
+
+test('audioState$$setDuration', () => {
+	const state = audioState;
+
+	expect(state.duration).toEqual(0);
+
+	audioState$$setDuration(100);
+	expect(state.duration).toEqual(100);
+	audioState$$setDuration(0);
+	expect(state.duration).toEqual(0);
+});
+
+test('audioState$$setCurrentTime', () => {
+	const state = audioState;
+
+	expect(state.currentTime).toEqual(0);
+
+	audioState$$setCurrentTime(100);
+	expect(state.currentTime).toEqual(100);
+	audioState$$setCurrentTime(0);
+	expect(state.currentTime).toEqual(0);
 });
