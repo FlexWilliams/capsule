@@ -20,7 +20,12 @@ export const GET: RequestHandler = async ({ url }) => {
 			.filter((p) =>
 				searchText === '*' ? true : p.title.toLowerCase().includes(searchText.toLowerCase())
 			)
-			.map((p) => ({ id: p.podcastGuid, name: p.title, imageUrl: p.image }));
+			.map((p) => ({
+				id: p.podcastGuid,
+				name: p.title,
+				imageUrl: p.image,
+				rssUrl: p.sourceFeedUrl
+			}));
 
 		return new Response(JSON.stringify(podcasts), { status: 200 });
 	} catch (e) {

@@ -1,5 +1,5 @@
 import { mockPodcasts } from '#lib/podcast/model/mock.ts';
-import type { PodcastEpisode } from '#lib/podcast/model/podcast.ts';
+import type { Podcast, PodcastEpisode } from '#lib/podcast/model/podcast.ts';
 import { parseFeedToJson, parseFeedToSesamy } from '@sesamy/podcast-parser';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -13,6 +13,7 @@ type PodcastIndexPodcast = {
 	podcastGuid: string;
 	title: string;
 	image: string;
+	sourceFeedUrl: string;
 	sources: PodcastIndexPodcastSource[];
 };
 
@@ -78,10 +79,11 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
 			console.error(`Error fetching rss fedd for source: ${firstSource}.\n${JSON.stringify(e)}`);
 		}
 
-		const podcast = {
+		const podcast: Podcast = {
 			id: rawPodcast.podcastGuid,
 			name: rawPodcast.title,
 			imageUrl: rawPodcast.image,
+			rssUrl: rawPodcast.sourceFeedUrl,
 			episodes
 		};
 

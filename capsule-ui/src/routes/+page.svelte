@@ -1,11 +1,14 @@
 <script>
+	import AddViaRss from '#lib/rss/component/AddViaRss.svelte';
 	import PodcastSearch from '#lib/search/components/PodcastSearch.svelte';
 </script>
 
-<div class="h-full w-full">
+<div class="relative h-full w-full">
 	<p class="w-full text-center text-3xl" aria-hidden="true">Capsule</p>
 
 	<PodcastSearch />
+
+	<AddViaRss />
 </div>
 
 <style lang="scss">

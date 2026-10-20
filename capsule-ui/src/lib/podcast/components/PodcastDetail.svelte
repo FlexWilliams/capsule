@@ -1,4 +1,5 @@
 <script lang="ts">
+	import spin from '#lib/assets/icons/at-icons--arrows-clockwise.svg';
 	import fastForward from '#lib/assets/icons/at-icons--fast-forward.svg';
 	import next from '#lib/assets/icons/at-icons--next.svg';
 	import pause from '#lib/assets/icons/at-icons--pause.svg';
@@ -11,7 +12,8 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import type { Podcast } from '../model/podcast';
+	import type { Podcast, PodcastRssMeta } from '../model/podcast';
+	import { podcastState, podcastState$$setSelectedPodcastUrl } from '../state/podcast.state.svelte';
 	import PodcastEpisodeCard from './PodcastEpisodeCard.svelte';
 
 	let podcast: Podcast | null = $state(null);
@@ -22,8 +24,67 @@
 
 	let isPlaying = $derived(audioState.isPlaying);
 
+	let podcastLoading = $derived(audioState.loading);
+
+	let selectedPodcastUrl = $derived(podcastState.selectedPodcastUrl);
+
+	async function fetchPodcastViaRss(podcastId: string): Promise<void> {
+		// TODO: update to use localforage
+
+		const existing = localStorage.getItem('rss-podcasts');
+		if (!existing) {
+			// TODO: display error
+			loading = false;
+
+			return;
+		}
+
+		const savedPodcasts = JSON.parse(existing) as PodcastRssMeta[];
+
+		const found = savedPodcasts.find((s) => s.id === podcastId);
+		if (!found) {
+			// TODO: display error
+			loading = false;
+
+			return;
+		}
+
+		const { rssUrl } = found;
+
+		try {
+			const response = await fetch(`/api/rss`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ rssUrl })
+			});
+
+			if (!response.ok) {
+				console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}`);
+			} else {
+				podcast = (await response.json()) as Podcast;
+			}
+		} catch (e) {
+			console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}.\n${JSON.stringify(e)}`);
+		} finally {
+			loading = false;
+		}
+	}
+
 	async function fetchPodcast(): Promise<void> {
 		const podcastId = page.params.id;
+
+		if (!podcastId) {
+			console.error(`Unable to load podcast, no id provided!`);
+
+			return;
+		}
+
+		const addViaRss = page.url.searchParams.get('viaRss') === 'true';
+		if (addViaRss) {
+			return fetchPodcastViaRss(podcastId);
+		}
 
 		try {
 			const response = await fetch(`/api/podcasts/${podcastId || ''}`);
@@ -86,13 +147,27 @@
 							onclick={() => {
 								audioState$$setIsPlaying(false);
 							}}
-							disabled={!podcast?.episodes}><img src={pause} alt="Pause icon" /></button
+							disabled={!podcast?.episodes}
 						>
+							{#if podcastLoading}
+								<img src={spin} alt="Loading icon" class="spin" />
+							{:else}
+								<img src={pause} alt="Pause icon" />
+							{/if}
+						</button>
 					{:else}
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Play"
 							onclick={() => {
+								if (!selectedPodcastUrl) {
+									const episode = podcast?.episodes ? podcast.episodes[0] : undefined;
+									if (!episode || !episode?.url) {
+										return;
+									}
+
+									podcastState$$setSelectedPodcastUrl(episode.url);
+								}
 								audioState$$setIsPlaying(true);
 							}}
 							disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
@@ -173,5 +248,22 @@
 				}
 			}
 		}
+	}
+
+	/**TODO: centralize animation */
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.spin {
+		animation-name: spin;
+		animation-duration: 5000ms;
+		animation-iteration-count: infinite;
+		animation-timing-function: linear;
 	}
 </style>
