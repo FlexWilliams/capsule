@@ -65,12 +65,16 @@ export class AudioService {
 		});
 	}
 
-	public static seek(position: number): void {
+	public static seekTo(position: number): void {
 		AudioService.audio$.next({
 			action: AudioAction.Seek,
 			data: {
 				position
 			} as SeekData
 		});
+	}
+
+	public static setIsPlaying(isPlaying: boolean): void {
+		audioState$$setIsPlaying(isPlaying);
 	}
 }

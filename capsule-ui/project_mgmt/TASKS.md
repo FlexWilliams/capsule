@@ -64,7 +64,7 @@ Notes: For now, saving to localstorage using native api not indexdb. Prefer asyn
 
 <br>
 
-## CAP-003 - Wire up Audio Controls
+## (COMPLETE) CAP-003 - Wire up Audio Controls
 
 ### Description:
 
@@ -72,7 +72,7 @@ Notes: For now, saving to localstorage using native api not indexdb. Prefer asyn
 
 ### Acceptance Criteria:
 
-Verified By <> on:
+Verified By cube on: 10/20/26
 
 <br>
 
