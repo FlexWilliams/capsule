@@ -44,7 +44,7 @@ Verified By cube on: 10/19/26
 
 <br>
 
-## CAP-002 - Manual RSS link support
+## (COMPLETE) CAP-002 - Manual RSS link support
 
 ### Description:
 
@@ -58,7 +58,9 @@ Would be nice to save in local storage for future ease.
 - Add ability to allow user to import rss url and load podcast
 - BONUS: Save to storage upon success (Or cut to new story)
 
-Verified By <> on:
+Verified By cube on: 10/20/26
+
+Notes: For now, saving to localstorage using native api not indexdb. Prefer async using localforage later on.
 
 <br>
 
