@@ -104,7 +104,6 @@
 	}
 
 	function rewind(): void {
-		// TODO: vibration
 		const audio = getAudioElement();
 
 		if (!audio) {
@@ -117,7 +116,6 @@
 	}
 
 	function fastForward(): void {
-		// TODO: vibration
 		const audio = getAudioElement();
 
 		if (!audio) {

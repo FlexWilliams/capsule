@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
 	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
+	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import type { PodcastEpisode } from '../model/podcast';
 	import { PodcastService } from '../service/podcast.service.svelte';
 	import { podcastState } from '../state/podcast.state.svelte';
@@ -20,7 +21,8 @@
 	);
 
 	function handlePlayButtonClick(episodeUrl?: string): void {
-		// TODO: vibrartion svc
+		VibrationService.vibrate();
+
 		if (!episodeUrl) {
 			return;
 		}

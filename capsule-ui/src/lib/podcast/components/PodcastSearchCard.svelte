@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Podcast } from '../model/podcast';
@@ -10,7 +11,8 @@
 	let { podcast }: PodcastSearchCardProps = $props();
 
 	function handlePodcastButtonClick(): void {
-		// TODO: add vibration here
+		VibrationService.vibrate();
+
 		goto(resolve(`/podcasts/[id]`, { id: podcast?.id }));
 	}
 </script>

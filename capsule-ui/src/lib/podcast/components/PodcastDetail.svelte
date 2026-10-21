@@ -10,6 +10,7 @@
 	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
 	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
 	import LoadingIndicator from '#lib/loading/component/LoadingIndicator.svelte';
+	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -189,8 +190,9 @@
 		return `${hoursStr}:${minutesStr}:${secondsStr}`;
 	}
 
-	// TODO: add easing to the progress bar value, too immediate!
 	function handleProgressBarClick(e: MouseEvent): void {
+		VibrationService.vibrate();
+
 		const totalWidth = (e.target as HTMLButtonElement)?.clientWidth;
 
 		const percentage = Math.fround(e.offsetX / totalWidth);
@@ -208,6 +210,51 @@
 
 	function getProgressBar(): HTMLProgressElement | null {
 		return document.getElementById(progressBarId) as HTMLProgressElement;
+	}
+
+	function handlePreviousButtonClick(): void {
+		VibrationService.vibrate();
+
+		AudioService.previous();
+	}
+
+	function handleRewindButtonClick(): void {
+		VibrationService.vibrate();
+
+		AudioService.rewind();
+	}
+
+	function handlePauseButtonClick(): void {
+		VibrationService.vibrate();
+
+		AudioService.pause();
+	}
+
+	function handlePlayButtonClick(): void {
+		VibrationService.vibrate();
+
+		if (!selectedPodcastUrl) {
+			const episode = podcast?.episodes ? podcast.episodes[0] : undefined;
+			if (!episode || !episode?.url) {
+				return;
+			}
+
+			PodcastService.setSelectedPodcastUrl(episode.url);
+		}
+
+		AudioService.play();
+	}
+
+	function handleFastForwardButtonClick(): void {
+		VibrationService.vibrate();
+
+		AudioService.fastForward();
+	}
+
+	function handleNextButtonClick(): void {
+		VibrationService.vibrate();
+
+		AudioService.next();
 	}
 
 	onMount(async () => {
@@ -238,13 +285,13 @@
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Previous episode"
-						onclick={AudioService.previous}
+						onclick={handlePreviousButtonClick}
 						disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
 					>
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Rewind audio"
-						onclick={AudioService.rewind}
+						onclick={handleRewindButtonClick}
 						disabled={!podcast?.episodes}><img src={rewind} alt="Rewind icon" /></button
 					>
 
@@ -254,7 +301,7 @@
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Pause"
-							onclick={AudioService.pause}
+							onclick={handlePauseButtonClick}
 							disabled={!podcast?.episodes}
 						>
 							{#if podcastLoading}
@@ -267,31 +314,20 @@
 						<button
 							class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 							aria-label="Play"
-							onclick={() => {
-								if (!selectedPodcastUrl) {
-									const episode = podcast?.episodes ? podcast.episodes[0] : undefined;
-									if (!episode || !episode?.url) {
-										return;
-									}
-
-									PodcastService.setSelectedPodcastUrl(episode.url);
-								}
-
-								AudioService.play();
-							}}
+							onclick={handlePlayButtonClick}
 							disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
 						>
 					{/if}
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Fast forward audio"
-						onclick={AudioService.fastForward}
+						onclick={handleFastForwardButtonClick}
 						disabled={!podcast?.episodes}><img src={fastForward} alt="Fast forward icon" /></button
 					>
 					<button
 						class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
 						aria-label="Next episode"
-						onclick={AudioService.next}
+						onclick={handleNextButtonClick}
 						disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button
 					>
 				</div>

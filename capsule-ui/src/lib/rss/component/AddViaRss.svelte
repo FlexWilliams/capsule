@@ -1,6 +1,7 @@
 <script lang="ts">
 	import podcastFeed from '#lib/assets/icons/ic--round-podcasts.svg';
 	import type { Podcast, PodcastRssMeta } from '#lib/podcast/model/podcast.ts';
+	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
@@ -14,6 +15,8 @@
 
 	async function handleSubmit(e: Event): Promise<void> {
 		e.preventDefault();
+
+		VibrationService.vibrate();
 
 		const form = e.target as HTMLFormElement;
 
@@ -31,13 +34,9 @@
 
 		fetching = false;
 
-		if (podcast) {
-			// TODO: display 'goto rsspodcast screen'
-		} else {
+		if (!podcast) {
 			// TODO: display 'error or retry clause
 		}
-
-		// dismissPopover();
 	}
 
 	async function fetchPodcast(rssUrl: string): Promise<Podcast | null> {
@@ -57,6 +56,8 @@
 	}
 
 	function handleAddViaRssButtonClick(): void {
+		VibrationService.vibrate();
+
 		showPopover();
 	}
 
@@ -69,11 +70,11 @@
 	}
 
 	async function handlePodcastClick(podcast: Podcast | null): Promise<void> {
+		VibrationService.vibrate();
+
 		if (!podcast) {
 			return;
 		}
-
-		// TODO: add vibration
 
 		await savePodcastUrl(podcast);
 
@@ -120,6 +121,12 @@
 	function dismissPopover(): void {
 		getPopover()?.hidePopover();
 	}
+
+	function handleDialogClose(): void {
+		VibrationService.vibrate();
+
+		dismissPopover();
+	}
 </script>
 
 <button
@@ -134,7 +141,7 @@
 	<button
 		type="button"
 		aria-label="Close"
-		onclick={dismissPopover}
+		onclick={handleDialogClose}
 		class="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-slate-100 p-4 text-xs"
 		>X</button
 	>
