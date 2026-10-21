@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { audioState$$setIsPlaying } from '../state/audio.state.svelte';
+import { audioState$$setIsPlaying, audioState$$setMuted } from '../state/audio.state.svelte';
 
 export enum AudioAction {
 	Play,
@@ -8,7 +8,9 @@ export enum AudioAction {
 	Next,
 	Rewind,
 	FastForward,
-	Seek
+	Seek,
+	Mute,
+	Unmute
 }
 
 export type SeekData = {
@@ -76,5 +78,21 @@ export class AudioService {
 
 	public static setIsPlaying(isPlaying: boolean): void {
 		audioState$$setIsPlaying(isPlaying);
+	}
+
+	public static mute(): void {
+		AudioService.audio$.next({
+			action: AudioAction.Mute
+		});
+
+		audioState$$setMuted(true);
+	}
+
+	public static unmute(): void {
+		AudioService.audio$.next({
+			action: AudioAction.Unmute
+		});
+
+		audioState$$setMuted(false);
 	}
 }

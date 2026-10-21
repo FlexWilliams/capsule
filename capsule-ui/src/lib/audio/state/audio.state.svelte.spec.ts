@@ -4,7 +4,8 @@ import {
 	audioState$$setCurrentTime,
 	audioState$$setDuration,
 	audioState$$setIsPlaying,
-	audioState$$setLoading
+	audioState$$setLoading,
+	audioState$$setMuted
 } from './audio.state.svelte';
 
 test('state should be defined', () => {
@@ -28,6 +29,17 @@ test('audioState$$setIsPlaying', () => {
 	expect(state.isPlaying).toEqual(true);
 	audioState$$setIsPlaying(false);
 	expect(state.isPlaying).toEqual(false);
+});
+
+test('audioState$$setMuted', () => {
+	const state = audioState;
+
+	expect(state.muted).toEqual(false);
+
+	audioState$$setMuted(true);
+	expect(state.muted).toEqual(true);
+	audioState$$setMuted(false);
+	expect(state.muted).toEqual(false);
 });
 
 test('audioState$$setLoading', () => {

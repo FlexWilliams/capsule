@@ -143,6 +143,30 @@
 		audio.currentTime = to;
 	}
 
+	function mute(): void {
+		const audio = getAudioElement();
+
+		if (!audio) {
+			return logAudioPlayerError('mute');
+		}
+
+		console.log(`Muting audio...`);
+
+		audio.muted = true;
+	}
+
+	function unmute(): void {
+		const audio = getAudioElement();
+
+		if (!audio) {
+			return logAudioPlayerError('unmute');
+		}
+
+		console.log(`Un-muting audio...`);
+
+		audio.muted = false;
+	}
+
 	async function handleAudioEvent(evt: AudioEvent): Promise<void> {
 		console.log(`New audio event: ${evt.action}`);
 
@@ -167,6 +191,12 @@
 				break;
 			case AudioAction.Seek:
 				seekTo((evt?.data as SeekData)?.position);
+				break;
+			case AudioAction.Mute:
+				mute();
+				break;
+			case AudioAction.Unmute:
+				unmute();
 				break;
 			default:
 				console.log(`Unknown audio event: ${evt.action}`);
