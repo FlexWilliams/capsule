@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { MediaSessionService } from '#lib/media-session/media-session-service.svelte.ts';
+	import type { MediaSessionEventHandlers } from '#lib/media-session/media-session.ts';
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import { podcastState } from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
@@ -26,6 +28,10 @@
 	let selectedPodcastUrl = $derived(podcastState.selectedPodcastUrl);
 
 	let isPlaying = $derived(audioState.isPlaying);
+
+	let currentTime = $derived(audioState.currentTime);
+
+	let duration = $derived(audioState.duration);
 
 	let skip = $derived(settingsState.skip);
 
@@ -179,7 +185,22 @@
 			.subscribe();
 	}
 
-	function updateAudioTime(): void {
+	async function updateMediaSession(): Promise<void> {
+		if (!selectedPodcastUrl || !selectedPodcast || !selectedPodcast.episodes) {
+			return;
+		}
+
+		const current = selectedPodcast.episodes.find((e) => e.url === selectedPodcastUrl);
+		if (!current) {
+			console.error(`Unable to play previous podcast episode, index not found!`);
+
+			return;
+		}
+
+		await MediaSessionService.updateMediaSession(selectedPodcast, current, currentTime, duration);
+	}
+
+	async function updateAudioTime(): Promise<void> {
 		const audioPlayer = getAudioElement();
 
 		if (!audioPlayer) {
@@ -187,6 +208,10 @@
 		}
 
 		audioState$$setCurrentTime(audioPlayer.currentTime);
+
+		if (isPlaying) {
+			await updateMediaSession();
+		}
 	}
 
 	function listenForCurrentTime(): Subscription {
@@ -201,6 +226,19 @@
 		}
 
 		audioState$$setDuration(audioPlayer.duration);
+
+		const handlers = {
+			play: AudioService.play,
+			pause: AudioService.pause,
+			stop: async () => {},
+			seekTo: AudioService.seekTo,
+			seekBackward: AudioService.rewind,
+			seekForward: AudioService.fastForward,
+			previousTrack: AudioService.previous,
+			nextTrack: AudioService.next
+		} as MediaSessionEventHandlers;
+
+		MediaSessionService.initMediaSession(handlers);
 
 		if (!isPlaying) {
 			return audioState$$setLoading(false);
@@ -221,6 +259,8 @@
 		}
 
 		audioPlayer.pause();
+
+		MediaSessionService.pauseMediaSessionAudio();
 	}
 
 	async function play(): Promise<void> {
@@ -237,6 +277,8 @@
 		}
 
 		await audioPlayer.play();
+
+		MediaSessionService.playMediaSessionAudio();
 	}
 
 	async function loadPodcast(url: string): Promise<void> {
