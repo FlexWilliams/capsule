@@ -76,7 +76,7 @@ Verified By cube on: 10/20/26
 
 <br>
 
-## CAP-004 - Add MediaSession info
+## (COMPLETE) CAP-004 - Add MediaSession info
 
 ### Description:
 
@@ -84,7 +84,7 @@ Verified By cube on: 10/20/26
 
 ### Acceptance Criteria:
 
-Verified By <> on:
+Verified By cube on: 10/20/26
 
 <br>
 

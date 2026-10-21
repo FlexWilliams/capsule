@@ -18,6 +18,8 @@
 	import { podcastState } from '../state/podcast.state.svelte';
 	import PodcastEpisodeCard from './PodcastEpisodeCard.svelte';
 
+	const progressBarId = 'progress-bar';
+
 	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
 
 	let loading = $state(true);
@@ -33,6 +35,65 @@
 	let currentTime = $derived(audioState.currentTime);
 
 	let duration = $derived(audioState.duration);
+
+	let easingProgress = $state(false);
+
+	let easingValue = $state(0);
+
+	let easingBoundValue = $state(0);
+
+	let progressBarValue = $derived(easingProgress ? easingValue : currentTime);
+
+	function easeProgressBarValue(): void {
+		easingValue = currentTime;
+
+		easingProgress = true;
+
+		const progressBar = getProgressBar();
+
+		if (!progressBar) {
+			easingValue = 0;
+			easingProgress = false;
+
+			return;
+		}
+
+		if (!currentTime) {
+			easingValue = 0;
+			easingProgress = false;
+
+			return;
+		}
+
+		let speed = 10;
+		const iteration = 1 * 20; // 50ms
+
+		const interval = setInterval(() => {
+			if (speed < 1000) {
+				speed *= 1.15;
+			}
+
+			if (easingValue > easingBoundValue) {
+				// decrement
+				easingValue =
+					easingValue - speed <= easingBoundValue ? easingBoundValue : easingValue - speed;
+
+				if (easingValue <= easingBoundValue) {
+					easingProgress = false;
+					clearInterval(interval);
+				}
+			} else if (easingValue < easingBoundValue) {
+				// increment
+				easingValue =
+					easingValue + speed >= easingBoundValue ? easingBoundValue : easingValue + speed;
+
+				if (easingValue >= easingBoundValue) {
+					easingProgress = false;
+					clearInterval(interval);
+				}
+			}
+		}, iteration);
+	}
 
 	// let progress = $derived(duration > 0 ? Math.floor(currentTime / duration) * 100 : 0);
 
@@ -136,9 +197,17 @@
 
 		const seekTo = Math.floor(duration * percentage);
 
+		easingBoundValue = seekTo;
+
+		easeProgressBarValue();
+
 		console.log(`Seeking to: ${percentage}% ~= ${seekTo}`);
 
-		AudioService.seek(seekTo);
+		AudioService.seekTo(seekTo);
+	}
+
+	function getProgressBar(): HTMLProgressElement | null {
+		return document.getElementById(progressBarId) as HTMLProgressElement;
 	}
 
 	onMount(async () => {
@@ -230,7 +299,11 @@
 				<!-- TODO: make into component! -->
 				<div class="progress-bar w-full">
 					<div class="progress-wrapper relative flex">
-						<progress id="progress-bar" max={duration} value={currentTime} class="w-full rounded-md"
+						<progress
+							id={progressBarId}
+							max={duration}
+							value={progressBarValue}
+							class="w-full rounded-md"
 						></progress>
 						<button
 							class="absolute h-full w-full"
