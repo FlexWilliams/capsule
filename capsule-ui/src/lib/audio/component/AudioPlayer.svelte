@@ -234,8 +234,8 @@
 			seekTo: AudioService.seekTo,
 			seekBackward: AudioService.rewind,
 			seekForward: AudioService.fastForward,
-			previousTrack: AudioService.previous,
-			nextTrack: AudioService.next
+			previousTrack: AudioService.rewind,
+			nextTrack: AudioService.fastForward
 		} as MediaSessionEventHandlers;
 
 		MediaSessionService.initMediaSession(handlers);
