@@ -1,1 +1,74 @@
 @import 'tailwindcss';
+
+@layer base {
+	/* Default Theme (Light) */
+	:root {
+		--background: #fcfcfc;
+		--text: #30374b;
+		--border: #30374b;
+		--button: #30374b;
+		--button-text: #fcfcfc;
+		--button-text-disabled: #90a1b9;
+		--audio-button: #ffb900;
+		--rss-button: #fcfcfc;
+		--subscribe-button: #cad5e2;
+		--mute-button: #cad5e2;
+		--footer-button: #cad5e2;
+		--dialog: #fcfcfc;
+		--dialog-text: #30374b;
+		--dialog-button: #ffb900;
+		--dialog-button-text: #30374b;
+		--card: #fcfcfc;
+		--card-text: #30374b;
+		--episode-play-button: #ffb900;
+		--progress-bar: #30374b;
+		--progress-bar-bg: #dadee6;
+	}
+
+	/* Dark Theme */
+	.dark {
+		--background: #30374b;
+		--text: #fcfcfc;
+		--border: #fcfcfc;
+		--button: #fcfcfc;
+		--button-text: #30374b;
+		--button-text-disabled: #90a1b9;
+		--audio-button: #ffb900;
+		--rss-button: #fcfcfc;
+		--subscribe-button: #cad5e2;
+		--mute-button: #cad5e2;
+		--footer-button: #cad5e2;
+		--dialog: #f0f0f0;
+		--dialog-text: #30374b;
+		--dialog-button: #ffb900;
+		--dialog-button-text: #30374b;
+		--card: #f0f0f0;
+		--card-text: #30374b;
+		--episode-play-button: #ffb900;
+		--progress-bar: #ffb900;
+		--progress-bar-bg: #dadee6;
+	}
+}
+
+@theme {
+	--color-background: var(--background);
+	--color-text: var(--text);
+	--color-border: var(--border);
+	--color-button: var(--button);
+	--color-button-text: var(--button-text);
+	--color-button-text-disabled: var(--button-text-disabled);
+	--color-audio-button: var(--audio-button);
+	--color-rss-button: var(--rss-button);
+	--color-subscribe-button: var(--subscribe-button);
+	--color-mute-button: var(--mute-button);
+	--color-footer-button: var(--footer-button);
+	--color-dialog: var(--dialog);
+	--color-dialog-text: var(--dialog-text);
+	--color-dialog-button-text: var(--dialog-button-text);
+	--color-dialog-button: var(--dialog-button);
+	--color-card: var(--card);
+	--color-card-text: var(--card-text);
+	--color-episode-play-button: var(--episode-play-button);
+	--color-progress-bar: var(--progress-bar);
+	--color-progress-bar-bg: var(--progress-bar-bg);
+}

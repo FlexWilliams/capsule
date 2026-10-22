@@ -1,5 +1,9 @@
 import { expect, test } from 'vitest';
-import { settingsState, settingsState$$setSelectedPodcastUrl } from './settings.state.svelte';
+import {
+	settingsState,
+	settingsState$$setLightMode,
+	settingsState$$setSelectedPodcastUrl
+} from './settings.state.svelte';
 
 test('state should be defined', () => {
 	const state = settingsState;
@@ -22,4 +26,14 @@ test('settingsState$$setSelectedPodcastUrl', () => {
 	expect(state.skip).toEqual(90);
 	settingsState$$setSelectedPodcastUrl(30);
 	expect(state.skip).toEqual(30);
+});
+
+test('settingsState$$setLightMode', () => {
+	const state = settingsState;
+
+	expect(state.lightMode).toEqual(true);
+	settingsState$$setLightMode(false);
+	expect(state.lightMode).toEqual(false);
+	settingsState$$setLightMode(true);
+	expect(state.lightMode).toEqual(true);
 });

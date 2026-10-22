@@ -73,12 +73,12 @@
 </script>
 
 <form name="search-podcasts" onsubmit={handleSearch} class="w-full p-4">
-	<label class="flex flex-col">
+	<label class="flex flex-col text-text">
 		Search:
 		<input
 			name="search"
 			type="search"
-			class="h-10 rounded-md border border-slate-700 px-2"
+			class="h-10 rounded-md border border-border px-2"
 			oninput={handleInput}
 			autocomplete="off"
 		/>
@@ -98,7 +98,7 @@
 				{#if hasSearched}
 					<li>No podcast results</li>
 				{:else}
-					<li>Try searching for your favorite podcasts!</li>
+					<li class="text-text">Try searching for your favorite podcasts!</li>
 				{/if}
 			{/each}
 		</ul>

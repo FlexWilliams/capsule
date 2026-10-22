@@ -14,7 +14,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="capsule">
+<div class="relative h-full w-full overflow-hidden bg-background">
 	<Header />
 
 	<Main {children} />
@@ -23,12 +23,3 @@
 
 	<AudioPlayer />
 </div>
-
-<style lang="scss">
-	.capsule {
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		position: relative;
-	}
-</style>

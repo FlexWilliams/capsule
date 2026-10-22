@@ -4,7 +4,7 @@
 </script>
 
 <div class="relative h-full w-full">
-	<p class="w-full text-center text-3xl" aria-hidden="true">Capsule</p>
+	<p class="w-full bg-background text-center text-3xl text-text" aria-hidden="true">Capsule</p>
 
 	<PodcastSearch />
 
@@ -13,10 +13,7 @@
 
 <style lang="scss">
 	p {
-		/* TODO: put into tailwind **/
-		color: #30374b;
 		font-weight: 700;
-		margin: 0;
 		font-size: 1.75rem;
 	}
 </style>
