@@ -88,7 +88,7 @@ Verified By cube on: 10/20/26
 
 <br>
 
-## CAP-005 - UX Baseline
+## (COMPLETE) CAP-005 - UX Baseline
 
 ### Description:
 
@@ -98,7 +98,7 @@ Verified By cube on: 10/20/26
 
 ### Acceptance Criteria:
 
-Verified By <> on:
+Verified By cube on: 10/23/26
 
 <br>
 
@@ -131,6 +131,11 @@ Verified By <> on:
 ## CAP-008 - Picture n picture
 
 ### Description:
+
+See:
+
+- https://developer.chrome.com/docs/web-platform/document-picture-in-picture
+- https://prompthub.gokuscraper.com/tools/js/picture-in-picture-api
 
 ### Acceptance Criteria:
 

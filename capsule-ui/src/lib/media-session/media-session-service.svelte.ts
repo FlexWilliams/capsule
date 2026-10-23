@@ -49,6 +49,10 @@ export class MediaSessionService {
 		navigator.mediaSession.setActionHandler('nexttrack', async () => {
 			await handlers.nextTrack();
 		});
+
+		navigator.mediaSession.setActionHandler('enterpictureinpicture', async (e) => {
+			console.log(e);
+		});
 	}
 
 	public static async updateMediaSession(
@@ -58,7 +62,9 @@ export class MediaSessionService {
 		duration: number
 	): Promise<void> {
 		if (!podcast) {
-			console.error(`Error: unable to update media session: no podcast provided!`);
+			console.warn(`Error: unable to update media session: no podcast provided!`);
+
+			return;
 		}
 
 		const imageUrl = episode.image || podcast.imageUrl || defaultImage;

@@ -5,7 +5,8 @@ import {
 	audioState$$setDuration,
 	audioState$$setIsPlaying,
 	audioState$$setLoading,
-	audioState$$setMuted
+	audioState$$setMuted,
+	audioState$$setVisualizerCanvasAnimationFrameId
 } from './audio.state.svelte';
 
 test('state should be defined', () => {
@@ -73,4 +74,15 @@ test('audioState$$setCurrentTime', () => {
 	expect(state.currentTime).toEqual(100);
 	audioState$$setCurrentTime(0);
 	expect(state.currentTime).toEqual(0);
+});
+
+test('audioState$$setVisualizerCanvasAnimationFrameId', () => {
+	const state = audioState;
+
+	expect(state.visualizerCanvasAnimationFrameId).toEqual(0);
+
+	audioState$$setVisualizerCanvasAnimationFrameId(100);
+	expect(state.visualizerCanvasAnimationFrameId).toEqual(100);
+	audioState$$setVisualizerCanvasAnimationFrameId(0);
+	expect(state.visualizerCanvasAnimationFrameId).toEqual(0);
 });
