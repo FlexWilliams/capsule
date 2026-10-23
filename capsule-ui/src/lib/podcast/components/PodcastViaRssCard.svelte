@@ -2,10 +2,10 @@
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { Podcast } from '../model/podcast';
+	import type { PodcastRssMeta } from '../model/podcast';
 
 	interface PodcastViaRssCardProps {
-		podcast: Podcast;
+		podcast: PodcastRssMeta;
 	}
 
 	let { podcast }: PodcastViaRssCardProps = $props();
@@ -17,7 +17,7 @@
 	}
 </script>
 
-<p class="relative z-1 w-fit">{podcast?.name}</p>
+<p class="relative z-1 w-fit max-w-full">{podcast?.name}</p>
 <img
 	src={podcast?.imageUrl}
 	alt={`Podcast cover for ${podcast?.name}`}
@@ -32,3 +32,11 @@
 	class="absolute top-0 left-0 h-full w-full cursor-pointer"
 	onclick={() => goToPodcast(podcast?.id)}
 ></button>
+
+<style lang="scss">
+	@use '../../styles/text.scss';
+
+	p {
+		@include text.textOverflowEllipses;
+	}
+</style>

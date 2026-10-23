@@ -110,7 +110,11 @@
 
 <div class="progress-bar w-full">
 	<div class="progress-wrapper relative flex">
-		<progress id={progressBarId} max={duration} value={progressBarValue} class="w-full rounded-md"
+		<progress
+			id={progressBarId}
+			max={duration}
+			value={progressBarValue}
+			class="w-full rounded-md bg-audio-button"
 		></progress>
 		<button class="absolute h-full w-full" aria-label="Seek to" onclick={handleProgressBarClick}
 		></button>
@@ -118,8 +122,8 @@
 
 	<label for="progress-bar" class="flex min-h-8 items-center justify-between">
 		{#if selectedPodcastUrl}
-			<span class="text-xs">{formatTime(currentTime)}</span>
-			<span class="text-xs">{formatTime(duration)}</span>
+			<span class="text-xs text-text">{formatTime(currentTime)}</span>
+			<span class="text-xs text-text">{formatTime(duration)}</span>
 		{/if}
 	</label>
 </div>
@@ -139,7 +143,7 @@
 		-webkit-appearance: none;
 		-moz-appearance: none;
 		appearance: none;
-		background-color: rgb(218, 222, 230);
+		background-color: var(--progress-bar-bg);
 	}
 
 	// See: https://stackoverflow.com/a/34798353
@@ -150,10 +154,12 @@
 	progress::-webkit-progress-bar {
 		@include progressbar;
 	}
+
 	progress::-webkit-progress-value {
 		@include progressbar;
-		background-color: #30374b;
+		background-color: var(--progress-bar);
 	}
+
 	progress::-moz-progress-bar {
 		@include progressbar;
 	}

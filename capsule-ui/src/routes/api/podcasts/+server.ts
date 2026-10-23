@@ -1,5 +1,7 @@
 import { mockPodcasts, type PodcastIndexPodcast } from '#lib/podcast/model/mock.ts';
 import type { Podcast } from '#lib/podcast/model/podcast.ts';
+import { db } from '#lib/server/db/index.ts';
+import { podcasts as podcastDto } from '#lib/server/db/schema.ts';
 import type { RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -12,6 +14,12 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	try {
+		console.log(process.cwd());
+		// Example db call, TODO: remove once ORM impld
+		const d = await db.select().from(podcastDto).limit(10);
+		console.log(`Example database query:`);
+		console.log(d);
+
 		const mocks = mockPodcasts as PodcastIndexPodcast[];
 
 		console.log(`Fetched ${mocks.length} podcasts via podcastindex API.`);

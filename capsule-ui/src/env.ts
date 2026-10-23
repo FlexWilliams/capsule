@@ -5,5 +5,8 @@ export const variables = defineEnvVars({
 		public: true,
 		static: true,
 		description: 'Flag used to allow mocks into api e2e testing'
+	},
+	DATABASE_URL: {
+		description: 'The database connection string.'
 	}
 });

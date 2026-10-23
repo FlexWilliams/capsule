@@ -73,13 +73,13 @@
 
 <div class="audio-buttons flex items-center justify-center">
 	<button
-		class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 		aria-label="Previous episode"
 		onclick={handlePreviousButtonClick}
 		disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
 	>
 	<button
-		class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 		aria-label="Rewind audio"
 		onclick={handleRewindButtonClick}
 		disabled={!podcast?.episodes}><img src={rewind} alt="Rewind icon" /></button
@@ -89,7 +89,7 @@
 	<!-- TODO: also make the space bar toggle these buttons -->
 	{#if isPlaying}
 		<button
-			class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+			class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 			aria-label="Pause"
 			onclick={handlePauseButtonClick}
 			disabled={!podcast?.episodes}
@@ -102,20 +102,20 @@
 		</button>
 	{:else}
 		<button
-			class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+			class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 			aria-label="Play"
 			onclick={handlePlayButtonClick}
 			disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
 		>
 	{/if}
 	<button
-		class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 		aria-label="Fast forward audio"
 		onclick={handleFastForwardButtonClick}
 		disabled={!podcast?.episodes}><img src={fastForward} alt="Fast forward icon" /></button
 	>
 	<button
-		class="flex items-center justify-center rounded-4xl bg-amber-400 p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 		aria-label="Next episode"
 		onclick={handleNextButtonClick}
 		disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button

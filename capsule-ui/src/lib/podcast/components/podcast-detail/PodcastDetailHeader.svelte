@@ -36,7 +36,7 @@
 </script>
 
 <div class="relative flex w-full flex-1 flex-col items-center justify-center gap-4">
-	<h2 class="text-center text-xl">{podcast?.name || `Unknown Podcast`}</h2>
+	<h2 class="text-center text-xl text-text">{podcast?.name || `Unknown Podcast`}</h2>
 
 	<img
 		src={podcast?.imageUrl || defaultCover}
@@ -47,12 +47,12 @@
 
 	<div class="ml-10 flex h-10 max-h-10 w-full justify-center gap-2">
 		<button
-			class="w-1/2 rounded-full bg-slate-300 p-2 text-sm shadow-md disabled:text-slate-400"
+			class="w-1/2 rounded-full bg-subscribe-button p-2 text-sm text-button-text shadow-md disabled:text-button-text-disabled"
 			disabled={!canSubscribe}>Subscribe</button
 		>
 		<button
 			aria-label={muted ? 'Unmute?' : 'Mute?'}
-			class="flex max-h-10 w-10 items-center justify-center rounded-full bg-slate-300 shadow-md"
+			class="flex max-h-10 w-10 items-center justify-center rounded-full bg-mute-button shadow-md"
 			onclick={handleMuteButtonClick}
 		>
 			<img

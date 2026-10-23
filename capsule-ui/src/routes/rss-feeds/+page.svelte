@@ -21,11 +21,11 @@
 	});
 </script>
 
-<h2 class="text-center text-2xl">Your Saved Rss Feeds</h2>
-<ul class="py-4">
+<h2 class="text-center text-2xl text-text">Your Saved Rss Feeds</h2>
+<ul class="max-h-11/12 overflow-auto p-4">
 	{#each podcasts as podcast (podcast.id)}
 		<!-- TODO: REFACTOR: make into card component -->
-		<li class="relative mb-4 flex h-35 flex-col rounded-md bg-slate-200 p-4 shadow-md">
+		<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 shadow-md">
 			<PodcastViaRssCard {podcast} />
 		</li>
 	{/each}

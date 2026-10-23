@@ -9,9 +9,9 @@
 	let { episodes }: PodcastEpisodeListProps = $props();
 </script>
 
-<ul class="max-w-full flex-1 overflow-auto sm:flex-2">
+<ul class="w-full flex-1 overflow-auto sm:flex-2">
 	{#each episodes as episode (episode?.guid)}
-		<li class="mb-4 h-40 rounded-md bg-slate-100">
+		<li class="mb-4 h-40 rounded-md px-2">
 			<PodcastEpisodeCard {episode} />
 		</li>
 	{:else}
