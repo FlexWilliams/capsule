@@ -5,7 +5,6 @@
 <br>
 
 - AC MODIFICATION Types
-
   - [AC-MOD_NOT-POSSIBLE-ALT-SOLUTION]
 
 - REJECTION Types
@@ -128,7 +127,7 @@ Verified By <> on:
 
 <br>
 
-## CAP-008 - Picture n picture
+## (COMPLETE) CAP-008 - Picture n picture
 
 ### Description:
 
@@ -139,7 +138,7 @@ See:
 
 ### Acceptance Criteria:
 
-Verified By <> on:
+Verified By cube on: 10/23/26
 
 <br>
 

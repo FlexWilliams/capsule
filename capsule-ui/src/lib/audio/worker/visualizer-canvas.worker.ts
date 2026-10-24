@@ -1,5 +1,7 @@
 import type { VisualizerCanvasWorkerRequest } from '../audio';
 
+import defaultCover from '#lib/assets/images/pexels-mic-1867121_1280.jpg';
+
 let animationFrameId = 0;
 
 let canvas: OffscreenCanvas | null = null;
@@ -21,7 +23,7 @@ function log(message: string): void {
 }
 
 function logError(message: string): void {
-	logError(`[VizCanvasWorker] ${message}`);
+	console.error(`[VizCanvasWorker] ${message}`);
 }
 
 async function draw(): Promise<void> {
@@ -97,11 +99,24 @@ onmessage = async (e: MessageEvent<VisualizerCanvasWorkerRequest>) => {
 	if (_imageUrl && _imageUrl !== imageUrl) {
 		imageUrl = _imageUrl;
 
-		const response = await fetch(imageUrl);
-		if (response.ok) {
-			const image = await createImageBitmap(await response.blob());
+		try {
+			const response = await fetch(imageUrl);
+			if (response.ok) {
+				const image = await createImageBitmap(await response.blob());
 
-			podcastImage = image;
+				podcastImage = image;
+			}
+		} catch (e) {
+			logError(`Error fetching podcast image (possibly CORS): ${JSON.stringify(e)}`);
+		} finally {
+			if (!podcastImage) {
+				const response = await fetch(defaultCover);
+				if (response.ok) {
+					const image = await createImageBitmap(await response.blob());
+
+					podcastImage = image;
+				}
+			}
 		}
 	}
 
