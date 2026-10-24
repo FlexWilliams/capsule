@@ -13,6 +13,7 @@
 		--rss-button: #fcfcfc;
 		--subscribe-button: #cad5e2;
 		--mute-button: #cad5e2;
+		--pip-button: #cad5e2;
 		--footer-button: #cad5e2;
 		--dialog: #fcfcfc;
 		--dialog-text: #30374b;
@@ -37,6 +38,7 @@
 		--rss-button: #fcfcfc;
 		--subscribe-button: #cad5e2;
 		--mute-button: #cad5e2;
+		--pip-button: #cad5e2;
 		--footer-button: #cad5e2;
 		--dialog: #f0f0f0;
 		--dialog-text: #30374b;
@@ -62,6 +64,7 @@
 	--color-subscribe-button: var(--subscribe-button);
 	--color-mute-button: var(--mute-button);
 	--color-footer-button: var(--footer-button);
+	--color-pip-button: var(--pip-button);
 	--color-dialog: var(--dialog);
 	--color-dialog-text: var(--dialog-text);
 	--color-dialog-button-text: var(--dialog-button-text);

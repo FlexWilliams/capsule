@@ -4,6 +4,7 @@
 	import mic from '#lib/assets/images/pexels-mic-1867121_1280.jpg';
 	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
 	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
+	import PictureInPicture from '#lib/picture-in-picture/component/PictureInPicture.svelte';
 
 	import type { Podcast } from '#lib/podcast/model/podcast.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
@@ -38,12 +39,16 @@
 <div class="relative flex w-full flex-1 flex-col items-center justify-center gap-4">
 	<h2 class="text-center text-xl text-text">{podcast?.name || `Unknown Podcast`}</h2>
 
-	<img
-		src={podcast?.imageUrl || defaultCover}
-		alt={`Podcast cover for "${podcast?.name}"`}
-		class="cover rounded-md shadow-xl"
-		onerror={handleImageLoadError}
-	/>
+	<div class="relative h-full w-full">
+		<img
+			src={podcast?.imageUrl || defaultCover}
+			alt={`Podcast cover for "${podcast?.name}"`}
+			class="cover rounded-md shadow-xl"
+			onerror={handleImageLoadError}
+		/>
+
+		<PictureInPicture />
+	</div>
 
 	<div class="ml-10 flex h-10 max-h-10 w-full justify-center gap-2">
 		<button

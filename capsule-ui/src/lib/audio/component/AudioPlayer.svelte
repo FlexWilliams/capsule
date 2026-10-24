@@ -6,6 +6,7 @@
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import { interval, Subscription, tap } from 'rxjs';
 	import { onDestroy, onMount, untrack } from 'svelte';
+	import { VISUALIZER_VIDEO_ID } from '../audio';
 	import {
 		AudioAction,
 		AudioService,
@@ -95,7 +96,7 @@
 		const newEpisode = selectedPodcast.episodes[newPodcastIndex];
 
 		if (!newEpisode || !newEpisode.url) {
-			console.error(`Unable to play previous podcast episode, new episode invalid!`);
+			console.error(`Unable to play next podcast episode, new episode invalid!`);
 
 			return;
 		}
@@ -173,9 +174,11 @@
 		switch (evt.action) {
 			case AudioAction.Play:
 				await play();
+				toggleVideoPlaying(true);
 				break;
 			case AudioAction.Pause:
 				pause();
+				toggleVideoPlaying(false);
 				break;
 			case AudioAction.Previous:
 				previous();
@@ -220,7 +223,7 @@
 
 		const current = selectedPodcast.episodes.find((e) => e.url === selectedPodcastUrl);
 		if (!current) {
-			console.error(`Unable to play previous podcast episode, index not found!`);
+			console.warn(`Unable to update the media session, episode not found!`);
 
 			return;
 		}
@@ -307,6 +310,18 @@
 		await audioPlayer.play();
 
 		MediaSessionService.playMediaSessionAudio();
+	}
+
+	// TODO: should this be handled here or in the pip service??
+	function toggleVideoPlaying(play?: boolean): void {
+		const videoPlayer = document.getElementById(VISUALIZER_VIDEO_ID) as HTMLVideoElement;
+		if (videoPlayer) {
+			if (play) {
+				videoPlayer.play();
+			} else {
+				videoPlayer.pause();
+			}
+		}
 	}
 
 	async function loadPodcast(url: string): Promise<void> {

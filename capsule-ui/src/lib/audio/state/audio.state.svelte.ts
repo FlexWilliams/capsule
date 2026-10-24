@@ -4,6 +4,7 @@ export interface AudioState {
 	loading: boolean;
 	duration: number;
 	currentTime: number;
+	visualizerCanvasAnimationFrameId: number;
 }
 
 const initialAudioState: AudioState = {
@@ -11,7 +12,8 @@ const initialAudioState: AudioState = {
 	muted: false,
 	loading: false,
 	duration: 0,
-	currentTime: 0
+	currentTime: 0,
+	visualizerCanvasAnimationFrameId: 0
 };
 
 export const audioState = $state(initialAudioState);
@@ -34,4 +36,10 @@ export function audioState$$setDuration(duration: number): void {
 
 export function audioState$$setCurrentTime(currentTime: number): void {
 	audioState.currentTime = currentTime;
+}
+
+export function audioState$$setVisualizerCanvasAnimationFrameId(
+	visualizerCanvasAnimationFrameId: number
+): void {
+	audioState.visualizerCanvasAnimationFrameId = visualizerCanvasAnimationFrameId;
 }

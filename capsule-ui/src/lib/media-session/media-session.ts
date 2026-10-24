@@ -3,6 +3,7 @@ export interface MediaSessionEventHandlers {
 	pause: () => Promise<void>;
 	stop: () => Promise<void>;
 	seekTo: (position?: number) => Promise<void>;
+	enterpictureinpicture?: () => Promise<void>;
 	seekBackward: () => Promise<void>;
 	seekForward: () => Promise<void>;
 	previousTrack: () => Promise<void>;
