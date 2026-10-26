@@ -10,7 +10,8 @@ export enum AudioAction {
 	FastForward,
 	Seek,
 	Mute,
-	Unmute
+	Unmute,
+	SkipAd
 }
 
 export type SeekData = {
@@ -64,6 +65,12 @@ export class AudioService {
 	public static fastForward(): void {
 		AudioService.audio$.next({
 			action: AudioAction.FastForward
+		});
+	}
+
+	public static skipAd(): void {
+		AudioService.audio$.next({
+			action: AudioAction.SkipAd
 		});
 	}
 

@@ -182,6 +182,16 @@
 		video.srcObject = stream;
 		video.muted = true;
 		video.controls = true;
+		video.loop = true;
+
+		video.onvolumechange = (e) => {
+			debugger;
+
+			// TODO: get mute/unmute button in PiP window to work. All other media controls work
+			// but media session handlers provide no mute/unmute event.
+			// Remove if found not to trigger in prod
+			console.log(`Testing to see if PiP video can trigger this event (for mute/unmute)`);
+		};
 	}
 
 	async function init(): Promise<void> {

@@ -36,6 +36,8 @@
 
 	let skip = $derived(settingsState.skip);
 
+	let skipAdInterval = $derived(settingsState.skipAd);
+
 	function getAudioElement(): HTMLAudioElement | null {
 		const audioPlayer = document.getElementById(audioPlayerId) as HTMLAudioElement;
 
@@ -128,6 +130,18 @@
 		audio.currentTime = Math.min(audio.duration, audio.currentTime + skip);
 	}
 
+	function skipAd(): void {
+		const audio = getAudioElement();
+
+		if (!audio) {
+			return logAudioPlayerError('skipAd');
+		}
+
+		console.log(`(SkipAd) Fast forwarding ${skipAdInterval} seconds...`);
+
+		audio.currentTime = Math.min(audio.duration, audio.currentTime + skipAdInterval);
+	}
+
 	function seekTo(to?: number): void {
 		if (!to) {
 			return;
@@ -191,6 +205,9 @@
 				break;
 			case AudioAction.FastForward:
 				fastForward();
+				break;
+			case AudioAction.SkipAd:
+				skipAd();
 				break;
 			case AudioAction.Seek:
 				seekTo((evt?.data as SeekData)?.position);
@@ -265,6 +282,7 @@
 			seekTo: AudioService.seekTo,
 			seekBackward: AudioService.rewind,
 			seekForward: AudioService.fastForward,
+			skipad: AudioService.skipAd,
 			previousTrack: AudioService.rewind,
 			nextTrack: AudioService.fastForward
 		} as MediaSessionEventHandlers;

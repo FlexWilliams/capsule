@@ -118,6 +118,10 @@ Verified By <> on:
 Dev notes:
 
 - may require chunking/streaming audio file...
+- see: https://huggingface.co/spaces/Xenova/realtime-whisper-webgpu
+  - NOTE: heavily minified code, unsure if i can trust fully.
+    may need to handle `transformers.js` setup with whisper manually
+- see: https://github.com/rn0x/audio2textjs
 
 ### Acceptance Criteria:
 

@@ -2,7 +2,8 @@ import { expect, test } from 'vitest';
 import {
 	settingsState,
 	settingsState$$setLightMode,
-	settingsState$$setSelectedPodcastUrl
+	settingsState$$setSkip,
+	settingsState$$setSkipAd
 } from './settings.state.svelte';
 
 test('state should be defined', () => {
@@ -20,12 +21,22 @@ test('initial state should contain correct default values', () => {
 test('settingsState$$setSelectedPodcastUrl', () => {
 	const state = settingsState;
 
-	settingsState$$setSelectedPodcastUrl(60);
+	settingsState$$setSkip(60);
 	expect(state.skip).toEqual(60);
-	settingsState$$setSelectedPodcastUrl(90);
+	settingsState$$setSkip(90);
 	expect(state.skip).toEqual(90);
-	settingsState$$setSelectedPodcastUrl(30);
+	settingsState$$setSkip(30);
 	expect(state.skip).toEqual(30);
+});
+test('settingsState$$setSkipAd', () => {
+	const state = settingsState;
+
+	settingsState$$setSkipAd(120);
+	expect(state.skipAd).toEqual(120);
+	settingsState$$setSkipAd(150);
+	expect(state.skipAd).toEqual(150);
+	settingsState$$setSkipAd(180);
+	expect(state.skipAd).toEqual(180);
 });
 
 test('settingsState$$setLightMode', () => {
