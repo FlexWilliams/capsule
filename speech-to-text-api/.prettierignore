@@ -1,0 +1,22 @@
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+
+# App
+/dist
+/bin
+/segments
+*.wav
+*.mp3
+*.mp4
+*.jpg
+*.srt
+*.wav.json
+
+
+# Miscellaneous
+/static/
