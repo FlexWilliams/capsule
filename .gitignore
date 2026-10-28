@@ -1,0 +1,12 @@
+node_modules
+
+# Output
+speech-to-text-api/dist
+speech-to-text-api/segments
+speech-to-text-api/*.wav
+speech-to-text-api/*.mp3
+speech-to-text-api/*.wav.json
+
+# Env
+.env
+.env.*
