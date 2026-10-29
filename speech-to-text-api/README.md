@@ -31,6 +31,29 @@ fi
 ffmpeg -i tim.mp3 -f segment -segment_time 15 -c copy segments/segment%03d.wav
 ```
 
+Extract image from audio file:
+[Source](https://stackoverflow.com/a/13677225)
+
+```sh
+ffmpeg -i podcast.mp3 -an -vcodec copy podcast.jpg
+```
+
+Create video from single image:
+[Source](https://www.ffmpeg-micro.com/blog/ffmpeg-create-video-from-images)
+
+```sh
+ffmpeg -loop 1 -i podcast.jpg -c:v libx264 -t 4411 -pix_fmt yuv420p -r 15 podcast.mp4
+```
+
+Add subtitles to video:
+[Source](https://www.ffmpeg-micro.com/blog/ffmpeg-subtitles-filter-guide)
+
+```sh
+ffmpeg -i podcast.mp4 -vf "subtitles=podcast.srt" -c:v libx264 -crf 23 -c:a copy podcast_transcribed.mp4
+```
+
+### Cleanup Scripts
+
 Remove Segments:
 
 ```sh

@@ -2,6 +2,7 @@ import Audio2TextJS from "audio2textjs";
 import { exec } from "child_process";
 import express from "express";
 import fs from "node:fs";
+import fsAsync from "node:fs/promises";
 
 type WhisperTranscription = {
   timestamps: {
@@ -29,6 +30,61 @@ type Audio2TextJSResult = {
   output: WhipserItem[];
   message: string;
 };
+
+function offsetTimestamp(timestamp: string, offset: number): string {
+  const tokens = timestamp.split(",");
+  if (tokens.length !== 2) {
+    console.error(`Invalid timestamp: ${timestamp}. Returning 0s`);
+
+    return "00:00:00,000";
+  }
+
+  const major = tokens[0]?.split(":");
+  if (!major || major.length !== 3) {
+    console.error(`Invalid timestamp: ${timestamp}. Returning 0s`);
+
+    return "00:00:00,000";
+  }
+
+  let [hours, minutes, seconds] = major.map((m) => Number(m));
+
+  if (hours === undefined || seconds === undefined || minutes === undefined) {
+    console.error(`Invalid timestamp: ${timestamp}. Returning 0s`);
+
+    return "00:00:00,000";
+  }
+
+  let additionalMinutes = 0;
+  let additionalHours = 0;
+
+  if (Math.fround((seconds + offset) / 60) > 1) {
+    additionalMinutes = Math.floor((seconds + offset) / 60);
+
+    seconds = (seconds + offset) % 60;
+  } else {
+    seconds += offset;
+  }
+
+  if (Math.fround((minutes + additionalMinutes) / 60) > 1) {
+    additionalHours = Math.floor((minutes + additionalMinutes) / 60);
+
+    minutes = (minutes + additionalMinutes) % 60;
+  } else {
+    minutes += additionalMinutes;
+  }
+
+  if (hours + additionalHours > 99) {
+    hours = 99;
+  } else {
+    hours += additionalHours;
+  }
+
+  const hoursStr = hours > 9 ? `${hours}` : `0${hours}`;
+  const minutesStr = minutes > 9 ? `${minutes}` : `0${minutes}`;
+  const secondsStr = seconds > 9 ? `${seconds}` : `0${seconds}`;
+
+  return `${hoursStr}:${minutesStr}:${secondsStr},${tokens[tokens.length - 1]}`;
+}
 
 async function transcribe(
   fileName: string,
@@ -116,15 +172,34 @@ app.post("/transcribe", async (req, res) => {
 
     const transcript: WhisperTranscription[] = [];
 
+    let offset = 0;
+
     for (const s of segments) {
       console.log(`Processing sgement: ${s}`);
 
       const transciptions = await transcribe(s);
+
       if (transciptions) {
-        transcript.push(...transciptions);
+        const t = transciptions.map((t) => {
+          const { timestamps } = t;
+
+          return {
+            ...t,
+            timestamps: {
+              from: offsetTimestamp(timestamps.from, offset),
+              to: offsetTimestamp(timestamps.to, offset),
+            },
+          } as WhisperTranscription;
+        });
+
+        transcript.push(...t);
       } else {
         console.error(`Transcription failure for segment: ${s}`);
       }
+
+      // TODO: store in constants
+      // needs to match the ffmpeg `-segment_time` value done before transcription
+      offset += 15;
     }
 
     const end = performance.now();
@@ -135,7 +210,23 @@ app.post("/transcribe", async (req, res) => {
       `Request for podcast ${podcastUrl} took ${diff}min to process.`,
     );
 
-    console.log(transcript);
+    let idx = 1;
+
+    for (let t of transcript) {
+      try {
+        let content = ``;
+
+        content += `${idx}\n`;
+        content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
+        content += `${t.text.trim()}\n\n`;
+
+        await fsAsync.appendFile("podcast.srt", content);
+      } catch (err) {
+        console.log(`Error writing transcript #${idx} to srt file:`);
+      }
+
+      idx++;
+    }
 
     console.log(`stdout: ${stdout.trim()}`);
   });
