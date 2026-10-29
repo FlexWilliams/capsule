@@ -69,6 +69,10 @@
 				<dd>{episode?.summary}</dd>
 			</div>
 			<div>
+				<dt>Duration:</dt>
+				<dd>{episode?.duration}sec</dd>
+			</div>
+			<div>
 				<dt>Size:</dt>
 				<dd>{episode?.contentLengthInMb}Mb</dd>
 			</div>
