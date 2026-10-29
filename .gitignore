@@ -5,6 +5,9 @@ speech-to-text-api/dist
 speech-to-text-api/segments
 speech-to-text-api/*.wav
 speech-to-text-api/*.mp3
+speech-to-text-api/*.mp4
+speech-to-text-api/*.jpg
+speech-to-text-api/*.srt
 speech-to-text-api/*.wav.json
 
 # Env

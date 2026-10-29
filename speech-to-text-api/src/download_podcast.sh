@@ -1,5 +1,15 @@
 #!/bin/bash
 
+PODCAST_URL=$1
+
+if [[ -n "$PODCAST_URL" ]]; then
+    echo "Downloading: $PODCAST_URL"
+else
+    echo "No podcast url sent." >&2 
+
+    exit 1
+fi
+
 if command -v curl >/dev/null 2>&1; then 
     echo "curl is available" 
 
@@ -7,11 +17,13 @@ if command -v curl >/dev/null 2>&1; then
 
     # TODO, check if exists and re-use
 
-    curl -L -o podcast.mp3 ${podcastUrl}
+    curl -L -o podcast.mp3 $PODCAST_URL
 
     echo "Download successful!"
 
     echo "Segmenting..."
+
+    mkdir -p segments
 
     ffmpeg -i podcast.mp3 -f segment -segment_time 15 -c copy segments/segment%03d.mp3 
 
@@ -23,3 +35,20 @@ if command -v curl >/dev/null 2>&1; then
 
         exit 1
 fi
+
+# TODO: remove below, needed to speed up testing.
+# SKIP=5
+# INDEX=0
+
+# for SEGMENT in $(ls segments)
+# do
+#     if [[ "$INDEX" -le "$SKIP" ]]; then
+#         echo "Skipping removal of segment $INDEX"
+#     else
+#         echo "Removing segment $INDEX" >&2 
+
+#         rm segments/$SEGMENT
+#     fi
+
+#     let INDEX=${INDEX}+1
+# done

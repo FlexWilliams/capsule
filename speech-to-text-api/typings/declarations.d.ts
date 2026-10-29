@@ -1,1 +1,1 @@
-declare module "audio2textjs";
+declare module 'audio2textjs';
