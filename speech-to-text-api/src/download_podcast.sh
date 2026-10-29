@@ -36,6 +36,8 @@ if command -v curl >/dev/null 2>&1; then
         exit 1
 fi
 
+# TODO: ffprobe for audio duration and pass back to node to properly set video duration
+
 # TODO: remove below, needed to speed up testing.
 # SKIP=5
 # INDEX=0

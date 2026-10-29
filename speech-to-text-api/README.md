@@ -31,6 +31,13 @@ fi
 ffmpeg -i tim.mp3 -f segment -segment_time 15 -c copy segments/segment%03d.wav
 ```
 
+Probe audio for duration:
+[Source](https://trac.ffmpeg.org/wiki/FFprobeTips)
+
+```sh
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 podcast.mp3
+```
+
 Extract image from audio file:
 [Source](https://stackoverflow.com/a/13677225)
 
