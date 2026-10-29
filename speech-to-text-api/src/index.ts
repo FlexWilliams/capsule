@@ -138,6 +138,66 @@ type TranscriptionRequest = {
   podcastUrl: string;
 };
 
+async function createSrtFile(
+  transcript: WhisperTranscription[],
+): Promise<void> {
+  let idx = 1;
+
+  for (let t of transcript) {
+    try {
+      let content = ``;
+
+      content += `${idx}\n`;
+      content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
+      content += `${t.text.trim()}\n\n`;
+
+      await fsAsync.appendFile("podcast.srt", content);
+    } catch (err) {
+      console.log(`Error writing transcript #${idx} to srt file:`);
+    }
+
+    idx++;
+  }
+}
+
+async function getTranscription(
+  segments: string[],
+): Promise<WhisperTranscription[]> {
+  const transcript: WhisperTranscription[] = [];
+
+  let offset = 0;
+
+  for (const s of segments) {
+    console.log(`Processing sgement: ${s}`);
+
+    const transciptions = await transcribe(s);
+
+    if (transciptions) {
+      const t = transciptions.map((t) => {
+        const { timestamps } = t;
+
+        return {
+          ...t,
+          timestamps: {
+            from: offsetTimestamp(timestamps.from, offset),
+            to: offsetTimestamp(timestamps.to, offset),
+          },
+        } as WhisperTranscription;
+      });
+
+      transcript.push(...t);
+    } else {
+      console.error(`Transcription failure for segment: ${s}`);
+    }
+
+    // TODO: store in constants
+    // needs to match the ffmpeg `-segment_time` value done before transcription
+    offset += 15;
+  }
+
+  return transcript;
+}
+
 app.post("/transcribe", async (req, res) => {
   const { podcastUrl } = req.body as TranscriptionRequest;
 
@@ -150,13 +210,14 @@ app.post("/transcribe", async (req, res) => {
   }
 
   // TODO: Cache this
-  const script = fs
-    .readFileSync("dist/script.sh", "utf8")
+  // TODO: investigate why code runs before file completely downloaded!
+  const downloadScript = fs
+    .readFileSync("dist/download_podcast.sh", "utf8")
     .replace("${podcastUrl}", podcastUrl);
 
   const start = performance.now();
 
-  exec(script, async (error, stdout, stderr) => {
+  exec(downloadScript, async (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -168,67 +229,49 @@ app.post("/transcribe", async (req, res) => {
 
     let segments = fs.readdirSync("segments");
 
-    console.log(`\nSegments in directory: ${segments.length}`);
+    console.debug(`\nSegments in directory: ${segments.length}`);
 
-    const transcript: WhisperTranscription[] = [];
+    /**
+     * TODO: perf this better via message queue or
+     * pipe each file once processed via whisper.
+     *
+     * Typically takes ~5min on cube for an hour-long podcast.
+     *
+     */
+    const transcript = await getTranscription(segments);
 
-    let offset = 0;
+    /**
+     * TODO: perf this better somehow?
+     */
+    await createSrtFile(transcript);
 
-    for (const s of segments) {
-      console.log(`Processing sgement: ${s}`);
+    // TODO: Cache this
+    const createVideoScript = fs
+      .readFileSync("dist/create_video.sh", "utf8")
+      .replace("${podcastUrl}", podcastUrl);
 
-      const transciptions = await transcribe(s);
-
-      if (transciptions) {
-        const t = transciptions.map((t) => {
-          const { timestamps } = t;
-
-          return {
-            ...t,
-            timestamps: {
-              from: offsetTimestamp(timestamps.from, offset),
-              to: offsetTimestamp(timestamps.to, offset),
-            },
-          } as WhisperTranscription;
-        });
-
-        transcript.push(...t);
-      } else {
-        console.error(`Transcription failure for segment: ${s}`);
+    exec(createVideoScript, async (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.log(`stderr:\n${stderr.trim()}`);
+        res.status(500).send();
       }
 
-      // TODO: store in constants
-      // needs to match the ffmpeg `-segment_time` value done before transcription
-      offset += 15;
-    }
+      console.debug(`\nDone creating video with subtitles burned in.`);
 
-    const end = performance.now();
+      // TODO: impl DASH and notify UI via websocket or similar.
 
-    const diff = (end - start) / 1000 / 60; // in minutes
+      const end = performance.now();
 
-    console.log(
-      `Request for podcast ${podcastUrl} took ${diff}min to process.`,
-    );
+      const diff = (end - start) / 1000;
 
-    let idx = 1;
-
-    for (let t of transcript) {
-      try {
-        let content = ``;
-
-        content += `${idx}\n`;
-        content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
-        content += `${t.text.trim()}\n\n`;
-
-        await fsAsync.appendFile("podcast.srt", content);
-      } catch (err) {
-        console.log(`Error writing transcript #${idx} to srt file:`);
-      }
-
-      idx++;
-    }
-
-    console.log(`stdout: ${stdout.trim()}`);
+      console.debug(
+        `Request for podcast ${podcastUrl} took ${diff}s to process.`,
+      );
+    });
   });
 
   res.send(`Processing video w/captions for podcast: ${podcastUrl}`);
