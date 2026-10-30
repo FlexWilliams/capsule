@@ -8,8 +8,8 @@ RUN npm install -g corepack
 # Download and install pnpm:
 RUN corepack enable pnpm
 
-# TODO: get working
-# RUN addgroup -S capsule && adduser -S capsule -G capsule
+# 1. Create a system group and user (avoiding interactive prompts and password requirements)
+RUN groupadd -r capsule && useradd -r -g capsule -m -s /sbin/nologin capsule
 
 WORKDIR /usr/src/app
 
@@ -20,18 +20,13 @@ COPY pnpm-workspace.yaml /usr/src/app
 
 RUN pnpm install --prod
 
-# RUN chmod +rwx /usr/local/bin/**.*
-# RUN chmod +rwx /usr/src/app/dist/bin/**.*
-# # RUN chmod +rwx /usr/src/app/dist/bin/ffmpeg
-# RUN chmod +rwx /usr/src/app/dist/*.sh
-
-# RUN chown -R capsule:capsule /usr/src/app
-# RUN chmod 755 /usr/src/app
+RUN chown -R capsule:capsule /usr/src/app
+RUN chmod 755 /usr/src/app
 
 ENV BUILD_FOLDER="dist"
 
 EXPOSE 8085
 
-# USER capsule:capsule
+USER capsule
 
 CMD ["node", "dist/index.js"]
