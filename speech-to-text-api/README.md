@@ -5,6 +5,8 @@
 Replace in
 `node_modules/audio2textjs/src/models`
 
+https://huggingface.co/ggerganov/whisper.cpp/blob/main/ggml-tiny.bin
+
 ### FFmpeg Scripts
 
 Mp3 to Mp3(s):

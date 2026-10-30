@@ -2,6 +2,7 @@ node_modules
 
 # Output
 speech-to-text-api/dist
+speech-to-text-api/bin
 speech-to-text-api/segments
 speech-to-text-api/*.wav
 speech-to-text-api/*.mp3

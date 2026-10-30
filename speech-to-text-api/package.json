@@ -4,7 +4,7 @@
 	"description": "A speech-to-text api for the companion UI",
 	"main": "src/index.ts",
 	"scripts": {
-		"build": "tsc && pnpm copy:scripts",
+		"build": "tsc -p src/tsconfig.json && pnpm copy:scripts",
 		"format": "prettier --write .",
 		"copy:scripts": "cp src/*.sh dist/",
 		"preview": "pnpm build && node dist/index.js",
@@ -29,7 +29,6 @@
 	},
 	"type": "commonjs",
 	"dependencies": {
-		"audio2textjs": "^1.0.5",
 		"express": "^5.3.0",
 		"ws": "^8.22.0"
 	},

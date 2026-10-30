@@ -14,9 +14,6 @@ COPY pnpm-workspace.yaml /usr/src/app
 RUN npm install -g pnpm@11.1.3
 RUN pnpm install --prod
 
-# TODO: fix in fork to pull locally
-COPY node_modules/audio2textjs/src/models/ggml-tiny.bin /usr/src/app/node_modules/.pnpm/audio2textjs@1.0.5/node_modules/audio2textjs/src/models/
-
 RUN chown -R capsule:capsule /usr/src/app
 RUN chmod 755 /usr/src/app
 

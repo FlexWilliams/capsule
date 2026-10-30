@@ -1,16 +1,16 @@
 import express from 'express';
-import * as WebSocket from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import { transcribePodcast } from './podcast';
 import { TranscriptionRequest, TranscriptionResponse, TranscriptionStatus } from './transcription';
 
 const wssPort = 8085;
 
-const wss = new WebSocket.Server({ port: wssPort });
+const wss = new WebSocketServer({ port: wssPort });
 
 console.log(`WebSocket server is running on ws://localhost:${wssPort}`);
 
 // Connection event handler
-wss.on('connection', (ws) => {
+wss.on('connection', (ws: WebSocket) => {
 	console.log('New client connected');
 
 	// Send a welcome message to the client

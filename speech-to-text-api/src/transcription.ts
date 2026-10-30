@@ -1,5 +1,5 @@
-import Audio2TextJS from 'audio2textjs';
 import fsAsync from 'node:fs/promises';
+import Audio2TextJS from './vendor/Audio2Text';
 import { Audio2TextJSResult, WhipserItem, WhisperTranscription } from './whisper';
 
 export type TranscriptionRequest = {
@@ -127,11 +127,10 @@ async function transcribe(fileName: string): Promise<WhisperTranscription[] | nu
 		});
 
 		const inputFile = `segments/${fileName}`;
-		const model = 'tiny'; // Specify one of the available models
 		const language = 'auto'; // or specify a language code for translation
 
 		converter
-			.runWhisper(inputFile, model, language)
+			.runWhisper(inputFile, language)
 			.then((result: Audio2TextJSResult) => {
 				if (result.success) {
 					const items = result.output as WhipserItem[];

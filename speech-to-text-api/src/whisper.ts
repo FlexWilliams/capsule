@@ -21,6 +21,6 @@ export type WhipserItem = {
 
 export type Audio2TextJSResult = {
 	success: boolean;
-	output: WhipserItem[];
+	output?: WhipserItem[];
 	message: string;
 };
