@@ -6,10 +6,12 @@ const exec = promisify(child_process.exec);
 
 const DEFAULT_AUDIO_DURATION = 60; // 1min
 
+const baseFolder = process.env.BUILD_FOLDER === 'dist' ? '/usr/src/app/dist/' : 'src/';
+
 export async function downloadPodcast(podcastUrl: string): Promise<void> {
 	const start = performance.now();
 
-	const command = `"src/download_podcast.sh" ${podcastUrl}`;
+	const command = `"${baseFolder}download_podcast.sh" ${podcastUrl}`;
 
 	const { stderr } = await exec(command);
 
@@ -26,7 +28,7 @@ export async function downloadPodcast(podcastUrl: string): Promise<void> {
 export async function getPodcastDuration(): Promise<number> {
 	const start = performance.now();
 
-	const command = `"src/probe_podcast.sh"`;
+	const command = `"${baseFolder}probe_podcast.sh"`;
 
 	const { stdout, stderr } = await exec(command);
 
@@ -65,7 +67,7 @@ export async function getPodcastDuration(): Promise<number> {
 export async function downloadPodcastImage(podcastImageUrl?: string): Promise<void> {
 	const start = performance.now();
 
-	const command = `"src/download_podcast_image.sh" ${podcastImageUrl}`;
+	const command = `"${baseFolder}download_podcast_image.sh" ${podcastImageUrl}`;
 
 	const { stderr, stdout } = await exec(command);
 
@@ -86,7 +88,7 @@ export async function downloadPodcastImage(podcastImageUrl?: string): Promise<vo
 export async function extractPodcastImage(podcastImageUrl?: string): Promise<void> {
 	const start = performance.now();
 
-	const command = `"src/extract_podcast_image.sh" ${podcastImageUrl}`;
+	const command = `"${baseFolder}extract_podcast_image.sh" ${podcastImageUrl}`;
 
 	const { stderr } = await exec(command);
 
@@ -110,7 +112,7 @@ export async function createVideo(duration: number): Promise<void> {
 
 	const start = performance.now();
 
-	const command = `"src/create_video.sh" ${duration}`;
+	const command = `"${baseFolder}create_video.sh" ${duration}`;
 
 	const { stderr } = await exec(command);
 
@@ -129,7 +131,7 @@ export async function createTranscribedVideo(): Promise<void> {
 
 	const start = performance.now();
 
-	const command = `"src/create_transcribed_video.sh"`;
+	const command = `"${baseFolder}create_transcribed_video.sh"`;
 
 	const { stderr } = await exec(command);
 

@@ -7,6 +7,18 @@ export type TranscriptionRequest = {
 	podcastImageUrl?: string;
 };
 
+export enum TranscriptionStatus {
+	Processing,
+	Finished,
+	Failed,
+	InvalidRequest
+}
+
+export type TranscriptionResponse = {
+	status: TranscriptionStatus;
+	message?: string;
+};
+
 /**
  * TODO: perf this better via message queue or
  * pipe each file once processed via whisper.
