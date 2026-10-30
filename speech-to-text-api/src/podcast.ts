@@ -7,21 +7,33 @@ const exec = promisify(child_process.exec);
 const DEFAULT_AUDIO_DURATION = 60; // 1min
 
 export async function downloadPodcast(podcastUrl: string): Promise<void> {
+	const start = performance.now();
+
 	const command = `"src/download_podcast.sh" ${podcastUrl}`;
 
-	const { stdout, stderr } = await exec(command);
+	const { stderr } = await exec(command);
 
 	if (stderr) {
 		console.error(`Error downloading podcast, stderr: ${stderr}.`);
-	} else {
-		console.debug(`Download podcast script stdout: ${stdout}.`);
 	}
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to download podcast: ${execTime}ms`);
 }
 
 export async function getPodcastDuration(): Promise<number> {
+	const start = performance.now();
+
 	const command = `"src/probe_podcast.sh"`;
 
 	const { stdout, stderr } = await exec(command);
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to probe for podcast duration: ${execTime}ms`);
 
 	if (stderr) {
 		console.error(
@@ -37,7 +49,7 @@ export async function getPodcastDuration(): Promise<number> {
 	if (tokens && tokens.length >= 2 && tokens[1] && !isNaN(Number(tokens[1]))) {
 		const duration = Math.ceil(Number(tokens[1]));
 
-		console.debug(`Podcast duration: ${duration}`);
+		console.debug(`Podcast duration: ${duration}s`);
 
 		return duration;
 	}
@@ -50,40 +62,81 @@ export async function getPodcastDuration(): Promise<number> {
 	return DEFAULT_AUDIO_DURATION;
 }
 
-export async function extractPodcastImage(): Promise<void> {
-	const command = `"src/extract_podcast_image.sh"`;
+export async function downloadPodcastImage(podcastImageUrl?: string): Promise<void> {
+	const start = performance.now();
 
-	const { stdout, stderr } = await exec(command);
+	const command = `"src/download_podcast_image.sh" ${podcastImageUrl}`;
+
+	const { stderr, stdout } = await exec(command);
 
 	if (stderr) {
-		console.error(`Error extracting podcast image, stderr: ${stderr}.`);
-	} else {
-		console.debug(`Extract podcast image script stdout: ${stdout}.`);
+		console.error(`Error downloading podcast image, stderr: ${stderr}.`);
 	}
+
+	if (stdout) {
+		console.error(`Download podcast image script, stdout: ${stdout}.`);
+	}
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to download podcast image: ${execTime}ms`);
+}
+
+export async function extractPodcastImage(podcastImageUrl?: string): Promise<void> {
+	const start = performance.now();
+
+	const command = `"src/extract_podcast_image.sh" ${podcastImageUrl}`;
+
+	const { stderr } = await exec(command);
+
+	if (stderr) {
+		// TODO: set default image
+		console.error(`Error extracting podcast image, stderr: ${stderr}.`);
+
+		if (podcastImageUrl) {
+			await downloadPodcastImage(podcastImageUrl);
+		}
+	}
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to extract podcast image: ${execTime}ms`);
 }
 
 export async function createVideo(duration: number): Promise<void> {
+	const start = performance.now();
+
 	const command = `"src/create_video.sh" ${duration}`;
 
-	const { stdout, stderr } = await exec(command);
+	const { stderr } = await exec(command);
 
 	if (stderr) {
 		console.error(`Error creating video, stderr: ${stderr}.`);
-	} else {
-		console.debug(`Create video script stdout: ${stdout}.`);
 	}
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to create podcast video: ${execTime}ms`);
 }
 
 export async function createTranscribedVideo(): Promise<void> {
+	const start = performance.now();
+
 	const command = `"src/create_transcribed_video.sh"`;
 
-	const { stdout, stderr } = await exec(command);
+	const { stderr } = await exec(command);
 
 	if (stderr) {
 		console.error(`Error creating transcribed video, stderr: ${stderr}.`);
-	} else {
-		console.debug(`Create transcribed video script stdout: ${stdout}.`);
 	}
+
+	const end = performance.now();
+	const execTime = Math.ceil(end - start);
+
+	console.debug(`Time to create transcribed podcast video: ${execTime}ms`);
 }
 
 export function getSegments(): string[] {
@@ -94,28 +147,33 @@ export function getSegments(): string[] {
 	return segments;
 }
 
-export async function transcribePodcast(podcastUrl: string): Promise<void> {
+export async function transcribePodcast(
+	podcastUrl: string,
+	podcastImageUrl?: string
+): Promise<void> {
+	console.info(`Transcribing podcast: ${podcastUrl}...`);
+
 	const start = performance.now();
 
 	await downloadPodcast(podcastUrl);
 
 	await createSrtFile(await getTranscription(getSegments()));
 
-	await extractPodcastImage();
+	await extractPodcastImage(podcastImageUrl);
 
 	await createVideo(await getPodcastDuration());
 
 	await createTranscribedVideo();
 
-	console.debug(`\nDone creating video with subtitles burned in.`);
-
 	// TODO: impl DASH and notify UI via websocket or similar.
 
 	const end = performance.now();
 
-	const diff = (end - start) / 1000;
+	const diff = Math.ceil(Math.ceil(end - start) / 1000);
 
 	// TODO: run cleanup script
 
-	console.debug(`Request for podcast ${podcastUrl} took ${diff}s to process.`);
+	console.info(`Done transcribing podcast: ${podcastUrl}...`);
+
+	console.info(`Transcription time: ${diff} (${Number(Math.fround(diff / 60).toFixed(2))})`);
 }

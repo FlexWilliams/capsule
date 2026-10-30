@@ -15,9 +15,8 @@ if command -v curl >/dev/null 2>&1; then
 
     echo "Downloading podcast...!"
 
-    # TODO, check if exists and re-use
-
-    curl -L -o podcast.mp3 $PODCAST_URL
+    # TODO: check if exists and re-use
+    curl -s -L -o podcast.mp3 $PODCAST_URL
 
     echo "Download successful!"
 
@@ -25,7 +24,7 @@ if command -v curl >/dev/null 2>&1; then
 
     mkdir -p segments
 
-    ffmpeg -i podcast.mp3 -f segment -segment_time 15 -c copy segments/segment%03d.mp3 
+    ffmpeg -hide_banner -loglevel error -i podcast.mp3 -f segment -segment_time 15 -c copy segments/segment%03d.mp3 
 
     echo "Done segmenting!"
 
@@ -39,18 +38,18 @@ fi
 # TODO: ffprobe for audio duration and pass back to node to properly set video duration
 
 # TODO: remove below, needed to speed up testing.
-# SKIP=5
-# INDEX=0
+SKIP=5
+INDEX=0
 
-# for SEGMENT in $(ls segments)
-# do
-#     if [[ "$INDEX" -le "$SKIP" ]]; then
-#         echo "Skipping removal of segment $INDEX"
-#     else
-#         echo "Removing segment $INDEX" >&2 
+for SEGMENT in $(ls segments)
+do
+    if [[ "$INDEX" -le "$SKIP" ]]; then
+        echo "Skipping removal of segment $INDEX"
+    else
+        echo "Removing segment $INDEX" >&2 
 
-#         rm segments/$SEGMENT
-#     fi
+        rm segments/$SEGMENT
+    fi
 
-#     let INDEX=${INDEX}+1
-# done
+    let INDEX=${INDEX}+1
+done

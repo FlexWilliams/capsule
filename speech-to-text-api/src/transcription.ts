@@ -4,6 +4,7 @@ import { Audio2TextJSResult, WhipserItem, WhisperTranscription } from './whisper
 
 export type TranscriptionRequest = {
 	podcastUrl: string;
+	podcastImageUrl?: string;
 };
 
 /**
@@ -121,8 +122,6 @@ async function transcribe(fileName: string): Promise<WhisperTranscription[] | nu
 			.runWhisper(inputFile, model, language)
 			.then((result: Audio2TextJSResult) => {
 				if (result.success) {
-					console.log('Conversion successful:', result.output);
-
 					const items = result.output as WhipserItem[];
 
 					const transcription = items[0]?.data?.transcription || null;

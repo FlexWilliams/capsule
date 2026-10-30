@@ -9,14 +9,14 @@ app.use(express.json());
 const port = 3000;
 
 app.post('/transcribe', async (req, res) => {
-	const { podcastUrl } = req.body as TranscriptionRequest;
+	const { podcastUrl, podcastImageUrl } = req.body as TranscriptionRequest;
 
 	// TODO: improve validation here and update to use regex
 	if (!podcastUrl || (!podcastUrl.startsWith(`http://`) && !podcastUrl.startsWith(`https://`))) {
 		return res.status(400).send('Bad Request');
 	}
 
-	transcribePodcast(podcastUrl);
+	transcribePodcast(podcastUrl, podcastImageUrl);
 
 	res.status(202).send(`Processing video w/captions for podcast: ${podcastUrl}`);
 });
