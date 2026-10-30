@@ -38,18 +38,18 @@ fi
 # TODO: ffprobe for audio duration and pass back to node to properly set video duration
 
 # TODO: remove below, needed to speed up testing.
-SKIP=5
-INDEX=0
+# SKIP=5
+# INDEX=0
 
-for SEGMENT in $(ls segments)
-do
-    if [[ "$INDEX" -le "$SKIP" ]]; then
-        echo "Skipping removal of segment $INDEX"
-    else
-        echo "Removing segment $INDEX" >&2 
+# for SEGMENT in $(ls segments)
+# do
+#     if [[ "$INDEX" -le "$SKIP" ]]; then
+#         echo "Skipping removal of segment $INDEX"
+#     else
+#         echo "Removing segment $INDEX" >&2 
 
-        rm segments/$SEGMENT
-    fi
+#         rm segments/$SEGMENT
+#     fi
 
-    let INDEX=${INDEX}+1
-done
+#     let INDEX=${INDEX}+1
+# done
