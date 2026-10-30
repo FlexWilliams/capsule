@@ -12,7 +12,7 @@ fi
 
 PODCAST_IMAGE=podcast.jpg;
 
-if [ ! -f $PODCAST_IMAGE || ! -s "$PODCAST_IMAGE" ]; then
+if [[ ! -f $PODCAST_IMAGE || ! -s "$PODCAST_IMAGE" ]]; then
     echo "No podcast image was found before video creation, using default image."
 
     PODCAST_IMAGE=default_cover.jpg
