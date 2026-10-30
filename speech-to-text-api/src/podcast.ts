@@ -106,6 +106,8 @@ export async function extractPodcastImage(podcastImageUrl?: string): Promise<voi
 }
 
 export async function createVideo(duration: number): Promise<void> {
+	console.debug(`Creating video ${duration} seconds long...`);
+
 	const start = performance.now();
 
 	const command = `"src/create_video.sh" ${duration}`;
@@ -119,10 +121,12 @@ export async function createVideo(duration: number): Promise<void> {
 	const end = performance.now();
 	const execTime = Math.ceil(end - start);
 
-	console.debug(`Time to create podcast video: ${execTime}ms`);
+	console.debug(`Time to create video: ${execTime}ms`);
 }
 
 export async function createTranscribedVideo(): Promise<void> {
+	console.debug(`Creating transcribed video now...`);
+
 	const start = performance.now();
 
 	const command = `"src/create_transcribed_video.sh"`;
@@ -136,7 +140,7 @@ export async function createTranscribedVideo(): Promise<void> {
 	const end = performance.now();
 	const execTime = Math.ceil(end - start);
 
-	console.debug(`Time to create transcribed podcast video: ${execTime}ms`);
+	console.debug(`Time to create transcribed video: ${execTime}ms`);
 }
 
 export function getSegments(): string[] {
