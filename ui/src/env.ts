@@ -8,5 +8,9 @@ export const variables = defineEnvVars({
 	},
 	DATABASE_URL: {
 		description: 'The database connection string.'
+	},
+	SPEECH_TO_TEXT_WSS_URL: {
+		public: true,
+		description: 'WSS url for the companion speech-to-text api.'
 	}
 });

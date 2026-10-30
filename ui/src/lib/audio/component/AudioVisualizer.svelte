@@ -185,7 +185,7 @@
 		video.loop = true;
 
 		video.onvolumechange = (e) => {
-			debugger;
+			// debugger;
 
 			// TODO: get mute/unmute button in PiP window to work. All other media controls work
 			// but media session handlers provide no mute/unmute event.

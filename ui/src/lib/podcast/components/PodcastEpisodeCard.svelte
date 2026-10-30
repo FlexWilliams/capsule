@@ -76,6 +76,10 @@
 				<dt>Size:</dt>
 				<dd>{episode?.contentLengthInMb}Mb</dd>
 			</div>
+			<div>
+				<dt>URL:</dt>
+				<dd>{episode?.url}Mb</dd>
+			</div>
 		</dl>
 	</details>
 
