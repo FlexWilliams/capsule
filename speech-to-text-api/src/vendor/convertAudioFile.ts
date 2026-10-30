@@ -1,19 +1,8 @@
-/**
- * LICENSE MIT
- * Copyright (c) 2024 rn0x
- * github: https://github.com/rn0x
- * telegram: https://t.me/F93ii
- * repository: https://github.com/rn0x/Audio2TextJS
- */
+// Modified from original source: https://github.com/rn0x/Audio2TextJS
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-
-// const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const currentFileURL = pathToFileURL(__filename).toString();
-// const __dirname = path.dirname(fileURLToPath(currentFileURL));
 
 type AudioConversionResponse = {
 	success: boolean;
@@ -29,16 +18,13 @@ function getFFmpegPaths() {
 	const dirBin = path.join(__dirname, '../../', 'bin');
 	let ffmpegPath = null;
 	let ffprobePath = null;
-	console.log(`\n\n%cdirBin: ${dirBin}\n\n`, 'red');
 
 	if (process.platform === 'linux' || process.platform === 'android') {
 		if (process.arch === 'x64') {
-			console.log(`\n\n%c x64 dirBin: ${dirBin}\n\n`, 'red');
-
 			ffmpegPath = path.join(dirBin, 'ffmpeg');
 			ffprobePath = path.join(dirBin, 'ffprobe');
 		} else if (['arm64', 'arm'].includes(process.arch)) {
-			console.log(`\n\n%c aarch dirBin: ${dirBin}\n\n`, 'red');
+			// TODO: remove if not needed in alpine
 			ffmpegPath = path.join(dirBin, 'linux', 'ffmpeg-aarch64');
 			ffprobePath = path.join(dirBin, 'linux', 'ffprobe-aarch64');
 		} else {

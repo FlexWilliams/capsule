@@ -4,8 +4,9 @@
 	"description": "A speech-to-text api for the companion UI",
 	"main": "src/index.ts",
 	"scripts": {
-		"build": "tsc -p src/tsconfig.json && pnpm copy:scripts",
+		"build": "tsc -p src/tsconfig.json && pnpm copy:bin && pnpm copy:scripts",
 		"format": "prettier --write .",
+		"copy:bin": "cp -r bin dist/",
 		"copy:scripts": "cp src/*.sh dist/",
 		"preview": "pnpm build && node dist/index.js",
 		"start": "node dist/index.js",

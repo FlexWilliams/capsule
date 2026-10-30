@@ -83,7 +83,7 @@ export class Audio2TextJS {
 	getWhisperPath(): string | undefined {
 		if (this.platform === 'linux' || this.platform === 'android') {
 			if (this.arch === 'x64') {
-				return path.join(__dirname, '../../bin', 'whisper');
+				return path.join(__dirname, '../bin', 'whisper');
 			} else if (['arm64', 'arm'].includes(this.arch)) {
 				return path.join(dirBin, 'whisper-aarch64');
 			}
@@ -146,7 +146,7 @@ export class Audio2TextJS {
 			outputCsv || outputAll ? '--output-csv' : '',
 			translate ? '--translate' : '',
 			`--model`,
-			`${path.join(__dirname, '../../bin', modelFile)}`,
+			`${path.join(__dirname, '../bin', modelFile)}`,
 			`--language`,
 			`${language}`,
 			`--file`,
