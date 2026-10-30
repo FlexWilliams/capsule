@@ -20,4 +20,4 @@ fi
 
 # Create video with single image for specific duration
 # TODO: perf via video optimizations...
-ffmpeg -hide_banner -loglevel error -loop 1 -i $PODCAST_IMAGE -c:v libx264 -t $PODCAST_DURATION -pix_fmt yuv420p -r 15 podcast.mp4
+ffmpeg -hide_banner -loglevel error -loop 1 -i $PODCAST_IMAGE -c:v libvpx-vp9 -t $PODCAST_DURATION -pix_fmt yuv420p -r 15 podcast.mp4

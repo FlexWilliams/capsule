@@ -1,3 +1,3 @@
 #!/bin/bash
 
-podman stop capsule-speech-to-text
+podman rm -f capsule-speech-to-text

@@ -15,7 +15,7 @@ type AudioConversionResponse = {
  * @returns {Object} Returns the paths to FFmpeg and ffprobe executables if installed, otherwise null.
  */
 function getFFmpegPaths() {
-	const dirBin = path.join(__dirname, '../../', 'bin');
+	const dirBin = path.join(__dirname, '../', 'bin');
 	let ffmpegPath = null;
 	let ffprobePath = null;
 
@@ -165,7 +165,7 @@ async function convertAudioFile(
 	} catch (error) {
 		return {
 			success: false,
-			message: `Failed to convert '${inputFilePath}' to the desired sample rate: ${(error as AudioConversionResponse)?.message}`
+			message: `[convertAudioFile] Failed to convert '${inputFilePath}' to the desired sample rate: ${(error as AudioConversionResponse)?.message}`
 		};
 	}
 }
@@ -205,7 +205,7 @@ async function convertSampleRate(
 			} else {
 				reject(
 					new Error(
-						`Failed to convert '${inputFilePath}' to the desired sample rate: ${stderr.trim()}`
+						`[convertSampleRate] Failed to convert '${inputFilePath}' to the desired sample rate: ${stderr.trim()}`
 					)
 				);
 			}
