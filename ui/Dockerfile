@@ -15,6 +15,7 @@ RUN pnpm install --prod
 # Safe usage of env for database as read-only and no auth
 # Via https://podcastindex.org/datasets
 ENV DATABASE_URL="file:/usr/src/app/build/db/podcastindex_feeds.db"
+ENV SPEECH_TO_TEXT_WSS_URL=wss://sst.metermade.cc
 
 EXPOSE 3000
 
