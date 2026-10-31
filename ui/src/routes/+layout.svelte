@@ -14,22 +14,22 @@
 	let webSocket: WebSocket | null = $state(null);
 
 	// Function to send a message
-	function sendWssMessage() {
-		if (!webSocket) {
-			console.error(`Unable to send wss message, wss null!`);
+	// function sendWssMessage() {
+	// 	if (!webSocket) {
+	// 		console.error(`Unable to send wss message, wss null!`);
 
-			return;
-		}
+	// 		return;
+	// 	}
 
-		const message = JSON.stringify({
-			podcastUrl:
-				'https://podtrac.com/pts/redirect.mp3/traffic.omny.fm/d/clips/e73c998e-6e60-432f-8610-ae210140c5b1/a6fe610a-4ca3-4b46-afc6-ae2c007b3c35/ebdb47f1-6ccd-40bc-80e1-b4f2018ace5e/audio.mp3?utm_source=Podcast&in_playlist=1c5eae1a-4416-4dcc-b699-ae2c007b3c48Mb',
-			podcastImageUrl:
-				'https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/a6fe610a-4ca3-4b46-afc6-ae2c007b3c35/1c5eae1a-4416-4dcc-b699-ae2c007b3c48/image.jpg?t=1726512474&size=Large'
-		});
+	// 	const message = JSON.stringify({
+	// 		podcastUrl:
+	// 			'https://podtrac.com/pts/redirect.mp3/traffic.omny.fm/d/clips/e73c998e-6e60-432f-8610-ae210140c5b1/a6fe610a-4ca3-4b46-afc6-ae2c007b3c35/ebdb47f1-6ccd-40bc-80e1-b4f2018ace5e/audio.mp3?utm_source=Podcast&in_playlist=1c5eae1a-4416-4dcc-b699-ae2c007b3c48Mb',
+	// 		podcastImageUrl:
+	// 			'https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/a6fe610a-4ca3-4b46-afc6-ae2c007b3c35/1c5eae1a-4416-4dcc-b699-ae2c007b3c48/image.jpg?t=1726512474&size=Large'
+	// 	});
 
-		webSocket.send(message);
-	}
+	// 	webSocket.send(message);
+	// }
 
 	function setupWss(): void {
 		// Connect to the WebSocket server
@@ -58,10 +58,6 @@
 
 	onMount(() => {
 		setupWss();
-
-		setTimeout(() => {
-			sendWssMessage();
-		}, 10000);
 	});
 </script>
 
