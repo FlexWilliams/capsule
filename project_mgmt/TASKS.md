@@ -125,6 +125,26 @@ Dev notes:
 
 ### Acceptance Criteria:
 
+lgtm, could be better
+
+TODOS:
+
+- Hoist project_mgmt up to root folder
+- FIX broken ui test and revert packagae json to run tests before prod build!!!!!!!
+- Need to figure out optimal solution for multi-transcription support (switching podcasts intermittently, lang change, etc)
+- UI resilience when Speech-to-Text api down, or wss disconnection.
+- Refactor and "robustify" stt server. (logs, try catches, unit/e2e tests...)
+- STT perf (multi-threading) and container resource limit increases
+- Bind volume to STT container
+- Determine naming scheme for downloads, transcriptions, videos...
+- Svelte api vs STT seperation of concerns!
+- Need to share data models between ui and stt
+- Possible need/want to cancel transcription.
+- UX cleanup and handling of text overflow.
+- Cleanup .gitignores AND package.json cleanup script (yuck!)
+- Use a better ts-node project setup. literally just guessed at it but the tsconfig setup is hieroglyphics tbh...
+- Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+
 Verified By cube on: 11/5/26
 
 <br>
@@ -144,7 +164,7 @@ Verified By cube on: 10/23/26
 
 <br>
 
-## CAP-009 - Favorites & Comments
+## CAP-009 - Favorites, Comments, & Import/Export
 
 ### Description:
 
@@ -156,7 +176,26 @@ Verified By <> on:
 
 <br>
 
-## CAP-010 - API updates & hardening
+## CAP-010 - Transcription Cleanup
+
+### Description:
+
+### Acceptance Criteria:
+
+- FIX broken ui test and revert package json to run tests before prod build!!!!!!!
+- Support for multi-transcription support (switching podcasts intermittently and lang change)
+- UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
+- Bind volume to STT container
+- Determine naming scheme for downloads, transcriptions, videos...
+- Share data models between ui and stt
+- UX cleanup and handling of text overflow.
+- Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+
+Verified By <> on:
+
+<br>
+
+## CAP-011 - API hardening
 
 ### Description:
 
@@ -171,7 +210,7 @@ Verified By <> on:
 
 <br>
 
-## CAP-011 - v1 Review
+## CAP-012 - v1 Review
 
 ### Description:
 
@@ -186,7 +225,7 @@ Verified By <> on:
 
 <br>
 
-## CAP-012 - tag v1 & v2 Feature Brainstorm
+## CAP-013 - tag v1 & v2 Feature Brainstorm
 
 ### Description:
 
