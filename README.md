@@ -1,3 +1,3 @@
 # Capsule Podcasts
 
-[Board](./capsule-ui/project_mgmt/BOARD.md)
+[Board](./project_mgmt/BOARD.md)

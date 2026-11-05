@@ -111,7 +111,7 @@ Verified By <> on:
 
 <br>
 
-## CAP-007 - Audio to Text Attempt
+## (COMPLETE) CAP-007 - Audio to Text Attempt
 
 ### Description:
 
@@ -125,9 +125,7 @@ Dev notes:
 
 ### Acceptance Criteria:
 
-TBD
-
-Verified By <> on:
+Verified By cube on: 11/5/26
 
 <br>
 
