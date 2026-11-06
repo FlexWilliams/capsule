@@ -36,36 +36,44 @@
 	}
 </script>
 
-<div class="relative flex w-full flex-1 flex-col items-center justify-center gap-4">
-	<h2 class="text-center text-xl text-text">{podcast?.name || `Unknown Podcast`}</h2>
+<h2 class="text-center text-xl text-text">{podcast?.name || `Unknown Podcast`}</h2>
 
-	<div class="relative h-full w-full">
-		<img
-			src={podcast?.imageUrl || defaultCover}
-			alt={`Podcast cover for "${podcast?.name}"`}
-			class="cover rounded-md shadow-xl"
-			onerror={handleImageLoadError}
-		/>
-
-		<PictureInPicture />
-	</div>
-
-	<div class="ml-10 flex h-10 max-h-10 w-full justify-center gap-2">
-		<button
-			class="w-1/2 cursor-pointer rounded-full bg-subscribe-button p-2 text-sm text-button-text shadow-md disabled:text-button-text-disabled"
-			disabled={!canSubscribe}>Subscribe</button
-		>
-		<button
-			aria-label={muted ? 'Unmute?' : 'Mute?'}
-			class="flex max-h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-mute-button shadow-md"
-			onclick={handleMuteButtonClick}
-		>
+<div class="relative flex w-full flex-1 items-center justify-between gap-4">
+	<div class="flex-1"></div>
+	<div class="flex h-full flex-1 flex-col gap-2">
+		<div class="relative h-full w-full">
 			<img
-				class="h-1/2"
-				src={muted ? speakerMute : speaker}
-				alt={muted ? 'Muted Icon' : 'Speaker Icon'}
+				src={podcast?.imageUrl || defaultCover}
+				alt={`Podcast cover for "${podcast?.name}"`}
+				class="cover rounded-md shadow-xl"
+				onerror={handleImageLoadError}
 			/>
-		</button>
+		</div>
+
+		<div class="flex h-10 max-h-10 w-full justify-center">
+			<button
+				class="w-full cursor-pointer rounded-full bg-subscribe-button p-2 text-sm text-button-text shadow-md disabled:text-button-text-disabled"
+				disabled={!canSubscribe}>Subscribe</button
+			>
+		</div>
+	</div>
+	<div class="items-between flex h-full flex-1">
+		<div class="flex flex-1 flex-col items-center justify-between">
+			<div></div>
+			<PictureInPicture />
+			<button
+				aria-label={muted ? 'Unmute?' : 'Mute?'}
+				class="flex max-h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-mute-button shadow-md"
+				onclick={handleMuteButtonClick}
+			>
+				<img
+					class="h-1/2"
+					src={muted ? speakerMute : speaker}
+					alt={muted ? 'Muted Icon' : 'Speaker Icon'}
+				/>
+			</button>
+		</div>
+		<div class="flex-1"></div>
 	</div>
 </div>
 

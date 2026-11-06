@@ -17,7 +17,7 @@
 	});
 </script>
 
-<div class="absolute top-1/2 right-8 flex items-center justify-around">
+<div class="flex items-center justify-around">
 	<button
 		id={buttonId}
 		class="flex h-8 w-8 min-w-8 cursor-pointer items-center justify-center rounded-full bg-pip-button p-1 shadow-md"

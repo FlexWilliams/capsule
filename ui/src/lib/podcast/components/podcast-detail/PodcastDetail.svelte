@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import type { Podcast, PodcastRssMeta } from '../../model/podcast';
+	import type { Podcast, PodcastEpisode, PodcastRssMeta } from '../../model/podcast';
 	import { PodcastService } from '../../service/podcast.service.svelte';
 	import { podcastState } from '../../state/podcast.state.svelte';
 	import PodcastAudioButtons from './PodcastAudioButtons.svelte';
@@ -12,6 +12,8 @@
 	import PodcastProgressBar from './PodcastProgressBar.svelte';
 
 	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
+
+	let episode: PodcastEpisode | null = $derived(podcastState.episode);
 
 	let loading = $state(true);
 
@@ -102,13 +104,30 @@
 
 				<PodcastAudioButtons {podcast} />
 
+				<p class="podcast-title max-h-126 min-h-12 w-11/12 text-center text-text">
+					{#if episode}
+						{episode?.title || `[Unknown Episode]`}
+					{/if}
+				</p>
+
 				<PodcastProgressBar />
 			</div>
 
-			<PodcastEpisodeList episodes={podcast?.episodes} />
+			<PodcastEpisodeList
+				episodes={podcast?.episodes}
+				podcastTitle={podcast?.name || '[Unknown Podcast]'}
+			/>
 		{:else}
 			<p class="rounded-sm bg-amber-200 px-4 py-2 text-center">Podcast not found!</p>
 			<a href={resolve('/')} class="underline">Go back Home?</a>
 		{/if}
 	{/if}
 </article>
+
+<style lang="scss">
+	@use '../../../styles//text.scss';
+
+	.podcast-title {
+		@include text.textOverflowEllipses2Lines;
+	}
+</style>

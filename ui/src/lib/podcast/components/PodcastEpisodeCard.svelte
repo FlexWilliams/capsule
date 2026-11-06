@@ -1,19 +1,22 @@
 <script lang="ts">
 	import spin from '#lib/assets/icons/at-icons--arrows-clockwise.svg';
 	import checkmark from '#lib/assets/icons/at-icons--checkmark.svg';
+	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
+
+	import arrowDown from '#lib/assets/icons/at-icons--cloud-arrow-down.svg';
 	import close from '#lib/assets/icons/at-icons--cross.svg';
 	import info from '#lib/assets/icons/at-icons--info.svg';
 	import text from '#lib/assets/icons/at-icons--text.svg';
-	import { AudioService } from '#lib/audio/service/audio.service.svelte.ts';
-	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
+	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import {
 		TranscriptionStatus,
-		type TranscriptionRequest
+		type TranscriptionRequest,
+		type ViaUrlRequest
 	} from '#lib/transcription/transcription.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
+	import { webSocketState } from '#lib/web-socket/state/websocket.state.svelte.ts';
 	import { WebSocketService } from '#lib/web-socket/web-socket-service.svelte.ts';
 	import type { PodcastEpisode } from '../model/podcast';
-	import { PodcastService } from '../service/podcast.service.svelte';
 	import {
 		podcastState,
 		podcastState$$addEpisodeTranscriptionRequest,
@@ -21,12 +24,14 @@
 		podcastState$$toggleShowEpisodeTranscription
 	} from '../state/podcast.state.svelte';
 	import PodcastEpisodeTranscription from './PodcastEpisodeTranscription.svelte';
+	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
 
 	interface PodcastEpisodeCardProps {
+		podcastTitle: string;
 		episode: PodcastEpisode;
 	}
 
-	let { episode }: PodcastEpisodeCardProps = $props();
+	let { podcastTitle, episode }: PodcastEpisodeCardProps = $props();
 
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(episode?.url || '') || null
@@ -36,35 +41,82 @@
 		podcastState.showEpisodeTranscriptionMap.get(episode?.url || '') || false
 	);
 
-	let isSelectedPodcast = $derived(podcastState.selectedPodcastUrl === episode?.url);
-
-	let isPlaying = $derived(audioState.isPlaying);
+	let transcriptionLanguage = $derived(settingsState.transcriptionLanguage);
 
 	let summaryOpen = $state(false);
+
+	let downloading = $state(false);
+
+	let wssClientId = $derived(webSocketState.clientId);
 
 	let pubDate = $derived(
 		`${new Date(episode?.publishDate || new Date().getTime()).toLocaleDateString()}`
 	);
 
-	function handlePlayButtonClick(episodeUrl?: string, directUrl?: string): void {
+	async function handleDownloadPlayButtonClick(
+		episodeUrl?: string,
+		directUrl?: string
+	): Promise<void> {
 		VibrationService.vibrate();
 
 		if (!episodeUrl) {
 			return;
 		}
 
-		if (isPlaying && isSelectedPodcast) {
-			AudioService.pause();
-		} else {
-			PodcastService.setSelectedPodcastDirectUrl(directUrl || null);
-			PodcastService.setSelectedPodcastUrl(episodeUrl);
+		downloading = true;
 
-			AudioService.play();
+		let downloadUrl = episodeUrl;
+
+		try {
+			if (directUrl) {
+				downloadUrl = directUrl;
+			} else if (episodeUrl) {
+				// TODO: REFACTOR: this code, duped from AudioPlayer.svelte
+				const viaUrlRequest: ViaUrlRequest = {
+					url: episodeUrl,
+					language: transcriptionLanguage,
+
+					// TODO:  REVIEW:, looks like wss thread loses activity and doesn't pipe transcriptions
+					// will need to handle in `handleCanPlay` to call wssService to request transcriptions...
+					clientId: wssClientId || ''
+				};
+
+				const response = await fetch(`${SPEECH_TO_TEXT_API_URL}/via-url`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(viaUrlRequest)
+				});
+
+				if (!response.ok) {
+					console.error(`Error loading podcast via url, defaulting to original url.`);
+				} else {
+					downloadUrl = await response.text();
+				}
+			}
+		} catch {
+			console.error(`Error downloading podcast via api. Trying `);
+		} finally {
+			// TODO: inner try/catch here...
+			const title = `${podcastTitle} - ${episode.title}`;
+
+			const data = await fetch(downloadUrl);
+
+			const blob = await data.blob();
+
+			const file = new Blob([blob], { type: 'audio/mpeg' });
+
+			const a = document.createElement('a');
+
+			a.href = URL.createObjectURL(file);
+
+			a.download = `${title}.mp3`;
+
+			a.click();
+
+			downloading = false;
 		}
-	}
-
-	function handleTranscriptionPlayButtonClick(): void {
-		handlePlayButtonClick(episode?.url, episode?.directUrl);
 	}
 
 	function handleCloseEpisodeTranscription(): void {
@@ -97,7 +149,8 @@
 		podcastState$$addEpisodeTranscriptionRequest(podcastUrl);
 
 		const msg: TranscriptionRequest = {
-			podcastUrl
+			podcastUrl,
+			language: transcriptionLanguage
 		};
 
 		WebSocketService.sendMessage(msg);
@@ -105,7 +158,8 @@
 </script>
 
 <article
-	class="relative mb-6 h-full overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
+	class="relative mb-6 h-40 overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
+	class:h-55={showTranscription}
 >
 	<header class="mt-6 h-7/12 max-h-7/12">
 		<h3 class="flex-1">
@@ -132,7 +186,7 @@
 
 	<details class="absolute top-4 right-4 flex w-full flex-col">
 		<summary
-			class="h-6 w-6"
+			class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-close-button p-1"
 			onclick={() => {
 				summaryOpen = !summaryOpen;
 			}}
@@ -146,19 +200,27 @@
 		<dl>
 			<div class="summary">
 				<dt>Summary:</dt>
-				<dd>{episode?.summary}</dd>
+				<dd>{episode?.summary || '(none)'}</dd>
 			</div>
 			<div>
 				<dt>Duration:</dt>
-				<dd>{episode?.duration}sec</dd>
+				<dd>{Math.floor((episode?.duration || 0) / 60)}min</dd>
 			</div>
 			<div>
 				<dt>Size:</dt>
 				<dd>{episode?.contentLengthInMb}Mb</dd>
 			</div>
 			<div>
-				<dt>URL:</dt>
-				<dd>{episode?.url}Mb</dd>
+				<dt>Original URL:</dt>
+				<dd>
+					{#if episode?.url}
+						<a href={episode.url} target="_blank" rel="external" class="font-semibold underline"
+							>Link</a
+						>
+					{:else}
+						<p>No Link Available</p>
+					{/if}
+				</dd>
 			</div>
 		</dl>
 	</details>
@@ -166,30 +228,31 @@
 	{#if showTranscription}
 		<PodcastEpisodeTranscription
 			duration={episode?.duration}
-			{handleTranscriptionPlayButtonClick}
 			{handleCloseEpisodeTranscription}
-			{isPlaying}
-			{isSelectedPodcast}
-			directUrl={episode?.directUrl}
+			{episode}
+			percentageComplete={transcriptionRequest?.percentageComplete}
+			status={transcriptionRequest?.status}
 		/>
 	{/if}
 
 	<footer class="flex h-2/12 max-h-2/12 items-center justify-between">
 		<p class="text-sm">{pubDate}</p>
-		<button
-			class="w-20 cursor-pointer rounded-sm bg-episode-play-button py-1 shadow-md"
-			onclick={() => handlePlayButtonClick(episode?.url, episode?.directUrl)}
-		>
-			{#if isSelectedPodcast}
-				{#if isPlaying}
-					<span>Playing</span>
+		<div class="flex h-6 max-h-6 items-center gap-4">
+			<button
+				aria-label={`Download episode "${episode?.title}"`}
+				class="flex h-6 w-6 items-center justify-center"
+				disabled={downloading}
+				onclick={() => handleDownloadPlayButtonClick(episode?.url, episode?.directUrl)}
+			>
+				{#if downloading}
+					<img src={spin} alt="Loading icon" class="spin" />
 				{:else}
-					<span>Paused</span>
+					<img src={arrowDown} alt="Save icon" />
 				{/if}
-			{:else}
-				<span>Play</span>
-			{/if}
-		</button>
+			</button>
+
+			<PodcastEpisodeCardAudioButton {episode} />
+		</div>
 	</footer>
 </article>
 
@@ -223,7 +286,7 @@
 			&:open {
 				position: absolute;
 				top: 0;
-				background: white;
+				background: var(--color-card);
 				padding: 1rem;
 				left: 0;
 				width: 100%;
@@ -238,13 +301,7 @@
 			}
 
 			dl {
-				padding: 1rem;
-				/**
-					// Unsure why percentage won't work here...
-					height: 80%;
-					max-height: 80%;
-				*/
-
+				padding: 0 1rem;
 				height: 6rem;
 				max-height: 6rem;
 
@@ -252,7 +309,6 @@
 
 				dt {
 					text-decoration: underline;
-					background-color: yellow;
 					padding: 0.25rem 0;
 					display: flex;
 					align-items: center;
@@ -261,6 +317,11 @@
 				div {
 					display: flex;
 					justify-content: space-between;
+					align-items: center;
+
+					&:first-of-type {
+						align-items: flex-start;
+					}
 				}
 
 				div.summary {

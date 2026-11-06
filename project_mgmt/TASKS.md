@@ -164,7 +164,7 @@ Verified By cube on: 10/23/26
 
 <br>
 
-## CAP-009 - Favorites, Comments, & Import/Export
+## CAP-009 - Pick Up Where You Left Off At, Favorites, Comments, & Import/Export
 
 ### Description:
 
@@ -182,14 +182,15 @@ Verified By <> on:
 
 ### Acceptance Criteria:
 
-- FIX broken ui test and revert package json to run tests before prod build!!!!!!!
+- (DONE) FIX broken ui test and revert package json to run tests before prod build!!!!!!!
 - Support for multi-transcription support (switching podcasts intermittently and lang change)
-- UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
-- Bind volume to STT container
-- Determine naming scheme for downloads, transcriptions, videos...
-- Share data models between ui and stt
-- UX cleanup and handling of text overflow.
-- Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+- (DONE-ISH) UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
+- (DONE) Bind volume to STT container
+- (DONE) Determine naming scheme for downloads, transcriptions, videos...
+- (DONE) UX cleanup and handling of text overflow.
+- (DONE-ISH) Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+
+(DONE-ISH) - To be handled/reviewed during CAP-012 - v1 Review
 
 Verified By <> on:
 
@@ -201,9 +202,11 @@ Verified By <> on:
 
 ### Acceptance Criteria:
 
+- fix skipped tests and add more api tests
 - multi-vendor support or DB download and self-host
 - rate limiting
-- downloading
+- (DONE) downloading
+  - done on ui side.
 - auth??
 
 Verified By <> on:
@@ -218,8 +221,14 @@ Verified By <> on:
 
 - a11y
 - security
+  1. cors!
 - perf
 - etc.
+
+REVIEW:
+
+- UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
+- Rework ui-wss flow... make simpler, reduce overhead and dupe vars...
 
 Verified By <> on:
 
