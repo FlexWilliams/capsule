@@ -201,6 +201,7 @@ Verified By <> on:
 
 ### Acceptance Criteria:
 
+- fix skipped tests and add more api tests
 - multi-vendor support or DB download and self-host
 - rate limiting
 - downloading

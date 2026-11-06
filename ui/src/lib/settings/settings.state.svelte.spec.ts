@@ -42,9 +42,9 @@ test('settingsState$$setSkipAd', () => {
 test('settingsState$$setLightMode', () => {
 	const state = settingsState;
 
-	expect(state.lightMode).toEqual(true);
-	settingsState$$setLightMode(false);
 	expect(state.lightMode).toEqual(false);
 	settingsState$$setLightMode(true);
 	expect(state.lightMode).toEqual(true);
+	settingsState$$setLightMode(false);
+	expect(state.lightMode).toEqual(false);
 });
