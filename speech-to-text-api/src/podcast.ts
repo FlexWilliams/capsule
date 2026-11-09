@@ -1,5 +1,8 @@
+import { Temporal } from '@js-temporal/polyfill';
 import child_process from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import {
@@ -9,6 +12,7 @@ import {
 	TextTrackFormat,
 	TranscriptionRequest
 } from './transcription';
+
 const exec = promisify(child_process.exec);
 
 const DEFAULT_AUDIO_DURATION = 60; // 1min
@@ -60,10 +64,24 @@ export async function fetchDirectPodcastUrl(podcastUrl: string): Promise<string>
 	return directUrl;
 }
 
-export async function downloadPodcast(podcastUrl: string, podcastId: string): Promise<void> {
+function getTodaysFolderName(): string {
+	const { year, month, day } = Temporal.Now.plainDateISO();
+
+	return `${year}${month}${day}`;
+}
+
+export function getPodcastHash(url: string): string {
+	return createHash('sha256').update(url).digest('hex');
+}
+
+export async function downloadPodcast(
+	podcastUrl: string,
+	podcastId: string,
+	subFolder: string
+): Promise<void> {
 	const start = performance.now();
 
-	const command = `"${baseFolder}download_podcast.sh" ${podcastId} ${podcastUrl}`;
+	const command = `"${baseFolder}download_podcast.sh" ${podcastId} ${podcastUrl} ${subFolder}`;
 
 	const { stderr } = await exec(command);
 
@@ -197,8 +215,8 @@ export async function createTranscribedVideo(): Promise<void> {
 	console.debug(`Time to create transcribed video: ${execTime}ms`);
 }
 
-export function getSegments(podcastId: string): string[] {
-	const folderPath = path.join(__dirname, '../tmp', `${podcastId}`, `segments`);
+export function getSegments(subFolder: string): string[] {
+	const folderPath = path.join(__dirname, '../tmp', `${subFolder}`, `segments`);
 
 	const segments = fs.readdirSync(folderPath);
 
@@ -207,13 +225,76 @@ export function getSegments(podcastId: string): string[] {
 	return segments;
 }
 
+export type PodcastEntry = {
+	id: string;
+	parentFolder: string;
+};
+
+export type PodcastEntryMap = Map<string, PodcastEntry>;
+
+async function writeEntry(id: string, parentFolder: string): Promise<void> {
+	try {
+		const entriesPath = path.join(__dirname, '../tmp', `entries.json`);
+
+		if (!fs.existsSync(entriesPath)) {
+			await fsPromises.writeFile(
+				entriesPath,
+				JSON.stringify(Array.from(new Map<string, PodcastEntry>())),
+				'utf8'
+			);
+		}
+
+		const data = await fsPromises.readFile(entriesPath, 'utf8');
+
+		const entries = data
+			? new Map<string, PodcastEntry>(JSON.parse(data))
+			: new Map<string, PodcastEntry>();
+
+		entries.set(id, {
+			id,
+			parentFolder
+		});
+
+		await fsPromises.writeFile(entriesPath, JSON.stringify(Array.from(entries)), 'utf8');
+
+		console.debug(`Wrote new entry for: ${id}`);
+	} catch (error) {
+		console.error('Error reading or parsing file:', error);
+	}
+}
+
+export async function getEntry(id: string): Promise<PodcastEntry | undefined> {
+	try {
+		const entriesPath = path.join(__dirname, '../tmp', `entries.json`);
+
+		const data = await fsPromises.readFile(entriesPath, 'utf8');
+
+		const entries = data
+			? new Map<string, PodcastEntry>(JSON.parse(data))
+			: new Map<string, PodcastEntry>();
+
+		return entries.get(id);
+	} catch (error) {
+		console.error('Error reading or parsing file:', error);
+	}
+}
+
+export function getDirectApiUrl(podcastId: string): string {
+	const baseUrl = process.env.HOST_NAME || `http://localhost:3000`;
+
+	return `${baseUrl}/api/podcasts/${podcastId}`;
+}
+
 export async function transcribePodcast(
 	request: TranscriptionRequest,
-	clientId: string
-): Promise<void> {
+	clientId: string,
+	noTranscribe?: boolean
+): Promise<string> {
 	const { podcastUrl, podcastImageUrl, textTrackFormat, video } = request;
 
-	const podcastId = crypto.randomUUID();
+	const podcastId = getPodcastHash(podcastUrl);
+
+	await writeEntry(podcastId, getTodaysFolderName());
 
 	console.info(`Transcribing podcast: ${podcastUrl}...`);
 
@@ -221,18 +302,24 @@ export async function transcribePodcast(
 
 	let directUrl = await fetchDirectPodcastUrl(podcastUrl);
 
-	await downloadPodcast(directUrl, podcastId);
+	const subFolder = `${getTodaysFolderName()}/${podcastId}`;
 
-	const baseUrl = process.env.HOST_NAME || `http://localhost:3000`;
+	console.debug(`Saving to: ${subFolder}...`);
 
-	directUrl = `${baseUrl}/api/podcasts/${podcastId}`;
+	await downloadPodcast(directUrl, podcastId, subFolder);
+
+	directUrl = getDirectApiUrl(podcastId);
+
+	if (noTranscribe) {
+		return podcastId;
+	}
 
 	const transcription = await getTranscription(
 		podcastUrl,
 		directUrl,
 		clientId,
-		podcastId,
-		getSegments(podcastId)
+		subFolder,
+		getSegments(subFolder)
 	);
 
 	if (textTrackFormat === TextTrackFormat.Srt || video) {
@@ -272,4 +359,6 @@ export async function transcribePodcast(
 	console.info(`Done transcribing podcast: ${podcastUrl}...`);
 
 	console.info(`Transcription time: ${diff} (${Number(Math.fround(diff / 60).toFixed(2))})`);
+
+	return podcastId;
 }

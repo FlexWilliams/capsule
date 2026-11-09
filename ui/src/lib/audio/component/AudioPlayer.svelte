@@ -23,6 +23,8 @@
 		audioState$$setLoading
 	} from '../state/audio.state.svelte';
 
+	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
+
 	const subscriptions: Subscription[] = [];
 
 	const audioPlayerId = 'audio-player';
@@ -44,10 +46,6 @@
 	let skip = $derived(settingsState.skip);
 
 	let skipAdInterval = $derived(settingsState.skipAd);
-
-	let transcriptions = $derived(
-		selectedPodcastUrl ? podcastState.episodeTranscriptionMap.get(selectedPodcastUrl) || [] : []
-	);
 
 	let textTrack: TextTrack | null = $state(null);
 
@@ -418,15 +416,39 @@
 
 		audioState$$setLoading(true);
 
-		audioPlayer.src = url;
+		try {
+			const response = await fetch(`${SPEECH_TO_TEXT_API_URL}/via-url`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					url
+				})
+			});
 
-		audioPlayer.oncanplay = handleCanPlay;
+			if (!response.ok) {
+				console.error(`Error loading podcast via url, defaulting to original url.`);
+
+				audioPlayer.src = url;
+			} else {
+				const directUrl = await response.text();
+
+				audioPlayer.src = directUrl;
+			}
+
+			audioPlayer.oncanplay = handleCanPlay;
+		} catch {
+			console.error(`Error loading podcast for url: ${url}`);
+		}
 	}
 
 	$effect(() => {
 		if (selectedPodcastUrl) {
 			untrack(() => {
-				console.log(`Request for new podcast URL: ${selectedPodcastUrl}`);
+				console.log(
+					`Request for new podcast URL: ${selectedPodcastDirectUrl || selectedPodcastUrl}`
+				);
 
 				loadPodcast(selectedPodcastDirectUrl || selectedPodcastUrl);
 			});

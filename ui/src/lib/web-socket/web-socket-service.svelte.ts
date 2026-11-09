@@ -41,6 +41,13 @@ export class WebSocketService {
 				response as TranscriptionResponse;
 
 			if (status === TranscriptionStatus.Finished) {
+				if (directUrl) {
+					podcastState$$setDirectUrl(podcastUrl, directUrl);
+
+					// TODO: review if this is the best way to handle this...
+					podcastState$$setSelectedPodcastTranscriptionUrl(directUrl);
+				}
+
 				podcastState$$setEpisodeTranscriptionRequest(podcastUrl, response);
 
 				WssLogger.log(`Finsihed transcribing podcast.\n${message}`);

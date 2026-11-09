@@ -42,7 +42,7 @@ export async function getTranscription(
 	url: string,
 	directUrl: string,
 	clientId: string,
-	podcastId: string,
+	subFolder: string,
 	segments: string[]
 ): Promise<WhisperTranscription[]> {
 	const transcript: WhisperTranscription[] = [];
@@ -52,7 +52,7 @@ export async function getTranscription(
 	for (const s of segments) {
 		console.log(`Processing segment: ${s} (out of ${segments.length})`);
 
-		const filePath = path.join(__dirname, '../tmp', `${podcastId}`, `segments/${s}`);
+		const filePath = path.join(__dirname, '../tmp', `${subFolder}`, `segments/${s}`);
 
 		const transciptions = await transcribe(filePath);
 

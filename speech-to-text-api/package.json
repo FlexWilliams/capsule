@@ -30,11 +30,14 @@
 	},
 	"type": "commonjs",
 	"dependencies": {
+		"cors": "^2.8.6",
 		"express": "^5.3.0",
 		"rxjs": "^7.8.2",
 		"ws": "^8.22.0"
 	},
 	"devDependencies": {
+		"@js-temporal/polyfill": "^0.5.1",
+		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
 		"@types/node": "^26.6.5",
 		"@types/ws": "^8.18.2",
