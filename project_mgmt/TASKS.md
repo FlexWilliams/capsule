@@ -182,12 +182,11 @@ Verified By <> on:
 
 ### Acceptance Criteria:
 
-- FIX broken ui test and revert package json to run tests before prod build!!!!!!!
+- (DONE) FIX broken ui test and revert package json to run tests before prod build!!!!!!!
 - Support for multi-transcription support (switching podcasts intermittently and lang change)
 - UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
 - Bind volume to STT container
 - Determine naming scheme for downloads, transcriptions, videos...
-- Share data models between ui and stt
 - UX cleanup and handling of text overflow.
 - Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
 

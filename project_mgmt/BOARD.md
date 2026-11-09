@@ -2,7 +2,7 @@
 
 Podcasts Your Way
 
-[Prod Website](http://podcasts.metermade.cc/)
+[Prod Website](https://podcasts.metermade.cc/)
 
 <br>
 
