@@ -4,7 +4,7 @@ import fsAsync from 'node:fs/promises';
 import path from 'node:path';
 import { filter, tap } from 'rxjs';
 import { WebSocket, WebSocketServer } from 'ws';
-import { getDirectApiUrl, getEntry, getPodcastHash, transcribePodcast } from './podcast';
+import { getDirectApiUrl, getEntry, getPodcastHash, processPodcastTranscription } from './podcast';
 import { TranscriptionRequest, TranscriptionResponse, TranscriptionStatus } from './transcription';
 import { TranscriptionService } from './transcription-service';
 
@@ -37,7 +37,13 @@ wss.on('connection', (ws: WebSocket) => {
 
 				console.log(`Sending out new transcription...`);
 
-				ws.send(JSON.stringify(response));
+				const existing = wssConnections.get(clientId);
+				if (existing) {
+					existing.send(JSON.stringify(response));
+				} else {
+					// TODO: REVIEW: fallback but may not send to anyone
+					ws.send(JSON.stringify(response));
+				}
 			})
 		)
 		.subscribe();
@@ -61,14 +67,6 @@ wss.on('connection', (ws: WebSocket) => {
 			return;
 		}
 
-		let response: TranscriptionResponse = {
-			podcastUrl,
-			status: TranscriptionStatus.Processing,
-			message: 'Processing podcast...'
-		};
-
-		ws.send(JSON.stringify(response));
-
 		try {
 			const podcastId = getPodcastHash(podcastUrl);
 
@@ -77,22 +75,30 @@ wss.on('connection', (ws: WebSocket) => {
 			if (existingEntry) {
 				console.debug(`Existing entry already exists for podcast: ${podcastUrl}. Returning entry.`);
 
-				const response: TranscriptionResponse = {
-					podcastUrl,
-					directUrl: getDirectApiUrl(existingEntry.id),
+				const { id, status } = existingEntry;
 
-					// TODO: update status here to actual from entry
-					status: TranscriptionStatus.Finished
+				const response_: TranscriptionResponse = {
+					podcastUrl,
+					directUrl: getDirectApiUrl(id),
+					status
 				};
 
-				ws.send(JSON.stringify(response));
+				ws.send(JSON.stringify(response_));
 
 				return;
 			}
 
+			let response: TranscriptionResponse = {
+				podcastUrl,
+				status: TranscriptionStatus.Processing,
+				message: 'Processing podcast...'
+			};
+
+			ws.send(JSON.stringify(response));
+
 			console.debug(`No existing entry already exists for podcast: ${podcastId}.`);
 
-			await transcribePodcast(request, clientId);
+			await processPodcastTranscription(request, clientId, false, false);
 
 			if (!request.video) {
 				const response: TranscriptionResponse = {
@@ -104,16 +110,6 @@ wss.on('connection', (ws: WebSocket) => {
 
 				return;
 			}
-
-			const textTranscription = await fsAsync.readFile(`podcast.webvtt`, 'utf-8');
-
-			const response: TranscriptionResponse = {
-				podcastUrl,
-				status: TranscriptionStatus.Finished,
-				message: textTranscription
-			};
-
-			ws.send(JSON.stringify(response));
 		} catch (e) {
 			console.error(
 				`Error occurred transcribing the podcast with url: ${podcastUrl}.\n${JSON.stringify(e)}`
@@ -163,19 +159,20 @@ app.post('/transcribe', async (req, res) => {
 		return res.status(400).send('Bad Request');
 	}
 
-	transcribePodcast(request, '');
+	processPodcastTranscription(request, '');
 
 	res.status(202).send(`Processing video w/captions for podcast: ${podcastUrl}`);
 });
 
 export type ViaUrlRequest = {
 	url: string;
+	clientId: string;
 };
 
 app.post('/via-url', async (req, res) => {
 	const request = req.body as ViaUrlRequest;
 
-	const { url } = request;
+	const { url, clientId } = request;
 
 	// TODO: improve validation here and update to use regex
 	if (!url || (!url.startsWith(`http://`) && !url.startsWith(`https://`))) {
@@ -191,13 +188,14 @@ app.post('/via-url', async (req, res) => {
 
 		directUrl = getDirectApiUrl(existingEntry.id);
 	} else {
-		console.log('No entry exists for podcast, downloading but not transcribing...');
+		console.log('No entry exists for podcast, downloading...');
 
-		const podcastId = await transcribePodcast(
+		const podcastId = await processPodcastTranscription(
 			{
 				podcastUrl: url
 			},
-			'',
+			clientId,
+			false,
 			true
 		);
 
@@ -208,6 +206,32 @@ app.post('/via-url', async (req, res) => {
 
 	res.status(200).send(directUrl);
 });
+
+async function accessFile(filePath: string): Promise<void> {
+	return new Promise((resolve, reject) => {
+		let retries = 0;
+		const maxRetries = 5;
+		const sleepTime = 2000;
+
+		const interval = setInterval(async () => {
+			retries++;
+
+			try {
+				await fsAsync.access(filePath);
+				clearInterval(interval);
+				resolve();
+			} catch {
+				console.warn(`Unable to open file ${filePath} after attempt ${retries}/${maxRetries}`);
+			}
+
+			if (retries > maxRetries) {
+				clearInterval(interval);
+
+				reject(`Unable to open the file, may not exist.`);
+			}
+		}, sleepTime);
+	});
+}
 
 app.get('/api/podcasts/:podcastId', async (req, res) => {
 	const { podcastId } = req.params;
@@ -235,7 +259,7 @@ app.get('/api/podcasts/:podcastId', async (req, res) => {
 			`podcast.mp3`
 		);
 
-		await fsAsync.access(filePath);
+		await accessFile(filePath);
 
 		res.sendFile(filePath, (err) => {
 			if (err) {

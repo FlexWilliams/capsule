@@ -13,8 +13,11 @@ import {
 	type TranscriptionResponse
 } from '#lib/transcription/transcription.ts';
 import { SPEECH_TO_TEXT_WSS_URL } from '$app/env/public';
+import { webSocketState$$setClientId } from './state/websocket.state.svelte';
 
 export class WebSocketService {
+	public static clientId: string | null = null;
+
 	private static webSocket: WebSocket | null = null;
 
 	private static onOpen(): void {
@@ -83,6 +86,16 @@ export class WebSocketService {
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (e) {
+			const str = event.data as string;
+
+			if (str.includes('Welcome to the WebSocket server')) {
+				const tokens = str.split(' ');
+
+				const clientId = tokens[tokens.length - 1];
+
+				webSocketState$$setClientId(clientId);
+			}
+
 			return WssLogger.serverLog(`${event.data}`);
 		}
 	}

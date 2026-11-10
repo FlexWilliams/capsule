@@ -2,9 +2,15 @@
 	import { MediaSessionService } from '#lib/media-session/media-session-service.svelte.ts';
 	import type { MediaSessionEventHandlers } from '#lib/media-session/media-session.ts';
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
-	import { podcastState } from '#lib/podcast/state/podcast.state.svelte.ts';
+	import {
+		podcastState,
+		podcastState$$addEpisodeTranscriptionRequest
+	} from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
-	import type { WhisperTranscription } from '#lib/transcription/transcription.ts';
+	import type {
+		TranscriptionRequest,
+		WhisperTranscription
+	} from '#lib/transcription/transcription.ts';
 	import { interval, Subscription, tap } from 'rxjs';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { TranscriptionService } from '../../transcription/transcription-service.svelte';
@@ -23,11 +29,15 @@
 		audioState$$setLoading
 	} from '../state/audio.state.svelte';
 
+	import { webSocketState } from '#lib/web-socket/state/websocket.state.svelte.ts';
+	import { WebSocketService } from '#lib/web-socket/web-socket-service.svelte.ts';
 	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
 
 	const subscriptions: Subscription[] = [];
 
 	const audioPlayerId = 'audio-player';
+
+	let wssClientId = $derived(webSocketState.clientId);
 
 	let selectedPodcast = $derived(podcastState.selectedPodcast);
 
@@ -357,6 +367,16 @@
 		audioState$$setLoading(false);
 
 		console.log(`Podcast now playing...`);
+
+		if (selectedPodcastUrl) {
+			podcastState$$addEpisodeTranscriptionRequest(selectedPodcastUrl);
+
+			const msg: TranscriptionRequest = {
+				podcastUrl: selectedPodcastUrl
+			};
+
+			WebSocketService.sendMessage(msg);
+		}
 	}
 
 	function pause(): void {
@@ -423,7 +443,11 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					url
+					url,
+
+					// TODO:  REVIEW:, looks like wss thread loses activity and doesn't pipe transcriptions
+					// will need to handle in `handleCanPlay` to call wssService to request transcriptions...
+					clientId: wssClientId
 				})
 			});
 

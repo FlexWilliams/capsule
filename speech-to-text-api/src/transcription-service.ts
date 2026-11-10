@@ -14,6 +14,7 @@ export class TranscriptionService {
 	public static transcription$ = this.transcription.asObservable();
 
 	public static emitTranscription(transcription: Transcription): void {
+		console.debug(`[emitTranscription]: ${transcription.clientId}`);
 		this.transcription.next(transcription);
 	}
 }

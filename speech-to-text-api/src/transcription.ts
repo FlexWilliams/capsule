@@ -213,7 +213,12 @@ async function transcribe(filePath: string): Promise<WhisperTranscription[] | nu
 /**
  * TODO: perf this better somehow?
  */
-export async function createSrtFile(transcript: WhisperTranscription[]): Promise<void> {
+export async function createSrtFile(
+	subFolder: string,
+	transcript: WhisperTranscription[]
+): Promise<void> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.srt`);
+
 	let idx = 1;
 
 	for (let t of transcript) {
@@ -224,7 +229,7 @@ export async function createSrtFile(transcript: WhisperTranscription[]): Promise
 			content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
 			content += `${t.text.trim()}\n\n`;
 
-			await fsAsync.appendFile('podcast.srt', content);
+			await fsAsync.appendFile(filePath, content);
 		} catch (err) {
 			console.log(`Error writing transcript #${idx} to srt file:`);
 		}
@@ -236,7 +241,12 @@ export async function createSrtFile(transcript: WhisperTranscription[]): Promise
 /**
  * TODO: perf this better somehow?
  */
-export async function createWebVttFile(transcript: WhisperTranscription[]): Promise<void> {
+export async function createWebVttFile(
+	subFolder: string,
+	transcript: WhisperTranscription[]
+): Promise<void> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.webvtt`);
+
 	let idx = 1;
 
 	for (let t of transcript) {
@@ -247,9 +257,9 @@ export async function createWebVttFile(transcript: WhisperTranscription[]): Prom
 			content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
 			content += `${t.text.trim()}\n\n`;
 
-			await fsAsync.appendFile('podcast.webvtt', content);
+			await fsAsync.appendFile(filePath, content);
 		} catch (err) {
-			console.log(`Error writing transcript #${idx} to srt file:`);
+			console.log(`Error writing transcript #${idx} to webvtt file:`);
 		}
 
 		idx++;

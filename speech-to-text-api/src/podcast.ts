@@ -10,7 +10,8 @@ import {
 	createWebVttFile,
 	getTranscription,
 	TextTrackFormat,
-	TranscriptionRequest
+	TranscriptionRequest,
+	TranscriptionStatus
 } from './transcription';
 
 const exec = promisify(child_process.exec);
@@ -228,11 +229,16 @@ export function getSegments(subFolder: string): string[] {
 export type PodcastEntry = {
 	id: string;
 	parentFolder: string;
+	status: TranscriptionStatus;
 };
 
 export type PodcastEntryMap = Map<string, PodcastEntry>;
 
-async function writeEntry(id: string, parentFolder: string): Promise<void> {
+async function writeEntry(
+	id: string,
+	parentFolder: string,
+	status: TranscriptionStatus
+): Promise<void> {
 	try {
 		const entriesPath = path.join(__dirname, '../tmp', `entries.json`);
 
@@ -252,7 +258,8 @@ async function writeEntry(id: string, parentFolder: string): Promise<void> {
 
 		entries.set(id, {
 			id,
-			parentFolder
+			parentFolder,
+			status
 		});
 
 		await fsPromises.writeFile(entriesPath, JSON.stringify(Array.from(entries)), 'utf8');
@@ -275,7 +282,7 @@ export async function getEntry(id: string): Promise<PodcastEntry | undefined> {
 
 		return entries.get(id);
 	} catch (error) {
-		console.error('Error reading or parsing file:', error);
+		console.error('Error reading or parsing file. Will create later...');
 	}
 }
 
@@ -285,34 +292,72 @@ export function getDirectApiUrl(podcastId: string): string {
 	return `${baseUrl}/api/podcasts/${podcastId}`;
 }
 
-export async function transcribePodcast(
+export async function processPodcastTranscription(
 	request: TranscriptionRequest,
 	clientId: string,
-	noTranscribe?: boolean
+	noTranscribe?: boolean,
+	immediateDirectUrl?: boolean
 ): Promise<string> {
-	const { podcastUrl, podcastImageUrl, textTrackFormat, video } = request;
+	const { podcastUrl } = request;
 
 	const podcastId = getPodcastHash(podcastUrl);
 
-	await writeEntry(podcastId, getTodaysFolderName());
-
-	console.info(`Transcribing podcast: ${podcastUrl}...`);
+	const existingEntry = await getEntry(podcastId);
 
 	const start = performance.now();
 
-	let directUrl = await fetchDirectPodcastUrl(podcastUrl);
+	if (existingEntry) {
+		const { parentFolder } = existingEntry;
 
-	const subFolder = `${getTodaysFolderName()}/${podcastId}`;
+		// TODO: handle check status && if web.vtt exists already! otherwise, do:
+		console.info(`Transcribing podcast: ${podcastUrl}...`);
 
-	console.debug(`Saving to: ${subFolder}...`);
+		await transcribePodcast(
+			request,
+			getDirectApiUrl(podcastId),
+			clientId,
+			`${parentFolder}/${podcastId}`,
+			start
+		);
 
-	await downloadPodcast(directUrl, podcastId, subFolder);
+		return podcastId;
+	} else {
+		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Processing);
 
-	directUrl = getDirectApiUrl(podcastId);
+		console.info(`Transcribing podcast: ${podcastUrl}...`);
 
-	if (noTranscribe) {
+		let directUrl = await fetchDirectPodcastUrl(podcastUrl);
+
+		const subFolder = `${getTodaysFolderName()}/${podcastId}`;
+
+		console.debug(`Saving to: ${subFolder}...`);
+
+		await downloadPodcast(directUrl, podcastId, subFolder);
+
+		directUrl = getDirectApiUrl(podcastId);
+
+		if (noTranscribe) {
+			return podcastId;
+		}
+
+		if (immediateDirectUrl) {
+			transcribePodcast(request, directUrl, clientId, subFolder, start);
+		} else {
+			await transcribePodcast(request, directUrl, clientId, subFolder, start);
+		}
+
 		return podcastId;
 	}
+}
+
+async function transcribePodcast(
+	request: TranscriptionRequest,
+	directUrl: string,
+	clientId: string,
+	subFolder: string,
+	start: number
+): Promise<void> {
+	const { podcastUrl, podcastImageUrl, textTrackFormat, video } = request;
 
 	const transcription = await getTranscription(
 		podcastUrl,
@@ -327,15 +372,15 @@ export async function transcribePodcast(
 			console.warn(`Creating video but 'TextTrackFormat' was set to WebVtt. Using Srt instead.`);
 		}
 
-		await createSrtFile(transcription);
+		await createSrtFile(subFolder, transcription);
 	} else if (textTrackFormat === TextTrackFormat.WebVtt) {
-		await createWebVttFile(transcription);
+		await createWebVttFile(subFolder, transcription);
 	} else {
 		console.warn(
 			`An invalid 'TextTrackFormat' was sent in: ${textTrackFormat}. Creating webvtt as default.`
 		);
 
-		await createWebVttFile(transcription);
+		await createWebVttFile(subFolder, transcription);
 	}
 
 	if (!video) {
@@ -359,6 +404,4 @@ export async function transcribePodcast(
 	console.info(`Done transcribing podcast: ${podcastUrl}...`);
 
 	console.info(`Transcription time: ${diff} (${Number(Math.fround(diff / 60).toFixed(2))})`);
-
-	return podcastId;
 }
