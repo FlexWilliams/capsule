@@ -53,6 +53,14 @@ export class WebSocketService {
 
 				podcastState$$setEpisodeTranscriptionRequest(podcastUrl, response);
 
+				if (transcriptions) {
+					WssLogger.log(`New transcriptions received, adding to existing.`);
+
+					podcastState$$addEpisodeTranscriptions(podcastUrl, transcriptions);
+
+					TranscriptionService.emitTranscriptions(transcriptions);
+				}
+
 				WssLogger.log(`Finsihed transcribing podcast.\n${message}`);
 			} else if (status === TranscriptionStatus.InvalidRequest) {
 				podcastState$$resetEpisodeTranscriptionRequest(podcastUrl);

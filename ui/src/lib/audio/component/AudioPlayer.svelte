@@ -7,9 +7,10 @@
 		podcastState$$addEpisodeTranscriptionRequest
 	} from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
-	import type {
-		TranscriptionRequest,
-		WhisperTranscription
+	import {
+		TranscriptionStatus,
+		type TranscriptionRequest,
+		type WhisperTranscription
 	} from '#lib/transcription/transcription.ts';
 	import { interval, Subscription, tap } from 'rxjs';
 	import { onDestroy, onMount, untrack } from 'svelte';
@@ -46,6 +47,10 @@
 	let selectedPodcastDirectUrl = $derived(podcastState.selectedPodcastDirectUrl);
 
 	let selectedPodcastTranscriptionUrl = $derived(podcastState.selectedPodcastTranscriptionUrl);
+
+	let transcriptionRequest = $derived(
+		podcastState.episodeTranscriptionRequestMap.get(selectedPodcastUrl || '') || null
+	);
 
 	let isPlaying = $derived(audioState.isPlaying);
 
@@ -368,7 +373,7 @@
 
 		console.log(`Podcast now playing...`);
 
-		if (selectedPodcastUrl) {
+		if (selectedPodcastUrl && transcriptionRequest?.status !== TranscriptionStatus.Finished) {
 			podcastState$$addEpisodeTranscriptionRequest(selectedPodcastUrl);
 
 			const msg: TranscriptionRequest = {

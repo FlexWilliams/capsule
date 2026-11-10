@@ -29,7 +29,12 @@ export type TranscriptionResponse = {
 	directUrl?: string;
 	message?: string;
 	transcriptions?: WhisperTranscription[];
+	percentageComplete?: number | undefined;
 };
+
+export async function getSavedTranscription(folderPath: string): Promise<WhisperTranscription[]> {
+	return await webVttFileToTranscriptionList(folderPath);
+}
 
 /**
  * TODO: perf this better via message queue or
@@ -49,7 +54,10 @@ export async function getTranscription(
 
 	let offset = 0;
 
+	let i = 0;
 	for (const s of segments) {
+		i++;
+
 		console.log(`Processing segment: ${s} (out of ${segments.length})`);
 
 		const filePath = path.join(__dirname, '../tmp', `${subFolder}`, `segments/${s}`);
@@ -72,7 +80,15 @@ export async function getTranscription(
 				} as WhisperTranscription;
 			});
 
-			TranscriptionService.emitTranscription({ url, directUrl, clientId, transcriptions: t });
+			const percentageComplete = Math.floor((i / segments.length) * 100);
+
+			TranscriptionService.emitTranscription({
+				url,
+				directUrl,
+				clientId,
+				transcriptions: t,
+				percentageComplete
+			});
 
 			transcript.push(...t);
 		} else {
@@ -263,5 +279,64 @@ export async function createWebVttFile(
 		}
 
 		idx++;
+	}
+}
+
+/**
+ * TODO: perf this better somehow?
+ */
+export async function webVttFileToTranscriptionList(
+	subFolder: string
+): Promise<WhisperTranscription[]> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.webvtt`);
+
+	try {
+		await fsAsync.access(filePath);
+
+		const data = await fsAsync.readFile(filePath, 'utf-8');
+
+		const tokens = data.split('\n').filter((f) => f);
+
+		if (tokens.length % 3 !== 0) {
+			console.error(`Invalid webvtt file! Returning empty list.`);
+
+			return [];
+		}
+
+		const transcriptions: WhisperTranscription[] = [];
+
+		for (let i = 0; i < tokens.length; i += 3) {
+			const timeStamp = tokens[i + 1];
+			const text = tokens[i + 2] || '';
+
+			const [from, to] = timeStamp?.split(' --> ') || [];
+
+			if (!from || !to) {
+				console.error(`Invalid webvtt timestamp! Returning empty list.`);
+
+				return [];
+			}
+
+			const fromInSeconds = offsetTimestampInSeconds(from, 0);
+
+			const toInSeconds = offsetTimestampInSeconds(to, 0);
+
+			const t: WhisperTranscription = {
+				timestamps: {
+					from,
+					fromInSeconds,
+					to,
+					toInSeconds
+				},
+				text
+			};
+
+			transcriptions.push(t);
+		}
+
+		return transcriptions;
+	} catch (e) {
+		console.error(`Error converting webvtt to transcriptions: ${e}`);
+		return [];
 	}
 }

@@ -5,7 +5,12 @@ import path from 'node:path';
 import { tap } from 'rxjs';
 import { WebSocket, WebSocketServer } from 'ws';
 import { getDirectApiUrl, getEntry, getPodcastHash, processPodcastTranscription } from './podcast';
-import { TranscriptionRequest, TranscriptionResponse, TranscriptionStatus } from './transcription';
+import {
+	getSavedTranscription,
+	TranscriptionRequest,
+	TranscriptionResponse,
+	TranscriptionStatus
+} from './transcription';
 import { TranscriptionService } from './transcription-service';
 
 const wssPort = 8085;
@@ -28,11 +33,13 @@ wss.on('connection', (ws: WebSocket) => {
 		.pipe(
 			// filter((t) => t.clientId === clientId),
 			tap((t) => {
+				// TODO: refactor, hella overlat with t.{} and TranscriptionResponse!
 				const response: TranscriptionResponse = {
 					podcastUrl: t.url,
 					directUrl: t.directUrl,
 					transcriptions: t.transcriptions,
-					status: TranscriptionStatus.Processing
+					status: t.finished ? TranscriptionStatus.Finished : TranscriptionStatus.Processing,
+					percentageComplete: t.percentageComplete
 				};
 
 				console.log(`Sending out new transcription...`);
@@ -75,15 +82,30 @@ wss.on('connection', (ws: WebSocket) => {
 			if (existingEntry) {
 				console.debug(`Existing entry already exists for podcast: ${podcastUrl}. Returning entry.`);
 
-				const { id, status } = existingEntry;
+				const { id, parentFolder, status } = existingEntry;
 
-				const response_: TranscriptionResponse = {
-					podcastUrl,
-					directUrl: getDirectApiUrl(id),
-					status
-				};
+				if (status === TranscriptionStatus.Finished) {
+					const transcriptions = await getSavedTranscription(`${parentFolder}/${id}`);
 
-				ws.send(JSON.stringify(response_));
+					const response_: TranscriptionResponse = {
+						podcastUrl,
+						directUrl: getDirectApiUrl(id),
+						status: TranscriptionStatus.Finished,
+						transcriptions
+					};
+
+					ws.send(JSON.stringify(response_));
+
+					return;
+				}
+
+				// const response_: TranscriptionResponse = {
+				// 	podcastUrl,
+				// 	directUrl: getDirectApiUrl(id),
+				// 	status
+				// };
+
+				// ws.send(JSON.stringify(response_));
 
 				return;
 			}
@@ -96,7 +118,7 @@ wss.on('connection', (ws: WebSocket) => {
 
 			ws.send(JSON.stringify(response));
 
-			console.debug(`No existing entry already exists for podcast: ${podcastId}.`);
+			console.debug(`No existing entry exists for podcast: ${podcastId}.`);
 
 			await processPodcastTranscription(request, clientId, false, false);
 

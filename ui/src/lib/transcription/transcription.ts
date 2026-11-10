@@ -40,4 +40,5 @@ export type TranscriptionResponse = {
 	directUrl?: string;
 	message?: string;
 	transcriptions?: WhisperTranscription[];
+	percentageComplete?: number;
 };

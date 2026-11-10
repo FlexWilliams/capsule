@@ -5,7 +5,7 @@ export type WhisperTranscription = {
 		to: string;
 		toInSeconds: number;
 	};
-	offsets: {
+	offsets?: {
 		from: number;
 		to: number;
 	};

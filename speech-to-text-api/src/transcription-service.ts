@@ -6,6 +6,8 @@ export type Transcription = {
 	directUrl: string;
 	clientId: string;
 	transcriptions: WhisperTranscription[];
+	percentageComplete?: number;
+	finished?: boolean;
 };
 
 export class TranscriptionService {

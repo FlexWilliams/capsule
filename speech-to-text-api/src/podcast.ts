@@ -13,6 +13,7 @@ import {
 	TranscriptionRequest,
 	TranscriptionStatus
 } from './transcription';
+import { TranscriptionService } from './transcription-service';
 
 const exec = promisify(child_process.exec);
 
@@ -307,20 +308,26 @@ export async function processPodcastTranscription(
 	const start = performance.now();
 
 	if (existingEntry) {
-		const { parentFolder } = existingEntry;
+		const { parentFolder, status } = existingEntry;
 
-		// TODO: handle check status && if web.vtt exists already! otherwise, do:
-		console.info(`Transcribing podcast: ${podcastUrl}...`);
+		if (status === TranscriptionStatus.Finished) {
+			console.info(`Podcast already transcribed, no more work to do.`);
 
-		await transcribePodcast(
-			request,
-			getDirectApiUrl(podcastId),
-			clientId,
-			`${parentFolder}/${podcastId}`,
-			start
-		);
+			return podcastId;
+		} else {
+			console.info(`Transcribing podcast: ${podcastUrl}...`);
 
-		return podcastId;
+			await transcribePodcast(
+				request,
+				getDirectApiUrl(podcastId),
+				clientId,
+				podcastId,
+				`${parentFolder}/${podcastId}`,
+				start
+			);
+
+			return podcastId;
+		}
 	} else {
 		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Processing);
 
@@ -341,9 +348,9 @@ export async function processPodcastTranscription(
 		}
 
 		if (immediateDirectUrl) {
-			transcribePodcast(request, directUrl, clientId, subFolder, start);
+			transcribePodcast(request, directUrl, clientId, podcastId, subFolder, start);
 		} else {
-			await transcribePodcast(request, directUrl, clientId, subFolder, start);
+			await transcribePodcast(request, directUrl, clientId, podcastId, subFolder, start);
 		}
 
 		return podcastId;
@@ -354,6 +361,7 @@ async function transcribePodcast(
 	request: TranscriptionRequest,
 	directUrl: string,
 	clientId: string,
+	podcastId: string,
 	subFolder: string,
 	start: number
 ): Promise<void> {
@@ -396,6 +404,16 @@ async function transcribePodcast(
 
 		// TODO: run cleanup script
 	}
+
+	await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Finished);
+
+	TranscriptionService.emitTranscription({
+		url: podcastUrl,
+		directUrl,
+		clientId,
+		transcriptions: [],
+		finished: true
+	});
 
 	const end = performance.now();
 

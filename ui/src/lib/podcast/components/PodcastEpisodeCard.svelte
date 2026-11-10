@@ -170,7 +170,8 @@
 			{handleCloseEpisodeTranscription}
 			{isPlaying}
 			{isSelectedPodcast}
-			directUrl={episode?.directUrl}
+			percentageComplete={transcriptionRequest?.percentageComplete}
+			status={transcriptionRequest?.status}
 		/>
 	{/if}
 

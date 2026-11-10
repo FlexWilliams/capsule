@@ -1,12 +1,13 @@
 <script lang="ts">
 	import close from '#lib/assets/icons/at-icons--cross.svg';
 	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
-	import { untrack } from 'svelte';
+	import { TranscriptionStatus } from '#lib/transcription/transcription.ts';
 	import PodcastProgressBar from './podcast-detail/PodcastProgressBar.svelte';
 
 	interface PodcastEpisodeTranscriptionProps {
 		duration?: number;
-		directUrl?: string;
+		percentageComplete?: number;
+		status?: TranscriptionStatus;
 		isSelectedPodcast: boolean;
 		isPlaying: boolean;
 		handleTranscriptionPlayButtonClick: () => void;
@@ -15,7 +16,8 @@
 
 	let {
 		duration,
-		directUrl,
+		percentageComplete,
+		status,
 		isSelectedPodcast,
 		isPlaying,
 		handleTranscriptionPlayButtonClick,
@@ -23,12 +25,6 @@
 	}: PodcastEpisodeTranscriptionProps = $props();
 
 	let currentCueText = $derived(audioState.currentCueText);
-
-	$effect(() => {
-		if (directUrl) {
-			untrack(() => {});
-		}
-	});
 </script>
 
 <article class="absolute top-0 left-0 z-5 flex h-full w-full flex-col justify-between bg-white p-4">
@@ -42,11 +38,18 @@
 
 	<header class="flex justify-between">
 		<h3>Podcast transcription:</h3>
-		<div class="flex flex-1 items-center justify-center">
-			{#if directUrl}
-				<div class="h-2 w-2 rounded-full bg-green-300"></div>
-			{:else}
-				<div class="h-2 w-2 rounded-full bg-red-200"></div>
+		<div class="flex flex-1 items-center">
+			{#if status === TranscriptionStatus.Finished}
+				<div class="flex w-full justify-center">
+					<div class="h-2 w-2 rounded-full bg-green-300"></div>
+				</div>
+			{:else if status === TranscriptionStatus.Processing}
+				<div class="flex w-full items-center justify-center pr-4">
+					<span class="mr-1 text-xs">{percentageComplete || 0}%</span>
+					<div class="h-2 w-2 rounded-full bg-red-200"></div>
+				</div>
+			{:else if status === TranscriptionStatus.Failed}
+				<div class="h-2 w-2 rounded-full bg-red-500"></div>
 			{/if}
 		</div>
 	</header>
