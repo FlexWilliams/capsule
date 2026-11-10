@@ -105,7 +105,8 @@
 </script>
 
 <article
-	class="relative mb-6 h-full overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
+	class="relative mb-6 h-40 overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
+	class:h-55={showTranscription}
 >
 	<header class="mt-6 h-7/12 max-h-7/12">
 		<h3 class="flex-1">
@@ -132,7 +133,7 @@
 
 	<details class="absolute top-4 right-4 flex w-full flex-col">
 		<summary
-			class="h-6 w-6"
+			class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-close-button p-1"
 			onclick={() => {
 				summaryOpen = !summaryOpen;
 			}}

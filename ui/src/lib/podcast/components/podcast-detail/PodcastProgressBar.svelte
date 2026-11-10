@@ -127,7 +127,7 @@
 		></button>
 	</div>
 
-	<label for="progress-bar" class="flex w-full justify-between">
+	<label for="progress-bar" class="flex min-h-4 w-full justify-between">
 		{#if selectedPodcastUrl || showProgressBarTimeStamps}
 			<span class="text-xs text-progress-bar-text">{formatTime(currentTime)}</span>
 			<span class="text-xs text-progress-bar-text">{formatTime(duration)}</span>

@@ -28,15 +28,7 @@
 </script>
 
 <article class="absolute top-0 left-0 z-5 flex h-full w-full flex-col justify-between bg-white p-4">
-	<button
-		class="absolute top-4 right-4 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-amber-200 p-1"
-		aria-label="Close Transcription Panel"
-		onclick={handleCloseEpisodeTranscription}
-	>
-		<img src={close} alt="Close Icon" class="h-full w-full" />
-	</button>
-
-	<header class="flex justify-between">
+	<header class="mb-1 flex justify-between">
 		<h3>Podcast transcription:</h3>
 		<div class="flex flex-1 items-center">
 			{#if status === TranscriptionStatus.Finished}
@@ -44,7 +36,7 @@
 					<div class="h-2 w-2 rounded-full bg-green-300"></div>
 				</div>
 			{:else if status === TranscriptionStatus.Processing}
-				<div class="flex w-full items-center justify-center pr-4">
+				<div class="flex w-full items-center justify-center">
 					<span class="mr-1 text-xs">{percentageComplete || 0}%</span>
 					<div class="h-2 w-2 rounded-full bg-red-200"></div>
 				</div>
@@ -52,10 +44,17 @@
 				<div class="h-2 w-2 rounded-full bg-red-500"></div>
 			{/if}
 		</div>
+		<button
+			class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-close-button p-1"
+			aria-label="Close Transcription Panel"
+			onclick={handleCloseEpisodeTranscription}
+		>
+			<img src={close} alt="Close Icon" class="h-full w-full" />
+		</button>
 	</header>
 
 	<div
-		class="my-0.5 flex flex-1 items-center justify-center rounded-md bg-episode-transcription-text-bg p-0.5 text-center font-bold"
+		class="my-0.5 flex flex-1 justify-center overflow-auto rounded-md bg-episode-transcription-text-bg px-1 py-2 text-center font-bold"
 	>
 		{#if currentCueText}
 			<p class="text-episode-transcription-text">“{currentCueText}”</p>

@@ -24,6 +24,7 @@
 		--episode-play-button: #ffb900;
 		--episode-transcribe-button: #ffb900;
 		--episode-transcribe-button-disabled: #cad5e2;
+		--episode-transcribe-close-button: #ffb900;
 		--episode-transcription-text: #30374b;
 		--episode-transcription-text-bg: #cad5e2;
 		--progress-bar: #30374b;
@@ -54,6 +55,7 @@
 		--episode-play-button: #ffb900;
 		--episode-transcribe-button: #ffb900;
 		--episode-transcribe-button-disabled: #cad5e2;
+		--episode-transcribe-close-button: #ffb900;
 		--episode-transcription-text: #fcfcfc;
 		--episode-transcription-text-bg: #30374b;
 		--progress-bar: #ffb900;
@@ -84,6 +86,7 @@
 	--color-episode-play-button: var(--episode-play-button);
 	--color-episode-transcribe-button: var(--episode-transcribe-button);
 	--color-episode-transcribe-button-disabled: var(--episode-transcribe-button-disabled);
+	--color-episode-transcribe-close-button: var(--episode-transcribe-close-button);
 	--color-episode-transcription-text: var(--episode-transcription-text);
 	--color-episode-transcription-text-bg: var(--episode-transcription-text-bg);
 	--color-progress-bar: var(--progress-bar);

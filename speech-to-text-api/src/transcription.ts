@@ -126,7 +126,7 @@ function offsetTimestampInSeconds(timestamp: string, offset: number): number {
 	}
 
 	const hoursToSeconds = hours * 60 * 60;
-	const minutesToSeconds = minutes * 60 * 60;
+	const minutesToSeconds = minutes * 60;
 
 	let totalSeconds = seconds + minutesToSeconds + hoursToSeconds + offset;
 

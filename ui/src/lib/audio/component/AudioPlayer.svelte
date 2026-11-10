@@ -373,7 +373,12 @@
 
 		console.log(`Podcast now playing...`);
 
-		if (selectedPodcastUrl && transcriptionRequest?.status !== TranscriptionStatus.Finished) {
+		const statuses = [TranscriptionStatus.Processing, TranscriptionStatus.Finished];
+		if (
+			selectedPodcastUrl &&
+			(!transcriptionRequest ||
+				(transcriptionRequest && !statuses.includes(transcriptionRequest?.status)))
+		) {
 			podcastState$$addEpisodeTranscriptionRequest(selectedPodcastUrl);
 
 			const msg: TranscriptionRequest = {
