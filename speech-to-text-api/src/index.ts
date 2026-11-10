@@ -2,7 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import fsAsync from 'node:fs/promises';
 import path from 'node:path';
-import { filter, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { WebSocket, WebSocketServer } from 'ws';
 import { getDirectApiUrl, getEntry, getPodcastHash, processPodcastTranscription } from './podcast';
 import { TranscriptionRequest, TranscriptionResponse, TranscriptionStatus } from './transcription';
@@ -26,7 +26,7 @@ wss.on('connection', (ws: WebSocket) => {
 
 	const subscription = TranscriptionService.transcription$
 		.pipe(
-			filter((t) => t.clientId === clientId),
+			// filter((t) => t.clientId === clientId),
 			tap((t) => {
 				const response: TranscriptionResponse = {
 					podcastUrl: t.url,
