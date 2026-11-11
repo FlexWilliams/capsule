@@ -47,8 +47,8 @@ export async function fetchDirectPodcastUrl(podcastUrl: string): Promise<string>
 				uTokens[0] &&
 				uTokens[0]?.toLowerCase().startsWith(`http`)
 			) {
-				console.debug(`Multiple urls found: ${uTokens.join('\n')}`);
-				console.debug(`Picking first one...`);
+				// console.debug(`Multiple urls found: ${uTokens.join('\n')}`);
+				console.debug(`Multiple urls found, picking first one...`);
 
 				directUrl = uTokens[0]?.trim() || podcastUrl;
 			} else {
@@ -61,7 +61,7 @@ export async function fetchDirectPodcastUrl(podcastUrl: string): Promise<string>
 	const execTime = Math.ceil(end - start);
 
 	console.debug(`Time to fetch direct podcast url: ${execTime}ms`);
-	console.debug(`Direct url: ${directUrl}`);
+	// console.debug(`Direct url: ${directUrl}`);
 
 	return directUrl;
 }
@@ -301,6 +301,16 @@ export async function processPodcastTranscription(
 ): Promise<string> {
 	const { podcastUrl } = request;
 
+	// TODO: setup prod env
+	const baseUrl = process.env.HOST_NAME || `http://localhost:3000`;
+	if (podcastUrl.includes(baseUrl)) {
+		console.error(`Client attempting to transcribe podcast recursively. Returning empty id.`);
+
+		const id = podcastUrl.replace(`${baseUrl}/api/podcasts/`, '');
+
+		return id;
+	}
+
 	const podcastId = getPodcastHash(podcastUrl);
 
 	const existingEntry = await getEntry(podcastId);
@@ -329,7 +339,7 @@ export async function processPodcastTranscription(
 			return podcastId;
 		}
 	} else {
-		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Processing);
+		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Downloading);
 
 		console.info(`Transcribing podcast: ${podcastUrl}...`);
 
@@ -346,6 +356,8 @@ export async function processPodcastTranscription(
 		if (noTranscribe) {
 			return podcastId;
 		}
+
+		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Processing);
 
 		if (immediateDirectUrl) {
 			transcribePodcast(request, directUrl, clientId, podcastId, subFolder, start);

@@ -28,6 +28,7 @@ export type TranscriptionRequest = {
 };
 
 export enum TranscriptionStatus {
+	Downloading,
 	Processing,
 	Finished,
 	Failed,

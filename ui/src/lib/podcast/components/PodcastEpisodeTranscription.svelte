@@ -27,8 +27,10 @@
 	let currentCueText = $derived(audioState.currentCueText);
 </script>
 
-<article class="absolute top-0 left-0 z-5 flex h-full w-full flex-col justify-between bg-white p-4">
-	<header class="mb-1 flex justify-between">
+<article
+	class="absolute top-0 left-0 z-5 flex h-full w-full flex-col justify-between gap-0.5 bg-white p-4"
+>
+	<header class="flex justify-between">
 		<h3>Podcast transcription:</h3>
 		<div class="flex flex-1 items-center">
 			{#if status === TranscriptionStatus.Finished}
@@ -59,13 +61,17 @@
 		{#if currentCueText}
 			<p class="text-episode-transcription-text">“{currentCueText}”</p>
 		{:else}
-			<p class="text-episode-transcription-text">...</p>
+			<p class="m-auto text-episode-transcription-text">...</p>
 		{/if}
 	</div>
 
 	<footer class="flex w-full items-center justify-between">
 		<div class="flex h-full w-7/12 items-center md:w-9/12">
-			<PodcastProgressBar explicitDuration={duration} showProgressBarTimeStamps={true} />
+			<PodcastProgressBar
+				explicitDuration={duration}
+				showProgressBarTimeStamps={true}
+				withinTranscribeCard={true}
+			/>
 		</div>
 
 		<button

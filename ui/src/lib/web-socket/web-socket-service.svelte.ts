@@ -61,7 +61,7 @@ export class WebSocketService {
 					TranscriptionService.emitTranscriptions(transcriptions);
 				}
 
-				WssLogger.log(`Finsihed transcribing podcast.\n${message}`);
+				WssLogger.log(`Finished transcribing podcast.`);
 			} else if (status === TranscriptionStatus.InvalidRequest) {
 				podcastState$$resetEpisodeTranscriptionRequest(podcastUrl);
 

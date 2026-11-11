@@ -27,6 +27,8 @@
 		--episode-transcribe-close-button: #ffb900;
 		--episode-transcription-text: #30374b;
 		--episode-transcription-text-bg: #cad5e2;
+		--episode-summary-bg: #cad5e2;
+		--episode-progress-bar-text: #30374b;
 		--progress-bar: #30374b;
 		--progress-bar-bg: #dadee6;
 		--progress-bar-text: #30374b;
@@ -58,9 +60,11 @@
 		--episode-transcribe-close-button: #ffb900;
 		--episode-transcription-text: #fcfcfc;
 		--episode-transcription-text-bg: #30374b;
+		--episode-summary-bg: #cad5e2;
+		--episode-progress-bar-text: #30374b;
 		--progress-bar: #ffb900;
 		--progress-bar-bg: #dadee6;
-		--progress-bar-text: #30374b;
+		--progress-bar-text: #fcfcfc;
 	}
 }
 
@@ -89,6 +93,7 @@
 	--color-episode-transcribe-close-button: var(--episode-transcribe-close-button);
 	--color-episode-transcription-text: var(--episode-transcription-text);
 	--color-episode-transcription-text-bg: var(--episode-transcription-text-bg);
+	--color-episode-progress-bar-text: var(--episode-progress-bar-text);
 	--color-progress-bar: var(--progress-bar);
 	--color-progress-bar-bg: var(--progress-bar-bg);
 	--color-progress-bar-text: var(--progress-bar-text);

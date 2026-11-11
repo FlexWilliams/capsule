@@ -7,9 +7,14 @@
 	interface PodcastProgressBarProps {
 		explicitDuration?: number;
 		showProgressBarTimeStamps?: boolean;
+		withinTranscribeCard?: boolean;
 	}
 
-	let { explicitDuration, showProgressBarTimeStamps }: PodcastProgressBarProps = $props();
+	let {
+		explicitDuration,
+		showProgressBarTimeStamps,
+		withinTranscribeCard
+	}: PodcastProgressBarProps = $props();
 
 	const progressBarId = 'progress-bar';
 
@@ -129,8 +134,16 @@
 
 	<label for="progress-bar" class="flex min-h-4 w-full justify-between">
 		{#if selectedPodcastUrl || showProgressBarTimeStamps}
-			<span class="text-xs text-progress-bar-text">{formatTime(currentTime)}</span>
-			<span class="text-xs text-progress-bar-text">{formatTime(duration)}</span>
+			<span
+				class="text-xs"
+				class:text-progress-bar-text={!withinTranscribeCard}
+				class:text-episode-progress-bar-text={withinTranscribeCard}>{formatTime(currentTime)}</span
+			>
+			<span
+				class="text-xs"
+				class:text-progress-bar-text={!withinTranscribeCard}
+				class:text-episode-progress-bar-text={withinTranscribeCard}>{formatTime(duration)}</span
+			>
 		{/if}
 	</label>
 </div>

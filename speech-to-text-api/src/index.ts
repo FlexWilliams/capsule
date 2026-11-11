@@ -80,57 +80,56 @@ wss.on('connection', (ws: WebSocket) => {
 			const existingEntry = await getEntry(podcastId);
 
 			if (existingEntry) {
-				console.debug(`Existing entry already exists for podcast: ${podcastUrl}. Returning entry.`);
-
 				const { id, parentFolder, status } = existingEntry;
 
 				if (status === TranscriptionStatus.Finished) {
+					console.debug(
+						`Existing entry already exists for podcast: ${podcastUrl}. Returning entry.`
+					);
+
 					const transcriptions = await getSavedTranscription(`${parentFolder}/${id}`);
 
 					const response_: TranscriptionResponse = {
 						podcastUrl,
 						directUrl: getDirectApiUrl(id),
 						status: TranscriptionStatus.Finished,
-						transcriptions
+						transcriptions,
+						percentageComplete: 100
 					};
 
 					ws.send(JSON.stringify(response_));
 
 					return;
+				} else if (status === TranscriptionStatus.Downloading) {
+					console.debug(
+						`Podcast previously downloaded but no transcriptions exist yet. Processing...`
+					);
+
+					await processPodcastTranscription(request, clientId, false, false);
 				}
-
-				// const response_: TranscriptionResponse = {
-				// 	podcastUrl,
-				// 	directUrl: getDirectApiUrl(id),
-				// 	status
-				// };
-
-				// ws.send(JSON.stringify(response_));
-
-				return;
-			}
-
-			let response: TranscriptionResponse = {
-				podcastUrl,
-				status: TranscriptionStatus.Processing,
-				message: 'Processing podcast...'
-			};
-
-			ws.send(JSON.stringify(response));
-
-			console.debug(`No existing entry exists for podcast: ${podcastId}.`);
-
-			await processPodcastTranscription(request, clientId, false, false);
-
-			if (!request.video) {
-				const response: TranscriptionResponse = {
+			} else {
+				let response: TranscriptionResponse = {
 					podcastUrl,
-					status: TranscriptionStatus.Finished
+					status: TranscriptionStatus.Processing,
+					message: 'Processing podcast...'
 				};
 
 				ws.send(JSON.stringify(response));
 
-				return;
+				console.debug(`No existing entry exists for podcast: ${podcastId}.`);
+
+				await processPodcastTranscription(request, clientId, false, false);
+
+				if (!request.video) {
+					const response: TranscriptionResponse = {
+						podcastUrl,
+						status: TranscriptionStatus.Finished
+					};
+
+					ws.send(JSON.stringify(response));
+
+					return;
+				}
 			}
 		} catch (e) {
 			console.error(
@@ -189,12 +188,13 @@ app.post('/transcribe', async (req, res) => {
 export type ViaUrlRequest = {
 	url: string;
 	clientId: string;
+	noTranscribe: boolean;
 };
 
 app.post('/via-url', async (req, res) => {
 	const request = req.body as ViaUrlRequest;
 
-	const { url, clientId } = request;
+	const { url, clientId, noTranscribe } = request;
 
 	// TODO: improve validation here and update to use regex
 	if (!url || (!url.startsWith(`http://`) && !url.startsWith(`https://`))) {
@@ -217,14 +217,14 @@ app.post('/via-url', async (req, res) => {
 				podcastUrl: url
 			},
 			clientId,
-			false,
+			noTranscribe,
 			true
 		);
 
 		directUrl = getDirectApiUrl(podcastId);
 	}
 
-	console.log(`Returning url ${directUrl} for original:\n${url}`);
+	console.log(`Returning url ${directUrl}`);
 
 	res.status(200).send(directUrl);
 });

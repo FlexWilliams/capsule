@@ -3,16 +3,17 @@
 	import PodcastEpisodeCard from '../PodcastEpisodeCard.svelte';
 
 	interface PodcastEpisodeListProps {
+		podcastTitle: string;
 		episodes?: PodcastEpisode[];
 	}
 
-	let { episodes }: PodcastEpisodeListProps = $props();
+	let { podcastTitle, episodes }: PodcastEpisodeListProps = $props();
 </script>
 
 <ul class="w-full flex-1 overflow-auto sm:flex-2">
 	{#each episodes as episode (episode?.guid)}
 		<li class="mb-4 max-h-160 min-h-40 rounded-md px-2">
-			<PodcastEpisodeCard {episode} />
+			<PodcastEpisodeCard {episode} {podcastTitle} />
 		</li>
 	{:else}
 		<li>

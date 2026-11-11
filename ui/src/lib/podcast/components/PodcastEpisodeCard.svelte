@@ -1,6 +1,9 @@
 <script lang="ts">
 	import spin from '#lib/assets/icons/at-icons--arrows-clockwise.svg';
 	import checkmark from '#lib/assets/icons/at-icons--checkmark.svg';
+	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
+
+	import arrowDown from '#lib/assets/icons/at-icons--cloud-arrow-down.svg';
 	import close from '#lib/assets/icons/at-icons--cross.svg';
 	import info from '#lib/assets/icons/at-icons--info.svg';
 	import text from '#lib/assets/icons/at-icons--text.svg';
@@ -23,10 +26,11 @@
 	import PodcastEpisodeTranscription from './PodcastEpisodeTranscription.svelte';
 
 	interface PodcastEpisodeCardProps {
+		podcastTitle: string;
 		episode: PodcastEpisode;
 	}
 
-	let { episode }: PodcastEpisodeCardProps = $props();
+	let { podcastTitle, episode }: PodcastEpisodeCardProps = $props();
 
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(episode?.url || '') || null
@@ -41,6 +45,8 @@
 	let isPlaying = $derived(audioState.isPlaying);
 
 	let summaryOpen = $state(false);
+
+	let downloading = $state(false);
 
 	let pubDate = $derived(
 		`${new Date(episode?.publishDate || new Date().getTime()).toLocaleDateString()}`
@@ -60,6 +66,65 @@
 			PodcastService.setSelectedPodcastUrl(episodeUrl);
 
 			AudioService.play();
+		}
+	}
+
+	async function handleDownloadPlayButtonClick(
+		episodeUrl?: string,
+		directUrl?: string
+	): Promise<void> {
+		VibrationService.vibrate();
+
+		if (!episodeUrl) {
+			return;
+		}
+
+		downloading = true;
+
+		let downloadUrl = episodeUrl;
+
+		try {
+			if (directUrl) {
+				downloadUrl = directUrl;
+			} else if (episodeUrl) {
+				const response = await fetch(`${SPEECH_TO_TEXT_API_URL}/via-url`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						url: episodeUrl,
+						noTranscribe: true
+					})
+				});
+
+				if (!response.ok) {
+					console.error(`Error loading podcast via url, defaulting to original url.`);
+				} else {
+					downloadUrl = await response.text();
+				}
+			}
+		} catch {
+			console.error(`Error downloading podcast via api. Trying `);
+		} finally {
+			// TODO: inner try/catch here...
+			const title = `${podcastTitle} - ${episode.title}`;
+
+			const data = await fetch(downloadUrl);
+
+			const blob = await data.blob();
+
+			const file = new Blob([blob], { type: 'audio/mpeg' });
+
+			const a = document.createElement('a');
+
+			a.href = URL.createObjectURL(file);
+
+			a.download = `${title}.mp3`;
+
+			a.click();
+
+			downloading = false;
 		}
 	}
 
@@ -147,19 +212,27 @@
 		<dl>
 			<div class="summary">
 				<dt>Summary:</dt>
-				<dd>{episode?.summary}</dd>
+				<dd>{episode?.summary || '(none)'}</dd>
 			</div>
 			<div>
 				<dt>Duration:</dt>
-				<dd>{episode?.duration}sec</dd>
+				<dd>{Math.floor((episode?.duration || 0) / 60)}min</dd>
 			</div>
 			<div>
 				<dt>Size:</dt>
 				<dd>{episode?.contentLengthInMb}Mb</dd>
 			</div>
 			<div>
-				<dt>URL:</dt>
-				<dd>{episode?.url}Mb</dd>
+				<dt>Original URL:</dt>
+				<dd>
+					{#if episode?.url}
+						<a href={episode.url} target="_blank" rel="external" class="font-semibold underline"
+							>Link</a
+						>
+					{:else}
+						<p>No Link Available</p>
+					{/if}
+				</dd>
 			</div>
 		</dl>
 	</details>
@@ -178,20 +251,34 @@
 
 	<footer class="flex h-2/12 max-h-2/12 items-center justify-between">
 		<p class="text-sm">{pubDate}</p>
-		<button
-			class="w-20 cursor-pointer rounded-sm bg-episode-play-button py-1 shadow-md"
-			onclick={() => handlePlayButtonClick(episode?.url, episode?.directUrl)}
-		>
-			{#if isSelectedPodcast}
-				{#if isPlaying}
-					<span>Playing</span>
+		<div class="flex items-center gap-4">
+			<button
+				aria-label={`Download episode "${episode?.title}"`}
+				class="flex h-6 w-6 items-center justify-center"
+				disabled={downloading}
+				onclick={() => handleDownloadPlayButtonClick(episode?.url, episode?.directUrl)}
+			>
+				{#if downloading}
+					<img src={spin} alt="Loading icon" class="spin" />
 				{:else}
-					<span>Paused</span>
+					<img src={arrowDown} alt="Save icon" />
 				{/if}
-			{:else}
-				<span>Play</span>
-			{/if}
-		</button>
+			</button>
+			<button
+				class="w-20 cursor-pointer rounded-sm bg-episode-play-button py-1 shadow-md"
+				onclick={() => handlePlayButtonClick(episode?.url, episode?.directUrl)}
+			>
+				{#if isSelectedPodcast}
+					{#if isPlaying}
+						<span>Playing</span>
+					{:else}
+						<span>Paused</span>
+					{/if}
+				{:else}
+					<span>Play</span>
+				{/if}
+			</button>
+		</div>
 	</footer>
 </article>
 
@@ -225,7 +312,7 @@
 			&:open {
 				position: absolute;
 				top: 0;
-				background: white;
+				background: var(--color-card);
 				padding: 1rem;
 				left: 0;
 				width: 100%;
@@ -240,13 +327,7 @@
 			}
 
 			dl {
-				padding: 1rem;
-				/**
-					// Unsure why percentage won't work here...
-					height: 80%;
-					max-height: 80%;
-				*/
-
+				padding: 0 1rem;
 				height: 6rem;
 				max-height: 6rem;
 
@@ -254,7 +335,6 @@
 
 				dt {
 					text-decoration: underline;
-					background-color: yellow;
 					padding: 0.25rem 0;
 					display: flex;
 					align-items: center;
@@ -263,6 +343,11 @@
 				div {
 					display: flex;
 					justify-content: space-between;
+					align-items: center;
+
+					&:first-of-type {
+						align-items: flex-start;
+					}
 				}
 
 				div.summary {
