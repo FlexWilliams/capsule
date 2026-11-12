@@ -20,6 +20,8 @@ export class WebSocketService {
 
 	private static webSocket: WebSocket | null = null;
 
+	private static podcastUrl: string | null = null;
+
 	private static onOpen(): void {
 		WssLogger.log(`Connection opened!`);
 	}
@@ -139,6 +141,14 @@ export class WebSocketService {
 
 							console.error(error);
 
+							if (this.podcastUrl) {
+								console.debug(`Clearing transcription request for user to retry.`);
+
+								podcastState$$resetEpisodeTranscriptionRequest(this.podcastUrl);
+
+								this.podcastUrl = null;
+							}
+
 							reject(error);
 						}
 
@@ -163,6 +173,10 @@ export class WebSocketService {
 
 			return;
 		}
+
+		const { podcastUrl } = request;
+
+		this.podcastUrl = podcastUrl;
 
 		if (this.webSocket.readyState === WebSocket.CLOSED) {
 			this.webSocket = null;

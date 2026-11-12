@@ -27,6 +27,7 @@
 		audioState$$setCurrentCueText,
 		audioState$$setCurrentTime,
 		audioState$$setDuration,
+		audioState$$setIsBuffering,
 		audioState$$setLoading
 	} from '../state/audio.state.svelte';
 
@@ -340,7 +341,13 @@
 		return interval(500).pipe(tap(updateAudioTime)).subscribe();
 	}
 
+	async function handleBuffering(): Promise<void> {
+		audioState$$setIsBuffering(true);
+	}
+
 	async function handleCanPlay(e: Event): Promise<void> {
+		audioState$$setIsBuffering(false);
+
 		const audioPlayer = e.target as HTMLAudioElement;
 
 		if (!audioPlayer) {
@@ -474,6 +481,12 @@
 			audioPlayer.oncanplay = handleCanPlay;
 		} catch {
 			console.error(`Error loading podcast for url: ${url}`);
+
+			audioPlayer.src = url;
+
+			audioPlayer.oncanplay = handleCanPlay;
+		} finally {
+			audioPlayer.onwaiting = handleBuffering;
 		}
 	}
 

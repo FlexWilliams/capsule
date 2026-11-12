@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import type { Podcast, PodcastRssMeta } from '../../model/podcast';
+	import type { Podcast, PodcastEpisode, PodcastRssMeta } from '../../model/podcast';
 	import { PodcastService } from '../../service/podcast.service.svelte';
 	import { podcastState } from '../../state/podcast.state.svelte';
 	import PodcastAudioButtons from './PodcastAudioButtons.svelte';
@@ -12,6 +12,8 @@
 	import PodcastProgressBar from './PodcastProgressBar.svelte';
 
 	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
+
+	let episode: PodcastEpisode | null = $derived(podcastState.episode);
 
 	let loading = $state(true);
 
@@ -101,6 +103,12 @@
 				<PodcastDetailHeader {podcast} />
 
 				<PodcastAudioButtons {podcast} />
+
+				<p class="min-h-12 text-center text-text">
+					{#if episode}
+						{episode?.title || `[Unknown Episode]`}
+					{/if}
+				</p>
 
 				<PodcastProgressBar />
 			</div>

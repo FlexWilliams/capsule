@@ -112,9 +112,9 @@
 		const minutes = Math.floor(timeInSeconds / 60) % 60;
 		const hours = Math.floor(timeInSeconds / 60 / 60);
 
-		const secondsStr = seconds > 10 ? seconds : `0${seconds}`;
-		const minutesStr = minutes > 10 ? minutes : `0${minutes}`;
-		const hoursStr = hours > 10 ? hours : `0${hours}`;
+		const secondsStr = seconds > 9 ? seconds : `0${seconds}`;
+		const minutesStr = minutes > 9 ? minutes : `0${minutes}`;
+		const hoursStr = hours > 9 ? hours : `0${hours}`;
 
 		return `${hoursStr}:${minutesStr}:${secondsStr}`;
 	}

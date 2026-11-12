@@ -187,7 +187,7 @@ Verified By <> on:
 - UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
 - (DONE) Bind volume to STT container
 - (DONE) Determine naming scheme for downloads, transcriptions, videos...
-- UX cleanup and handling of text overflow.
+- (DONE) UX cleanup and handling of text overflow.
 - Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
 
 Verified By <> on:

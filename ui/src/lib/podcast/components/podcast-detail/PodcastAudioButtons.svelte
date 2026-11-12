@@ -10,7 +10,10 @@
 	import { audioState } from '#lib/audio/state/audio.state.svelte.ts';
 	import type { Podcast } from '#lib/podcast/model/podcast.ts';
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
-	import { podcastState } from '#lib/podcast/state/podcast.state.svelte.ts';
+	import {
+		podcastState,
+		podcastState$$setListeningEpisode
+	} from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 
 	interface PodcastAudioButtons {
@@ -20,6 +23,8 @@
 	let { podcast }: PodcastAudioButtons = $props();
 
 	let isPlaying = $derived(audioState.isPlaying);
+
+	let isBuffering = $derived(audioState.isBuffering);
 
 	let podcastLoading = $derived(audioState.loading);
 
@@ -52,6 +57,8 @@
 				return;
 			}
 
+			// TODO: REFACTOR: this ... yuck, leverage pdocast service!!
+			podcastState$$setListeningEpisode(episode);
 			PodcastService.setSelectedPodcastDirectUrl(episode.directUrl || null);
 			PodcastService.setSelectedPodcastUrl(episode.url);
 		}
@@ -95,7 +102,7 @@
 			onclick={handlePauseButtonClick}
 			disabled={!podcast?.episodes}
 		>
-			{#if podcastLoading}
+			{#if podcastLoading || isBuffering}
 				<img src={spin} alt="Loading icon" class="spin" />
 			{:else}
 				<img src={pause} alt="Pause icon" />

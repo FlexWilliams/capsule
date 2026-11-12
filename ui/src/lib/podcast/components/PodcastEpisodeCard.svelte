@@ -20,10 +20,12 @@
 	import {
 		podcastState,
 		podcastState$$addEpisodeTranscriptionRequest,
+		podcastState$$setListeningEpisode,
 		podcastState$$setShowEpisodeTranscription,
 		podcastState$$toggleShowEpisodeTranscription
 	} from '../state/podcast.state.svelte';
 	import PodcastEpisodeTranscription from './PodcastEpisodeTranscription.svelte';
+	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
 
 	interface PodcastEpisodeCardProps {
 		podcastTitle: string;
@@ -44,6 +46,10 @@
 
 	let isPlaying = $derived(audioState.isPlaying);
 
+	let podcastLoading = $derived(audioState.loading);
+
+	let isBuffering = $derived(audioState.isBuffering);
+
 	let summaryOpen = $state(false);
 
 	let downloading = $state(false);
@@ -62,6 +68,7 @@
 		if (isPlaying && isSelectedPodcast) {
 			AudioService.pause();
 		} else {
+			podcastState$$setListeningEpisode(episode);
 			PodcastService.setSelectedPodcastDirectUrl(directUrl || null);
 			PodcastService.setSelectedPodcastUrl(episodeUrl);
 
@@ -240,10 +247,8 @@
 	{#if showTranscription}
 		<PodcastEpisodeTranscription
 			duration={episode?.duration}
-			{handleTranscriptionPlayButtonClick}
 			{handleCloseEpisodeTranscription}
-			{isPlaying}
-			{isSelectedPodcast}
+			{episode}
 			percentageComplete={transcriptionRequest?.percentageComplete}
 			status={transcriptionRequest?.status}
 		/>
@@ -251,7 +256,7 @@
 
 	<footer class="flex h-2/12 max-h-2/12 items-center justify-between">
 		<p class="text-sm">{pubDate}</p>
-		<div class="flex items-center gap-4">
+		<div class="flex h-6 max-h-6 items-center gap-4">
 			<button
 				aria-label={`Download episode "${episode?.title}"`}
 				class="flex h-6 w-6 items-center justify-center"
@@ -264,20 +269,8 @@
 					<img src={arrowDown} alt="Save icon" />
 				{/if}
 			</button>
-			<button
-				class="w-20 cursor-pointer rounded-sm bg-episode-play-button py-1 shadow-md"
-				onclick={() => handlePlayButtonClick(episode?.url, episode?.directUrl)}
-			>
-				{#if isSelectedPodcast}
-					{#if isPlaying}
-						<span>Playing</span>
-					{:else}
-						<span>Paused</span>
-					{/if}
-				{:else}
-					<span>Play</span>
-				{/if}
-			</button>
+
+			<PodcastEpisodeCardAudioButton {episode} />
 		</div>
 	</footer>
 </article>

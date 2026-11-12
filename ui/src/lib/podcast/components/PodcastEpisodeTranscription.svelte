@@ -4,13 +4,14 @@
 	import { TranscriptionStatus } from '#lib/transcription/transcription.ts';
 	import PodcastProgressBar from './podcast-detail/PodcastProgressBar.svelte';
 
+	import type { PodcastEpisode } from '../model/podcast';
+	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
+
 	interface PodcastEpisodeTranscriptionProps {
 		duration?: number;
 		percentageComplete?: number;
 		status?: TranscriptionStatus;
-		isSelectedPodcast: boolean;
-		isPlaying: boolean;
-		handleTranscriptionPlayButtonClick: () => void;
+		episode: PodcastEpisode;
 		handleCloseEpisodeTranscription: () => void;
 	}
 
@@ -18,9 +19,7 @@
 		duration,
 		percentageComplete,
 		status,
-		isSelectedPodcast,
-		isPlaying,
-		handleTranscriptionPlayButtonClick,
+		episode,
 		handleCloseEpisodeTranscription
 	}: PodcastEpisodeTranscriptionProps = $props();
 
@@ -74,19 +73,6 @@
 			/>
 		</div>
 
-		<button
-			class="w-20 cursor-pointer rounded-sm bg-episode-play-button py-1 shadow-md"
-			onclick={handleTranscriptionPlayButtonClick}
-		>
-			{#if isSelectedPodcast}
-				{#if isPlaying}
-					<span>Playing</span>
-				{:else}
-					<span>Paused</span>
-				{/if}
-			{:else}
-				<span>Play</span>
-			{/if}
-		</button>
+		<PodcastEpisodeCardAudioButton {episode} />
 	</footer>
 </article>
