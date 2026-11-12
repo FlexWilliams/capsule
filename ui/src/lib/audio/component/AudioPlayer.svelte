@@ -12,7 +12,7 @@
 		type TranscriptionRequest,
 		type WhisperTranscription
 	} from '#lib/transcription/transcription.ts';
-	import { interval, Subscription, tap } from 'rxjs';
+	import { filter, interval, Subscription, tap } from 'rxjs';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { TranscriptionService } from '../../transcription/transcription-service.svelte';
 	import { VISUALIZER_VIDEO_ID } from '../audio';
@@ -63,7 +63,9 @@
 
 	let skipAdInterval = $derived(settingsState.skipAd);
 
-	let textTrack: TextTrack | null = $state(null);
+	let textTracks: Map<string, TextTrack> = $state(new Map());
+
+	let activeTextTrack: string | null = $state(null);
 
 	let transcriptionSub: Subscription | null = $state(null);
 
@@ -73,6 +75,36 @@
 		return audioPlayer || null;
 	}
 
+	// TODO: try to remove or disable previous text track, see:
+	// https://stackoverflow.com/questions/29306931/delete-a-texttrack-from-a-video
+	function createNewTextTrack(): void {
+		if (activeTextTrack) {
+			const textTrack = textTracks.get(activeTextTrack);
+
+			if (textTrack) {
+				console.debug(`Hiding current text track.`);
+
+				textTrack.mode = 'disabled';
+			}
+		}
+
+		const nextActiveTextTrack = `Captions-${selectedPodcastUrl}`;
+
+		const existingTextTrack = textTracks.get(nextActiveTextTrack);
+
+		if (existingTextTrack) {
+			activeTextTrack = nextActiveTextTrack;
+
+			console.debug(`Resusing existing text track.`);
+
+			existingTextTrack.mode = 'showing';
+		} else {
+			console.debug(`Creating new text track.`);
+
+			createTextTrack();
+		}
+	}
+
 	function createTextTrack(): void {
 		const audioPlayer = getAudioElement();
 
@@ -80,7 +112,9 @@
 			return logAudioPlayerError('createTextTrack');
 		}
 
-		textTrack = audioPlayer.addTextTrack('captions', 'Captions', 'en');
+		activeTextTrack = `Captions-${selectedPodcastUrl}`;
+
+		const textTrack = audioPlayer.addTextTrack('captions', activeTextTrack, 'en');
 
 		textTrack.mode = 'showing';
 
@@ -95,6 +129,8 @@
 				}
 			}
 		};
+
+		textTracks.set(activeTextTrack, textTrack);
 	}
 
 	function addTextTrack(transcriptions: WhisperTranscription[]): void {
@@ -103,6 +139,12 @@
 		if (!audioPlayer) {
 			return logAudioPlayerError('addTextTrack');
 		}
+
+		if (!activeTextTrack) {
+			return logAudioPlayerError('addTextTrack (no activeTextTrack)');
+		}
+
+		const textTrack = textTracks.get(activeTextTrack);
 
 		if (!textTrack) {
 			return logAudioPlayerError('addTextTrack (no textTrack)');
@@ -291,7 +333,10 @@
 	function listenForTranscriptions(): Subscription {
 		return TranscriptionService.transcription$
 			.pipe(
-				tap((transcriptions: WhisperTranscription[]) => {
+				filter(({ podcastUrl }) => {
+					return podcastUrl === selectedPodcastUrl;
+				}),
+				tap(({ transcriptions }) => {
 					addTextTrack(transcriptions);
 				})
 			)
@@ -497,6 +542,8 @@
 					`Request for new podcast URL: ${selectedPodcastDirectUrl || selectedPodcastUrl}`
 				);
 
+				createNewTextTrack();
+
 				loadPodcast(selectedPodcastDirectUrl || selectedPodcastUrl);
 			});
 		}
@@ -518,16 +565,11 @@
 		// how to remove/add tracks effectively without disruption?
 		if (selectedPodcastTranscriptionUrl) {
 			untrack(() => {
-				if (transcriptionSub) {
-					transcriptionSub.unsubscribe();
+				if (!transcriptionSub) {
+					transcriptionSub = listenForTranscriptions();
+
+					subscriptions.push(transcriptionSub);
 				}
-				// TODO: try to remove or disable previous text track, see:
-				// https://stackoverflow.com/questions/29306931/delete-a-texttrack-from-a-video
-				createTextTrack();
-
-				transcriptionSub = listenForTranscriptions();
-
-				subscriptions.push(transcriptionSub);
 			});
 		}
 	});

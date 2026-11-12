@@ -104,7 +104,7 @@
 
 				<PodcastAudioButtons {podcast} />
 
-				<p class="min-h-12 text-center text-text">
+				<p class="podcast-title max-h-126 min-h-12 w-11/12 text-center text-text">
 					{#if episode}
 						{episode?.title || `[Unknown Episode]`}
 					{/if}
@@ -123,3 +123,11 @@
 		{/if}
 	{/if}
 </article>
+
+<style lang="scss">
+	@use '../../../styles//text.scss';
+
+	.podcast-title {
+		@include text.textOverflowEllipses2Lines;
+	}
+</style>

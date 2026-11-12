@@ -60,7 +60,7 @@ export class WebSocketService {
 
 					podcastState$$addEpisodeTranscriptions(podcastUrl, transcriptions);
 
-					TranscriptionService.emitTranscriptions(transcriptions);
+					TranscriptionService.emitTranscriptions(podcastUrl, transcriptions);
 				}
 
 				WssLogger.log(`Finished transcribing podcast.`);
@@ -83,7 +83,7 @@ export class WebSocketService {
 
 					podcastState$$addEpisodeTranscriptions(podcastUrl, transcriptions);
 
-					TranscriptionService.emitTranscriptions(transcriptions);
+					TranscriptionService.emitTranscriptions(podcastUrl, transcriptions);
 				}
 
 				podcastState$$setEpisodeTranscriptionRequest(podcastUrl, response);

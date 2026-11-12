@@ -11,7 +11,7 @@ export interface SettingsState {
 const initialSettingsState: SettingsState = {
 	skip: 30,
 	skipAd: 120,
-	lightMode: false
+	lightMode: true
 };
 
 export const settingsState = $state(initialSettingsState);

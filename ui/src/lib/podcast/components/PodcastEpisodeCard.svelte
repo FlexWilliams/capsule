@@ -46,10 +46,6 @@
 
 	let isPlaying = $derived(audioState.isPlaying);
 
-	let podcastLoading = $derived(audioState.loading);
-
-	let isBuffering = $derived(audioState.isBuffering);
-
 	let summaryOpen = $state(false);
 
 	let downloading = $state(false);

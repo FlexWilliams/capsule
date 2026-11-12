@@ -5,6 +5,7 @@
 	import PodcastProgressBar from './podcast-detail/PodcastProgressBar.svelte';
 
 	import type { PodcastEpisode } from '../model/podcast';
+	import { podcastState } from '../state/podcast.state.svelte';
 	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
 
 	interface PodcastEpisodeTranscriptionProps {
@@ -24,6 +25,8 @@
 	}: PodcastEpisodeTranscriptionProps = $props();
 
 	let currentCueText = $derived(audioState.currentCueText);
+
+	let isSelectedPodcast = $derived(podcastState.selectedPodcastUrl === episode?.url);
 </script>
 
 <article
@@ -55,9 +58,9 @@
 	</header>
 
 	<div
-		class="my-0.5 flex flex-1 justify-center overflow-auto rounded-md bg-episode-transcription-text-bg px-1 py-2 text-center font-bold"
+		class="my-0.5 flex flex-1 items-center justify-center overflow-auto rounded-md bg-episode-transcription-text-bg px-1 py-2 text-center font-bold"
 	>
-		{#if currentCueText}
+		{#if isSelectedPodcast && currentCueText}
 			<p class="text-episode-transcription-text">“{currentCueText}”</p>
 		{:else}
 			<p class="m-auto text-episode-transcription-text">...</p>
