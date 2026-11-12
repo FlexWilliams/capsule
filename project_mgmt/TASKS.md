@@ -184,11 +184,13 @@ Verified By <> on:
 
 - (DONE) FIX broken ui test and revert package json to run tests before prod build!!!!!!!
 - Support for multi-transcription support (switching podcasts intermittently and lang change)
-- UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
+- (DONE-ISH) UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
 - (DONE) Bind volume to STT container
 - (DONE) Determine naming scheme for downloads, transcriptions, videos...
 - (DONE) UX cleanup and handling of text overflow.
-- Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+- (DONE-ISH) Rework ui-wss flow... may require different messaging format or status...currently a mess and dupe work through spaghetti code ---> K I S S
+
+(DONE-ISH) - To be handled/reviewed during CAP-012 - v1 Review
 
 Verified By <> on:
 
@@ -203,7 +205,8 @@ Verified By <> on:
 - fix skipped tests and add more api tests
 - multi-vendor support or DB download and self-host
 - rate limiting
-- downloading
+- (DONE) downloading
+  - done on ui side.
 - auth??
 
 Verified By <> on:
@@ -220,6 +223,11 @@ Verified By <> on:
 - security
 - perf
 - etc.
+
+REVIEW:
+
+- UI resilience when Speech-to-Text api down, or wss disconnection. Disable buttons, info messages, or similar.
+- Rework ui-wss flow... make simpler, reduce overhead and dupe vars...
 
 Verified By <> on:
 
