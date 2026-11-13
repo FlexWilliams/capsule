@@ -1,4 +1,5 @@
 <script>
+	import AudioVisualizer from '#lib/audio/component/AudioVisualizer.svelte';
 	import { resolve } from '$app/paths';
 </script>
 
@@ -8,5 +9,7 @@
 	<a href={resolve('/')} class="absolute top-0 left-0 z-2 h-full w-full">
 		<h1 class="sr-only w-full text-center text-3xl">Capsule</h1>
 	</a>
-	<div class="absolute top-0 left-0 z-1 h-full w-full"></div>
+	<div class="absolute top-0 left-0 z-1 h-full w-full">
+		<AudioVisualizer />
+	</div>
 </header>

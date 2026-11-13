@@ -472,13 +472,17 @@
 	}
 
 	// TODO: should this be handled here or in the pip service??
-	function toggleVideoPlaying(play?: boolean): void {
+	async function toggleVideoPlaying(play?: boolean): Promise<void> {
 		const videoPlayer = document.getElementById(VISUALIZER_VIDEO_ID) as HTMLVideoElement;
 		if (videoPlayer) {
 			if (play) {
-				videoPlayer.play();
+				if (videoPlayer.paused) {
+					await videoPlayer.play();
+				}
 			} else {
-				videoPlayer.pause();
+				if (!videoPlayer.paused) {
+					videoPlayer.pause();
+				}
 			}
 		}
 	}

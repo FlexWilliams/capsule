@@ -10,7 +10,8 @@ export interface VisualizerCanvasWorkerRequest {
 	draw: boolean;
 	skipDraw?: boolean;
 	pictureInPicture: boolean;
-	text?: string;
+	text: string | null;
 	fillStyle?: string;
 	imageUrl?: string;
+	currentCueText: string | null;
 }

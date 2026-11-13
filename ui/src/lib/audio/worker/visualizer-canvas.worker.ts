@@ -10,7 +10,9 @@ let drawing = false;
 
 let pictureInPicture = false;
 
-let text: string | undefined = undefined;
+let text: string | null = null;
+
+let currentCueText: string | null = null;
 
 let fillStyle: string | undefined = undefined;
 
@@ -61,7 +63,9 @@ async function draw(): Promise<void> {
 			);
 		}
 
-		const marqueeText = `${new Date().toISOString()}`; // text || `Now Playing...`;
+		const marqueeText = currentCueText
+			? currentCueText
+			: `Now Playing...\n${text || 'Unkown Podcast'}`;
 
 		context.fillStyle = pictureInPicture ? 'red' : 'black'; // TODO: Get via theme...
 		context.textAlign = 'center';
@@ -88,12 +92,14 @@ onmessage = async (e: MessageEvent<VisualizerCanvasWorkerRequest>) => {
 		imageUrl: _imageUrl,
 		pictureInPicture: _pictureInPicture,
 		text: _text,
+		currentCueText: _currentCueText,
 		fillStyle: _fillStyle,
 		skipDraw
 	} = e.data;
 
 	pictureInPicture = _pictureInPicture;
 	text = _text;
+	currentCueText = _currentCueText;
 	fillStyle = _fillStyle;
 
 	if (_imageUrl && _imageUrl !== imageUrl) {
@@ -137,7 +143,7 @@ onmessage = async (e: MessageEvent<VisualizerCanvasWorkerRequest>) => {
 		log(`Canvas transferred to offscreen! `);
 	}
 
-	if (drawing && !draw) {
+	if (drawing && !_draw) {
 		cancelAnimationFrame(animationFrameId);
 
 		drawing = false;

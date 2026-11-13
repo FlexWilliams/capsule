@@ -164,7 +164,7 @@ Verified By cube on: 10/23/26
 
 <br>
 
-## CAP-009 - Favorites, Comments, & Import/Export
+## CAP-009 - Pick Up Where You Left Off At, Favorites, Comments, & Import/Export
 
 ### Description:
 

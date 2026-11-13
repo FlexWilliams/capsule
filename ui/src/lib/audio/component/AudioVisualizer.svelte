@@ -23,6 +23,10 @@
 
 	let initialized = $state(false);
 
+	let requestAnimationFrameId = $state(0);
+
+	let currentCueText = $derived(audioState.currentCueText);
+
 	function getCanvasElement(): HTMLCanvasElement | undefined {
 		const canvas = document.getElementById(VISUALIZER_CANVAS_ID) as HTMLCanvasElement;
 
@@ -43,8 +47,9 @@
 			draw,
 			pictureInPicture,
 			imageUrl: selectedPodcast?.imageUrl,
-			text: selectedPodcast?.name,
+			text: selectedPodcast?.name || '',
 			fillStyle,
+			currentCueText: $state.snapshot(currentCueText),
 			skipDraw
 		};
 	}
@@ -77,6 +82,8 @@
 
 			visualizationCanvasWorker.postMessage(request);
 		}
+
+		requestAnimationFrameId = requestAnimationFrame(draw);
 	}
 
 	function stopDrawing(): void {
@@ -98,13 +105,17 @@
 					return;
 				}
 
-				draw();
+				// TODO: Currently there are 2 animation frames, one here to constanyly update the cue text
+				// then another in the worker itself. may want to remove the one from the worker...
+				requestAnimationFrameId = requestAnimationFrame(draw);
 			});
 		} else {
 			untrack(() => {
 				if (!initialized) {
 					return;
 				}
+
+				cancelAnimationFrame(requestAnimationFrameId);
 				stopDrawing();
 			});
 		}
@@ -128,7 +139,7 @@
 		}
 	});
 
-	function updatePip(): void {
+	async function updatePip(): Promise<void> {
 		if (!initialized) {
 			return;
 		}
@@ -136,22 +147,22 @@
 		if (!visualizationCanvasWorker) {
 			console.error('Unable to stop drawing to visualizer canvas, worker null.');
 
-			return;
+			await loadVisualizationCanvasWorker();
 		}
 
 		const request = getVisualizerCanvasWorkerRequest(false, undefined, true);
 
-		visualizationCanvasWorker.postMessage(request);
+		visualizationCanvasWorker?.postMessage(request);
 	}
 
 	$effect(() => {
 		if (pictureInPicture) {
 			untrack(async () => {
-				updatePip();
+				await updatePip();
 			});
 		} else {
 			untrack(async () => {
-				updatePip();
+				await updatePip();
 			});
 		}
 	});
@@ -184,9 +195,7 @@
 		video.controls = true;
 		video.loop = true;
 
-		video.onvolumechange = (e) => {
-			// debugger;
-
+		video.onvolumechange = () => {
 			// TODO: get mute/unmute button in PiP window to work. All other media controls work
 			// but media session handlers provide no mute/unmute event.
 			// Remove if found not to trigger in prod
@@ -207,5 +216,8 @@
 	});
 </script>
 
-<canvas id={VISUALIZER_CANVAS_ID} class="h-full w-full" class:invisible={pictureInPicture}></canvas>
-<video id={VISUALIZER_VIDEO_ID} class:invisible={!pictureInPicture}></video>
+<div class="hidden">
+	<canvas id={VISUALIZER_CANVAS_ID} class="h-full w-full" class:invisible={pictureInPicture}
+	></canvas>
+	<video id={VISUALIZER_VIDEO_ID} class:invisible={!pictureInPicture}></video>
+</div>
