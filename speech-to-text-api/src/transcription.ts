@@ -12,6 +12,7 @@ export enum TextTrackFormat {
 export type TranscriptionRequest = {
 	podcastUrl: string;
 	podcastImageUrl?: string;
+	language?: string;
 	textTrackFormat?: TextTrackFormat;
 	video?: boolean;
 };
@@ -27,14 +28,20 @@ export enum TranscriptionStatus {
 export type TranscriptionResponse = {
 	status: TranscriptionStatus;
 	podcastUrl: string;
+	language: string;
 	directUrl?: string;
 	message?: string;
 	transcriptions?: WhisperTranscription[];
 	percentageComplete?: number | undefined;
 };
 
-export async function getSavedTranscription(folderPath: string): Promise<WhisperTranscription[]> {
-	return await webVttFileToTranscriptionList(folderPath);
+export async function getSavedTranscription(
+	folderPath: string,
+	language?: string
+): Promise<WhisperTranscription[]> {
+	language = language ? language : 'es';
+
+	return await webVttFileToTranscriptionList(folderPath, language);
 }
 
 /**
@@ -49,7 +56,8 @@ export async function getTranscription(
 	directUrl: string,
 	clientId: string,
 	subFolder: string,
-	segments: string[]
+	segments: string[],
+	language: string
 ): Promise<WhisperTranscription[]> {
 	const transcript: WhisperTranscription[] = [];
 
@@ -63,7 +71,7 @@ export async function getTranscription(
 
 		const filePath = path.join(__dirname, '../tmp', `${subFolder}`, `segments/${s}`);
 
-		const transciptions = await transcribe(filePath);
+		const transciptions = await transcribe(filePath, language);
 
 		if (transciptions) {
 			const t = transciptions.map((tr) => {
@@ -88,7 +96,8 @@ export async function getTranscription(
 				directUrl,
 				clientId,
 				transcriptions: t,
-				percentageComplete
+				percentageComplete,
+				language
 			});
 
 			transcript.push(...t);
@@ -100,6 +109,8 @@ export async function getTranscription(
 		// needs to match the ffmpeg `-segment_time` value done before transcription
 		offset += 15;
 	}
+
+	console.debug(`Done transcribing for language: ${language}`);
 
 	return transcript;
 }
@@ -195,16 +206,16 @@ function offsetTimestamp(timestamp: string, offset: number): string {
 	return `${hoursStr}:${minutesStr}:${secondsStr},${tokens[tokens.length - 1]}`;
 }
 
-async function transcribe(filePath: string): Promise<WhisperTranscription[] | null> {
+async function transcribe(
+	filePath: string,
+	language: string
+): Promise<WhisperTranscription[] | null> {
 	return new Promise((resolve, reject) => {
-		// Example usage
 		const converter = new Audio2TextJS({
 			threads: 4,
 			processors: 1,
 			outputJson: true
 		});
-
-		const language = 'auto'; // or specify a language code for translation
 
 		converter
 			.runWhisper(filePath, language)
@@ -260,9 +271,10 @@ export async function createSrtFile(
  */
 export async function createWebVttFile(
 	subFolder: string,
-	transcript: WhisperTranscription[]
+	transcript: WhisperTranscription[],
+	language: string
 ): Promise<void> {
-	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.webvtt`);
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast-${language}.webvtt`);
 
 	let idx = 1;
 
@@ -287,9 +299,10 @@ export async function createWebVttFile(
  * TODO: perf this better somehow?
  */
 export async function webVttFileToTranscriptionList(
-	subFolder: string
+	subFolder: string,
+	language: string
 ): Promise<WhisperTranscription[]> {
-	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.webvtt`);
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast-${language}.webvtt`);
 
 	try {
 		await fsAsync.access(filePath);

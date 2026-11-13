@@ -5,6 +5,7 @@ export type Transcription = {
 	url: string;
 	directUrl: string;
 	clientId: string;
+	language: string;
 	transcriptions: WhisperTranscription[];
 	percentageComplete?: number;
 	finished?: boolean;

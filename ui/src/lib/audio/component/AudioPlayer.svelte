@@ -434,7 +434,8 @@
 			podcastState$$addEpisodeTranscriptionRequest(selectedPodcastUrl);
 
 			const msg: TranscriptionRequest = {
-				podcastUrl: selectedPodcastUrl
+				podcastUrl: selectedPodcastUrl,
+				language: 'es' // TODO: get from state!
 			};
 
 			WebSocketService.sendMessage(msg);

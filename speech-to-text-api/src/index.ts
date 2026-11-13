@@ -19,6 +19,41 @@ const wss = new WebSocketServer({ port: wssPort });
 
 const wssConnections = new Map<string, WebSocket>();
 
+async function x(
+	ws: WebSocket,
+	request: TranscriptionRequest,
+	podcastUrl: string,
+	podcastId: string,
+	clientId: string
+): Promise<void> {
+	const language = request.language || 'es'; // TODO: make const!
+
+	let response: TranscriptionResponse = {
+		podcastUrl,
+		language,
+		status: TranscriptionStatus.Processing,
+		message: 'Processing podcast...'
+	};
+
+	ws.send(JSON.stringify(response));
+
+	console.debug(`No existing entry exists for podcast: ${podcastId}.`);
+
+	await processPodcastTranscription(request, clientId, false, false);
+
+	if (!request.video) {
+		const response: TranscriptionResponse = {
+			podcastUrl,
+			language,
+			status: TranscriptionStatus.Finished
+		};
+
+		ws.send(JSON.stringify(response));
+
+		return;
+	}
+}
+
 // Connection event handler
 wss.on('connection', (ws: WebSocket) => {
 	const clientId = crypto.randomUUID();
@@ -37,6 +72,7 @@ wss.on('connection', (ws: WebSocket) => {
 				const response: TranscriptionResponse = {
 					podcastUrl: t.url,
 					directUrl: t.directUrl,
+					language: t.language,
 					transcriptions: t.transcriptions,
 					status: t.finished ? TranscriptionStatus.Finished : TranscriptionStatus.Processing,
 					percentageComplete: t.percentageComplete
@@ -62,9 +98,12 @@ wss.on('connection', (ws: WebSocket) => {
 
 		const { podcastUrl } = request;
 
+		const language = request.language ? request.language : 'es';
+
 		if (!podcastUrl) {
 			const response: TranscriptionResponse = {
 				podcastUrl,
+				language,
 				status: TranscriptionStatus.InvalidRequest,
 				message: 'Invalid request: No podcast url set.'
 			};
@@ -80,17 +119,30 @@ wss.on('connection', (ws: WebSocket) => {
 			const existingEntry = await getEntry(podcastId);
 
 			if (existingEntry) {
-				const { id, parentFolder, status } = existingEntry;
+				const { id, parentFolder, transcriptions } = existingEntry;
+
+				const transcriptionMap = new Map(transcriptions);
+
+				const t = transcriptionMap.get(language);
+
+				if (!t) {
+					x(ws, request, podcastUrl, podcastId, clientId);
+
+					return;
+				}
+
+				const status = t ? t.status : TranscriptionStatus.InvalidRequest;
 
 				if (status === TranscriptionStatus.Finished) {
 					console.debug(
 						`Existing entry already exists for podcast: ${podcastUrl}. Returning entry.`
 					);
 
-					const transcriptions = await getSavedTranscription(`${parentFolder}/${id}`);
+					const transcriptions = await getSavedTranscription(`${parentFolder}/${id}`, language);
 
 					const response_: TranscriptionResponse = {
 						podcastUrl,
+						language,
 						directUrl: getDirectApiUrl(id),
 						status: TranscriptionStatus.Finished,
 						transcriptions,
@@ -106,30 +158,13 @@ wss.on('connection', (ws: WebSocket) => {
 					);
 
 					await processPodcastTranscription(request, clientId, false, false);
-				}
-			} else {
-				let response: TranscriptionResponse = {
-					podcastUrl,
-					status: TranscriptionStatus.Processing,
-					message: 'Processing podcast...'
-				};
-
-				ws.send(JSON.stringify(response));
-
-				console.debug(`No existing entry exists for podcast: ${podcastId}.`);
-
-				await processPodcastTranscription(request, clientId, false, false);
-
-				if (!request.video) {
-					const response: TranscriptionResponse = {
-						podcastUrl,
-						status: TranscriptionStatus.Finished
-					};
-
-					ws.send(JSON.stringify(response));
+				} else {
+					console.error(`Entry found, but invalid data. Returning...`);
 
 					return;
 				}
+			} else {
+				await x(ws, request, podcastUrl, podcastId, clientId);
 			}
 		} catch (e) {
 			console.error(
@@ -138,6 +173,7 @@ wss.on('connection', (ws: WebSocket) => {
 
 			let response: TranscriptionResponse = {
 				podcastUrl,
+				language,
 				status: TranscriptionStatus.Failed,
 				message: `Error occurred transcribing the podcast with url: ${podcastUrl}`
 			};

@@ -227,10 +227,17 @@ export function getSegments(subFolder: string): string[] {
 	return segments;
 }
 
+export type TranscriptionLog = {
+	language: string;
+	status: TranscriptionStatus;
+};
+
+export type PodcastEntryTranscriptions = [string, TranscriptionLog][]; // really a map!
+
 export type PodcastEntry = {
 	id: string;
 	parentFolder: string;
-	status: TranscriptionStatus;
+	transcriptions: PodcastEntryTranscriptions;
 };
 
 export type PodcastEntryMap = Map<string, PodcastEntry>;
@@ -238,17 +245,30 @@ export type PodcastEntryMap = Map<string, PodcastEntry>;
 async function writeEntry(
 	id: string,
 	parentFolder: string,
+	language: string,
 	status: TranscriptionStatus
 ): Promise<void> {
 	try {
 		const entriesPath = path.join(__dirname, '../tmp', `entries.json`);
 
 		if (!fs.existsSync(entriesPath)) {
-			await fsPromises.writeFile(
-				entriesPath,
-				JSON.stringify(Array.from(new Map<string, PodcastEntry>())),
-				'utf8'
-			);
+			const initialEntry = new Map<string, PodcastEntry>();
+
+			const transcriptionMap = new Map<string, TranscriptionLog>();
+			transcriptionMap.set('auto', {
+				language: 'auto',
+				status: TranscriptionStatus.Finished
+			});
+
+			const transcriptions = Array.from(transcriptionMap);
+
+			initialEntry.set(id, {
+				id: 'test',
+				parentFolder: 'test',
+				transcriptions
+			});
+
+			await fsPromises.writeFile(entriesPath, JSON.stringify(Array.from(initialEntry)), 'utf8');
 		}
 
 		const data = await fsPromises.readFile(entriesPath, 'utf8');
@@ -257,10 +277,19 @@ async function writeEntry(
 			? new Map<string, PodcastEntry>(JSON.parse(data))
 			: new Map<string, PodcastEntry>();
 
+		let tt = entries.get(id)?.transcriptions || [];
+		let transcriptionMap = new Map<string, TranscriptionLog>(tt);
+
+		transcriptionMap.set(language, {
+			language,
+			status
+		});
+		const transcriptions = Array.from(transcriptionMap);
+
 		entries.set(id, {
 			id,
 			parentFolder,
-			status
+			transcriptions
 		});
 
 		await fsPromises.writeFile(entriesPath, JSON.stringify(Array.from(entries)), 'utf8');
@@ -301,6 +330,8 @@ export async function processPodcastTranscription(
 ): Promise<string> {
 	const { podcastUrl } = request;
 
+	const language = request.language ? request.language : 'es';
+
 	// TODO: setup prod env
 	const baseUrl = process.env.HOST_NAME || `http://localhost:3000`;
 	if (podcastUrl.includes(baseUrl)) {
@@ -318,7 +349,13 @@ export async function processPodcastTranscription(
 	const start = performance.now();
 
 	if (existingEntry) {
-		const { parentFolder, status } = existingEntry;
+		const { parentFolder, transcriptions } = existingEntry;
+
+		const transcriptionMap = new Map(transcriptions);
+
+		const t = transcriptionMap.get(language);
+
+		const status = t ? t.status : TranscriptionStatus.InvalidRequest;
 
 		if (status === TranscriptionStatus.Finished) {
 			console.info(`Podcast already transcribed, no more work to do.`);
@@ -339,7 +376,7 @@ export async function processPodcastTranscription(
 			return podcastId;
 		}
 	} else {
-		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Downloading);
+		await writeEntry(podcastId, getTodaysFolderName(), language, TranscriptionStatus.Downloading);
 
 		console.info(`Transcribing podcast: ${podcastUrl}...`);
 
@@ -357,9 +394,10 @@ export async function processPodcastTranscription(
 			return podcastId;
 		}
 
-		await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Processing);
+		await writeEntry(podcastId, getTodaysFolderName(), language, TranscriptionStatus.Processing);
 
 		if (immediateDirectUrl) {
+			// TODO: merge all into `request` obj
 			transcribePodcast(request, directUrl, clientId, podcastId, subFolder, start);
 		} else {
 			await transcribePodcast(request, directUrl, clientId, podcastId, subFolder, start);
@@ -369,6 +407,7 @@ export async function processPodcastTranscription(
 	}
 }
 
+// TODO: REFACTOR: merge all params into `request` obj
 async function transcribePodcast(
 	request: TranscriptionRequest,
 	directUrl: string,
@@ -379,12 +418,16 @@ async function transcribePodcast(
 ): Promise<void> {
 	const { podcastUrl, podcastImageUrl, textTrackFormat, video } = request;
 
+	// TODO: ensure language supported!
+	const language = request.language ? request.language : 'es';
+
 	const transcription = await getTranscription(
 		podcastUrl,
 		directUrl,
 		clientId,
 		subFolder,
-		getSegments(subFolder)
+		getSegments(subFolder),
+		language
 	);
 
 	if (textTrackFormat === TextTrackFormat.Srt || video) {
@@ -394,13 +437,13 @@ async function transcribePodcast(
 
 		await createSrtFile(subFolder, transcription);
 	} else if (textTrackFormat === TextTrackFormat.WebVtt) {
-		await createWebVttFile(subFolder, transcription);
+		await createWebVttFile(subFolder, transcription, language);
 	} else {
 		console.warn(
 			`An invalid 'TextTrackFormat' was sent in: ${textTrackFormat}. Creating webvtt as default.`
 		);
 
-		await createWebVttFile(subFolder, transcription);
+		await createWebVttFile(subFolder, transcription, language);
 	}
 
 	if (!video) {
@@ -417,14 +460,15 @@ async function transcribePodcast(
 		// TODO: run cleanup script
 	}
 
-	await writeEntry(podcastId, getTodaysFolderName(), TranscriptionStatus.Finished);
+	await writeEntry(podcastId, getTodaysFolderName(), language, TranscriptionStatus.Finished);
 
 	TranscriptionService.emitTranscription({
 		url: podcastUrl,
 		directUrl,
 		clientId,
 		transcriptions: [],
-		finished: true
+		finished: true,
+		language
 	});
 
 	const end = performance.now();
