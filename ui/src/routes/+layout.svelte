@@ -4,6 +4,7 @@
 	import Footer from '#lib/layout/footer/Footer.svelte';
 	import Header from '#lib/layout/header/Header.svelte';
 	import Main from '#lib/layout/main/Main.svelte';
+	import Nav from '#lib/layout/Nav/Nav.svelte';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import { LightDakModeService } from '#lib/theme/service/light-dark-mode-service.svelte.ts';
 	import { WebSocketService } from '#lib/web-socket/web-socket-service.svelte.ts';
@@ -34,6 +35,8 @@
 
 <div class="relative h-full w-full overflow-hidden bg-background">
 	<Header />
+
+	<Nav />
 
 	<Main {children} />
 

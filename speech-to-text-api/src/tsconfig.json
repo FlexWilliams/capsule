@@ -9,7 +9,7 @@
 		// See also https://aka.ms/tsconfig/module
 		"target": "ES2020",
 		"module": "commonjs",
-		"types": [],
+		"types": ["node", "@js-temporal/polyfill"],
 		// For nodejs:
 		// "lib": ["esnext"],
 		// "types": ["node"],

@@ -13,9 +13,14 @@ import {
 	type TranscriptionResponse
 } from '#lib/transcription/transcription.ts';
 import { SPEECH_TO_TEXT_WSS_URL } from '$app/env/public';
+import { webSocketState$$setClientId } from './state/websocket.state.svelte';
 
 export class WebSocketService {
+	public static clientId: string | null = null;
+
 	private static webSocket: WebSocket | null = null;
+
+	private static podcastUrl: string | null = null;
 
 	private static onOpen(): void {
 		WssLogger.log(`Connection opened!`);
@@ -41,9 +46,24 @@ export class WebSocketService {
 				response as TranscriptionResponse;
 
 			if (status === TranscriptionStatus.Finished) {
+				if (directUrl) {
+					podcastState$$setDirectUrl(podcastUrl, directUrl);
+
+					// TODO: review if this is the best way to handle this...
+					podcastState$$setSelectedPodcastTranscriptionUrl(directUrl);
+				}
+
 				podcastState$$setEpisodeTranscriptionRequest(podcastUrl, response);
 
-				WssLogger.log(`Finsihed transcribing podcast.\n${message}`);
+				if (transcriptions) {
+					WssLogger.log(`New transcriptions received, adding to existing.`);
+
+					podcastState$$addEpisodeTranscriptions(podcastUrl, transcriptions);
+
+					TranscriptionService.emitTranscriptions(podcastUrl, directUrl, transcriptions);
+				}
+
+				WssLogger.log(`Finished transcribing podcast.`);
 			} else if (status === TranscriptionStatus.InvalidRequest) {
 				podcastState$$resetEpisodeTranscriptionRequest(podcastUrl);
 
@@ -63,7 +83,7 @@ export class WebSocketService {
 
 					podcastState$$addEpisodeTranscriptions(podcastUrl, transcriptions);
 
-					TranscriptionService.emitTranscriptions(transcriptions);
+					TranscriptionService.emitTranscriptions(podcastUrl, directUrl, transcriptions);
 				}
 
 				podcastState$$setEpisodeTranscriptionRequest(podcastUrl, response);
@@ -76,6 +96,16 @@ export class WebSocketService {
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (e) {
+			const str = event.data as string;
+
+			if (str.includes('Welcome to the WebSocket server')) {
+				const tokens = str.split(' ');
+
+				const clientId = tokens[tokens.length - 1];
+
+				webSocketState$$setClientId(clientId);
+			}
+
 			return WssLogger.serverLog(`${event.data}`);
 		}
 	}
@@ -111,6 +141,14 @@ export class WebSocketService {
 
 							console.error(error);
 
+							if (this.podcastUrl) {
+								console.debug(`Clearing transcription request for user to retry.`);
+
+								podcastState$$resetEpisodeTranscriptionRequest(this.podcastUrl);
+
+								this.podcastUrl = null;
+							}
+
 							reject(error);
 						}
 
@@ -136,6 +174,10 @@ export class WebSocketService {
 			return;
 		}
 
+		const { podcastUrl } = request;
+
+		this.podcastUrl = podcastUrl;
+
 		if (this.webSocket.readyState === WebSocket.CLOSED) {
 			this.webSocket = null;
 
@@ -159,7 +201,7 @@ export class WebSocketService {
 		}
 
 		WssLogger.log(`Sending request to transcribe podcast: ${request.podcastUrl}...`);
-
+		debugger;
 		const message = JSON.stringify(request);
 
 		this.webSocket.send(message);

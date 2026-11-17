@@ -1,14 +1,16 @@
+import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 import {
 	TranscriptionStatus,
 	type TranscriptionResponse,
 	type WhisperTranscription
 } from '#lib/transcription/transcription.ts';
 import { SvelteMap } from 'svelte/reactivity';
-import type { Podcast } from '../model/podcast';
+import type { Podcast, PodcastEpisode } from '../model/podcast';
 
 export interface PodcastState {
 	selectedPodcast: Podcast | null;
 	selectedPodcastUrl: string | null;
+	episode: PodcastEpisode | null;
 	selectedPodcastDirectUrl: string | null;
 	selectedPodcastTranscriptionUrl: string | null;
 	episodeTranscriptionMap: Map<string, WhisperTranscription[]>;
@@ -19,6 +21,7 @@ export interface PodcastState {
 const initialPodcastState: PodcastState = {
 	selectedPodcast: null,
 	selectedPodcastUrl: null,
+	episode: null,
 	selectedPodcastDirectUrl: null,
 	selectedPodcastTranscriptionUrl: null,
 	episodeTranscriptionMap: new Map<string, WhisperTranscription[]>(),
@@ -36,6 +39,10 @@ export function podcastState$$setSelectedPodcastUrl(url: string | null): void {
 	podcastState.selectedPodcastUrl = url;
 }
 
+export function podcastState$$setListeningEpisode(episode: PodcastEpisode | null): void {
+	podcastState.episode = episode;
+}
+
 export function podcastState$$setSelectedPodcastTranscriptionUrl(url: string | null): void {
 	podcastState.selectedPodcastTranscriptionUrl = url;
 }
@@ -46,6 +53,7 @@ export function podcastState$$setSelectedPodcasDirectUrl(url: string | null): vo
 export function podcastState$$addEpisodeTranscriptionRequest(podcastUrl: string): void {
 	podcastState.episodeTranscriptionRequestMap.set(podcastUrl, {
 		podcastUrl,
+		language: settingsState.transcriptionLanguage,
 		status: TranscriptionStatus.Processing
 	});
 

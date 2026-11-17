@@ -5,7 +5,10 @@ export type Transcription = {
 	url: string;
 	directUrl: string;
 	clientId: string;
+	language: string;
 	transcriptions: WhisperTranscription[];
+	percentageComplete?: number;
+	finished?: boolean;
 };
 
 export class TranscriptionService {
@@ -14,6 +17,7 @@ export class TranscriptionService {
 	public static transcription$ = this.transcription.asObservable();
 
 	public static emitTranscription(transcription: Transcription): void {
+		console.debug(`[emitTranscription]: ${transcription.clientId}`);
 		this.transcription.next(transcription);
 	}
 }

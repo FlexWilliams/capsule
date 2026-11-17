@@ -4,6 +4,8 @@ import { TranscriptionService } from './transcription-service';
 import Audio2TextJS from './vendor/Audio2Text';
 import { Audio2TextJSResult, WhipserItem, WhisperTranscription } from './whisper';
 
+export const defaultLang = 'auto';
+
 export enum TextTrackFormat {
 	WebVtt,
 	Srt
@@ -12,11 +14,13 @@ export enum TextTrackFormat {
 export type TranscriptionRequest = {
 	podcastUrl: string;
 	podcastImageUrl?: string;
+	language?: string;
 	textTrackFormat?: TextTrackFormat;
 	video?: boolean;
 };
 
 export enum TranscriptionStatus {
+	Downloading,
 	Processing,
 	Finished,
 	Failed,
@@ -26,10 +30,21 @@ export enum TranscriptionStatus {
 export type TranscriptionResponse = {
 	status: TranscriptionStatus;
 	podcastUrl: string;
+	language: string;
 	directUrl?: string;
 	message?: string;
 	transcriptions?: WhisperTranscription[];
+	percentageComplete?: number | undefined;
 };
+
+export async function getSavedTranscription(
+	folderPath: string,
+	language?: string
+): Promise<WhisperTranscription[]> {
+	language = language ? language : defaultLang;
+
+	return await webVttFileToTranscriptionList(folderPath, language);
+}
 
 /**
  * TODO: perf this better via message queue or
@@ -42,19 +57,23 @@ export async function getTranscription(
 	url: string,
 	directUrl: string,
 	clientId: string,
-	podcastId: string,
-	segments: string[]
+	subFolder: string,
+	segments: string[],
+	language: string
 ): Promise<WhisperTranscription[]> {
 	const transcript: WhisperTranscription[] = [];
 
 	let offset = 0;
 
+	let i = 0;
 	for (const s of segments) {
+		i++;
+
 		console.log(`Processing segment: ${s} (out of ${segments.length})`);
 
-		const filePath = path.join(__dirname, '../tmp', `${podcastId}`, `segments/${s}`);
+		const filePath = path.join(__dirname, '../tmp', `${subFolder}`, `segments/${s}`);
 
-		const transciptions = await transcribe(filePath);
+		const transciptions = await transcribe(filePath, language);
 
 		if (transciptions) {
 			const t = transciptions.map((tr) => {
@@ -72,7 +91,16 @@ export async function getTranscription(
 				} as WhisperTranscription;
 			});
 
-			TranscriptionService.emitTranscription({ url, directUrl, clientId, transcriptions: t });
+			const percentageComplete = Math.floor((i / segments.length) * 100);
+
+			TranscriptionService.emitTranscription({
+				url,
+				directUrl,
+				clientId,
+				transcriptions: t,
+				percentageComplete,
+				language
+			});
 
 			transcript.push(...t);
 		} else {
@@ -83,6 +111,8 @@ export async function getTranscription(
 		// needs to match the ffmpeg `-segment_time` value done before transcription
 		offset += 15;
 	}
+
+	console.debug(`Done transcribing for language: ${language}`);
 
 	return transcript;
 }
@@ -110,7 +140,7 @@ function offsetTimestampInSeconds(timestamp: string, offset: number): number {
 	}
 
 	const hoursToSeconds = hours * 60 * 60;
-	const minutesToSeconds = minutes * 60 * 60;
+	const minutesToSeconds = minutes * 60;
 
 	let totalSeconds = seconds + minutesToSeconds + hoursToSeconds + offset;
 
@@ -178,16 +208,16 @@ function offsetTimestamp(timestamp: string, offset: number): string {
 	return `${hoursStr}:${minutesStr}:${secondsStr},${tokens[tokens.length - 1]}`;
 }
 
-async function transcribe(filePath: string): Promise<WhisperTranscription[] | null> {
+async function transcribe(
+	filePath: string,
+	language: string
+): Promise<WhisperTranscription[] | null> {
 	return new Promise((resolve, reject) => {
-		// Example usage
 		const converter = new Audio2TextJS({
 			threads: 4,
 			processors: 1,
 			outputJson: true
 		});
-
-		const language = 'auto'; // or specify a language code for translation
 
 		converter
 			.runWhisper(filePath, language)
@@ -213,7 +243,12 @@ async function transcribe(filePath: string): Promise<WhisperTranscription[] | nu
 /**
  * TODO: perf this better somehow?
  */
-export async function createSrtFile(transcript: WhisperTranscription[]): Promise<void> {
+export async function createSrtFile(
+	subFolder: string,
+	transcript: WhisperTranscription[]
+): Promise<void> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast.srt`);
+
 	let idx = 1;
 
 	for (let t of transcript) {
@@ -224,7 +259,7 @@ export async function createSrtFile(transcript: WhisperTranscription[]): Promise
 			content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
 			content += `${t.text.trim()}\n\n`;
 
-			await fsAsync.appendFile('podcast.srt', content);
+			await fsAsync.appendFile(filePath, content);
 		} catch (err) {
 			console.log(`Error writing transcript #${idx} to srt file:`);
 		}
@@ -236,7 +271,13 @@ export async function createSrtFile(transcript: WhisperTranscription[]): Promise
 /**
  * TODO: perf this better somehow?
  */
-export async function createWebVttFile(transcript: WhisperTranscription[]): Promise<void> {
+export async function createWebVttFile(
+	subFolder: string,
+	transcript: WhisperTranscription[],
+	language: string
+): Promise<void> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast-${language}.webvtt`);
+
 	let idx = 1;
 
 	for (let t of transcript) {
@@ -247,11 +288,71 @@ export async function createWebVttFile(transcript: WhisperTranscription[]): Prom
 			content += `${t.timestamps.from} --> ${t.timestamps.to}\n`;
 			content += `${t.text.trim()}\n\n`;
 
-			await fsAsync.appendFile('podcast.webvtt', content);
+			await fsAsync.appendFile(filePath, content);
 		} catch (err) {
-			console.log(`Error writing transcript #${idx} to srt file:`);
+			console.log(`Error writing transcript #${idx} to webvtt file:`);
 		}
 
 		idx++;
+	}
+}
+
+/**
+ * TODO: perf this better somehow?
+ */
+export async function webVttFileToTranscriptionList(
+	subFolder: string,
+	language: string
+): Promise<WhisperTranscription[]> {
+	const filePath = path.join(__dirname, '../tmp', subFolder, `podcast-${language}.webvtt`);
+
+	try {
+		await fsAsync.access(filePath);
+
+		const data = await fsAsync.readFile(filePath, 'utf-8');
+
+		const tokens = data.split('\n').filter((f) => f);
+
+		if (tokens.length % 3 !== 0) {
+			console.error(`Invalid webvtt file! Returning empty list.`);
+
+			return [];
+		}
+
+		const transcriptions: WhisperTranscription[] = [];
+
+		for (let i = 0; i < tokens.length; i += 3) {
+			const timeStamp = tokens[i + 1];
+			const text = tokens[i + 2] || '';
+
+			const [from, to] = timeStamp?.split(' --> ') || [];
+
+			if (!from || !to) {
+				console.error(`Invalid webvtt timestamp! Returning empty list.`);
+
+				return [];
+			}
+
+			const fromInSeconds = offsetTimestampInSeconds(from, 0);
+
+			const toInSeconds = offsetTimestampInSeconds(to, 0);
+
+			const t: WhisperTranscription = {
+				timestamps: {
+					from,
+					fromInSeconds,
+					to,
+					toInSeconds
+				},
+				text
+			};
+
+			transcriptions.push(t);
+		}
+
+		return transcriptions;
+	} catch (e) {
+		console.error(`Error converting webvtt to transcriptions: ${e}`);
+		return [];
 	}
 }

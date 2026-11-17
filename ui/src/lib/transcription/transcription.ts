@@ -23,11 +23,13 @@ export enum TextTrackFormat {
 export type TranscriptionRequest = {
 	podcastUrl: string;
 	podcastImageUrl?: string;
+	language?: string;
 	textTrackFormat?: TextTrackFormat;
 	video?: boolean;
 };
 
 export enum TranscriptionStatus {
+	Downloading,
 	Processing,
 	Finished,
 	Failed,
@@ -37,7 +39,16 @@ export enum TranscriptionStatus {
 export type TranscriptionResponse = {
 	status: TranscriptionStatus;
 	podcastUrl: string;
+	language: string;
 	directUrl?: string;
 	message?: string;
 	transcriptions?: WhisperTranscription[];
+	percentageComplete?: number | undefined;
+};
+
+export type ViaUrlRequest = {
+	url: string;
+	clientId: string;
+	noTranscribe?: boolean;
+	language?: string;
 };

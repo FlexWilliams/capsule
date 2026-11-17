@@ -14,7 +14,7 @@
 
 <button
 	onclick={handleLightModeToggleClick}
-	class="50 absolute top-2 right-8 h-10 w-30 rounded-full bg-button text-button-text"
+	class="h-10 w-30 rounded-full bg-button text-button-text"
 >
 	{#if lightMode}
 		<span>Dark Mode?</span>

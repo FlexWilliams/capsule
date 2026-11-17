@@ -6,12 +6,14 @@ export interface SettingsState {
 	skip: SkipInterval;
 	skipAd: SkipAdInterval;
 	lightMode: boolean;
+	transcriptionLanguage: string;
 }
 
 const initialSettingsState: SettingsState = {
 	skip: 30,
 	skipAd: 120,
-	lightMode: false
+	lightMode: true,
+	transcriptionLanguage: 'en'
 };
 
 export const settingsState = $state(initialSettingsState);
@@ -25,4 +27,8 @@ export function settingsState$$setSkipAd(skipAd: SkipAdInterval): void {
 
 export function settingsState$$setLightMode(lightMode: boolean): void {
 	settingsState.lightMode = lightMode;
+}
+
+export function settingsState$$setTranscriptionLanguage(transcriptionLanguage: string): void {
+	settingsState.transcriptionLanguage = transcriptionLanguage;
 }

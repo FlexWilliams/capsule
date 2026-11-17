@@ -1,5 +1,6 @@
 export interface AudioState {
 	isPlaying: boolean;
+	isBuffering: boolean;
 	muted: boolean;
 	loading: boolean;
 	duration: number;
@@ -10,6 +11,7 @@ export interface AudioState {
 
 const initialAudioState: AudioState = {
 	isPlaying: false,
+	isBuffering: false,
 	muted: false,
 	loading: false,
 	duration: 0,
@@ -22,6 +24,10 @@ export const audioState = $state(initialAudioState);
 
 export function audioState$$setIsPlaying(isPlaying: boolean): void {
 	audioState.isPlaying = isPlaying;
+}
+
+export function audioState$$setIsBuffering(isBuffering: boolean): void {
+	audioState.isBuffering = isBuffering;
 }
 
 export function audioState$$setMuted(muted: boolean): void {
