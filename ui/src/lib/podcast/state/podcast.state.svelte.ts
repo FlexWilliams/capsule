@@ -19,6 +19,7 @@ export interface PodcastState {
 	myPodcasts: Podcast[];
 	loadingPodcast: boolean;
 	loadingMyPodcasts: boolean;
+	loadingPodcastViaRss: boolean;
 }
 
 const initialPodcastState: PodcastState = {
@@ -32,7 +33,8 @@ const initialPodcastState: PodcastState = {
 	showEpisodeTranscriptionMap: new Map<string, boolean | null>(),
 	myPodcasts: [],
 	loadingPodcast: false,
-	loadingMyPodcasts: false
+	loadingMyPodcasts: false,
+	loadingPodcastViaRss: false
 };
 
 export const podcastState = $state(initialPodcastState);
@@ -147,4 +149,8 @@ export function podcastState$$setLoadingPodcast(loadingPodcast: boolean): void {
 
 export function podcastState$$setLoadingMyPodcasts(loadingMyPodcasts: boolean): void {
 	podcastState.loadingMyPodcasts = loadingMyPodcasts;
+}
+
+export function podcastState$$setLoadingPodcastViaRss(loadingPodcastViaRss: boolean): void {
+	podcastState.loadingPodcastViaRss = loadingPodcastViaRss;
 }

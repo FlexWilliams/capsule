@@ -1,6 +1,7 @@
 import type { Podcast } from '#lib/podcast/model/podcast.ts';
 import { parseFeedToJson, parseFeedToSesamy } from '@sesamy/podcast-parser';
 import type { RequestHandler } from '@sveltejs/kit';
+import { createHash } from 'crypto';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { rssUrl } = await request.json();
@@ -40,8 +41,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			tags: e.tags
 		}));
 
+		const id = createHash('sha256').update(rssUrl).digest('hex');
+
 		const podcast: Podcast = {
-			id: sesamyPodcastFeed.sesamy.feedId || crypto.randomUUID(),
+			id,
 			name: sesamyPodcastFeed.title,
 			imageUrl: sesamyPodcastFeed.image,
 			rssUrl,

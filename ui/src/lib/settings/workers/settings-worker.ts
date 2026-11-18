@@ -2,7 +2,7 @@ import { WorkerLogger } from '#lib/logging/logger.ts';
 import { settingsStorageKey } from '#lib/storage/keys.ts';
 import { StorageService } from '#lib/storage/storage-service.ts';
 import type { SettingsWorkerRequest, SettingsWorkerResponse } from '.';
-import type { UserSettings } from '../model';
+import { defaultUserSettings, type UserSettings } from '../model';
 
 async function saveSettings(userSettings: UserSettings): Promise<void> {
 	try {
@@ -38,7 +38,8 @@ async function saveSettings(userSettings: UserSettings): Promise<void> {
 }
 
 async function loadSettings(): Promise<void> {
-	const settings = (await StorageService.getObject(settingsStorageKey)) as UserSettings;
+	const settings =
+		((await StorageService.getObject(settingsStorageKey)) as UserSettings) || defaultUserSettings;
 
 	const response: SettingsWorkerResponse = {
 		load: {

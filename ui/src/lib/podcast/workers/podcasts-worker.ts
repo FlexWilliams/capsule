@@ -10,6 +10,24 @@ async function saveToMyPodcasts(podcast: Podcast): Promise<void> {
 			return;
 		}
 
+		const existing = (await StorageService.getObject(generatePodcastKey(podcast.id))) as Podcast;
+
+		const podcastSavedAlready = !!existing;
+
+		if (podcastSavedAlready) {
+			WorkerLogger.log(`[PodcastsWorker] Podcast (${podcast?.name}) already saved.`);
+
+			const response: PodcastsWorkerResponse = {
+				saveToMyPodcasts: {
+					success: true
+				}
+			};
+
+			postMessage(response);
+
+			return;
+		}
+
 		await StorageService.saveObject(generatePodcastKey(podcast.id), podcast);
 
 		let myPodcasts = (await StorageService.getListFromStorage(

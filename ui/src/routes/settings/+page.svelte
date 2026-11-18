@@ -55,19 +55,24 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<LightDarkModeToggle {handleLightModeToggleClick} />
-
-	<label class="flex max-w-8/12 flex-col">
-		<span>Transcription Language</span>
-		<select bind:value={transcriptionLanguage} oninput={handleTranscriptionLanguageChange}>
+	<label class="flex max-w-8/12 flex-col text-text">
+		<span>Transcription Language:</span>
+		<select
+			name="transcription-language"
+			class="h-8 rounded-md border bg-input-bg text-input-text"
+			bind:value={transcriptionLanguage}
+			oninput={handleTranscriptionLanguageChange}
+		>
 			{#each languages as language (language)}
 				<option value={language}>{language}</option>
 			{/each}
 		</select>
 	</label>
 
+	<LightDarkModeToggle {handleLightModeToggleClick} />
+
 	<button
-		class="h-10 w-30 cursor-pointer rounded-full bg-button text-button-text"
+		class="h-10 w-30 cursor-pointer rounded-full bg-button text-button-text shadow-md"
 		onclick={ExportService.handleExportData}
 		disabled={exportingData}>Export Data</button
 	>
