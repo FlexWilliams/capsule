@@ -1,11 +1,10 @@
-import type { SavedHabit } from '$lib/habits/model';
-import type { SavedNote } from '$lib/note';
-import type { SavedTodo } from '$lib/todo/model';
+import type { Podcast, PodcastMeta } from '#lib/podcast/model/podcast.ts';
+import type { UserSettings } from '#lib/settings/model/index.ts';
 
 export type DataExport = {
-	notes: SavedNote[];
-	todos: SavedTodo[];
-	habits: SavedHabit[];
+	myPodcasts: PodcastMeta[];
+	podcasts: Podcast[];
+	settings: UserSettings;
 };
 
 export * from './state';

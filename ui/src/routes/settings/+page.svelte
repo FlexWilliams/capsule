@@ -7,6 +7,8 @@
 		settingsState$$setLightMode,
 		settingsState$$setTranscriptionLanguage
 	} from '#lib/settings/settings.state.svelte.ts';
+	import { exportState } from '#lib/storage/export/index.ts';
+	import { ExportService } from '#lib/storage/export/service/ExportService.svelte.ts';
 	import LightDarkModeToggle from '#lib/theme/component/LightDarkModeToggle.svelte';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { onMount } from 'svelte';
@@ -18,6 +20,8 @@
 	let transcriptionLanguage = $derived(settingsState.transcriptionLanguage);
 
 	let lightMode = $derived(settingsState.lightMode);
+
+	let exportingData = $derived(exportState.exporting);
 
 	// TODO: place in other constants or i18 file...
 	const languages = ['en', 'es', 'fr'];
@@ -61,4 +65,10 @@
 			{/each}
 		</select>
 	</label>
+
+	<button
+		class="h-10 w-30 cursor-pointer rounded-full bg-button text-button-text"
+		onclick={ExportService.handleExportData}
+		disabled={exportingData}>Export Data</button
+	>
 </div>
