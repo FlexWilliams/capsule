@@ -170,9 +170,13 @@ Verified By cube on: 10/23/26
 
 ### Acceptance Criteria:
 
-TBD
+Cutting Comments and Import functionality onto [CAP-014](./TASKS.md#cap-014---import-and-comments)
 
-Verified By <> on:
+Need to think about best UX, don't want to rush.
+
+Import isn't high priority, export is good enough for now.
+
+Verified By cube on: 11/23/26
 
 <br>
 
@@ -237,6 +241,18 @@ Verified By <> on:
 ## CAP-013 - tag v1 & v2 Feature Brainstorm
 
 ### Description:
+
+### Acceptance Criteria:
+
+Verified By <> on:
+
+<br>
+
+## CAP-014 - Import and Comments
+
+### Description:
+
+Cutover from CAP-009.
 
 ### Acceptance Criteria:
 

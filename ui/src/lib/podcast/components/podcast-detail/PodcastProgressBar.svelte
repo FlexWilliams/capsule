@@ -8,17 +8,21 @@
 		explicitDuration?: number;
 		showProgressBarTimeStamps?: boolean;
 		withinTranscribeCard?: boolean;
+		disableButtons?: boolean;
 	}
 
 	let {
 		explicitDuration,
 		showProgressBarTimeStamps,
-		withinTranscribeCard
+		withinTranscribeCard,
+		disableButtons
 	}: PodcastProgressBarProps = $props();
 
 	const progressBarId = 'progress-bar';
 
 	let selectedPodcastUrl = $derived(podcastState.selectedPodcastUrl);
+
+	let episodeStarted = $derived(podcastState.episodeStarted);
 
 	let currentTime = $derived(audioState.currentTime);
 
@@ -30,7 +34,7 @@
 
 	let easingBoundValue = $state(0);
 
-	let progressBarValue = $derived(easingProgress ? easingValue : currentTime);
+	let progressBarValue = $derived(easingProgress ? easingValue : episodeStarted ? currentTime : 0);
 
 	function getProgressBar(): HTMLProgressElement | null {
 		return document.getElementById(progressBarId) as HTMLProgressElement;
@@ -105,8 +109,8 @@
 		AudioService.seekTo(seekTo);
 	}
 
-	function formatTime(timeInSeconds: number): string {
-		timeInSeconds = Math.floor(timeInSeconds);
+	function formatTime(timeInSeconds: number, episodeStarted: boolean = true): string {
+		timeInSeconds = !episodeStarted ? 0 : Math.floor(timeInSeconds);
 
 		const seconds = timeInSeconds % 60;
 		const minutes = Math.floor(timeInSeconds / 60) % 60;
@@ -128,7 +132,13 @@
 			value={progressBarValue}
 			class="w-full rounded-md bg-audio-button"
 		></progress>
-		<button class="absolute h-full w-full" aria-label="Seek to" onclick={handleProgressBarClick}
+		<button
+			class="absolute h-full w-full"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
+			aria-label="Seek to"
+			onclick={handleProgressBarClick}
+			disabled={disableButtons}
 		></button>
 	</div>
 
@@ -137,7 +147,8 @@
 			<span
 				class="text-xs"
 				class:text-progress-bar-text={!withinTranscribeCard}
-				class:text-episode-progress-bar-text={withinTranscribeCard}>{formatTime(currentTime)}</span
+				class:text-episode-progress-bar-text={withinTranscribeCard}
+				>{formatTime(currentTime, episodeStarted)}</span
 			>
 			<span
 				class="text-xs"

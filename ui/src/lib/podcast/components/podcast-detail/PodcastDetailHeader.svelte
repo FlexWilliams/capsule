@@ -11,10 +11,11 @@
 
 	interface PodcastDetailHeaderProps {
 		podcast: Podcast;
-		canSubscribe?: boolean;
+		subscribed: boolean;
+		handleSubscribeToggle(): void;
 	}
 
-	let { podcast, canSubscribe }: PodcastDetailHeaderProps = $props();
+	let { podcast, subscribed, handleSubscribeToggle }: PodcastDetailHeaderProps = $props();
 
 	let defaultCover = $state(mic);
 
@@ -52,9 +53,16 @@
 
 		<div class="flex h-10 max-h-10 w-full justify-center">
 			<button
-				class="w-full cursor-pointer rounded-full bg-subscribe-button p-2 text-sm text-button-text shadow-md disabled:text-button-text-disabled"
-				disabled={!canSubscribe}>Subscribe</button
+				class="w-full cursor-pointer rounded-full bg-subscribe-button p-2 text-sm text-button-text shadow-md"
+				class:text-button-text-disabled={subscribed}
+				onclick={handleSubscribeToggle}
 			>
+				{#if subscribed}
+					<span>Unsubscribe</span>
+				{:else}
+					<span>Subscribe</span>
+				{/if}
+			</button>
 		</div>
 	</div>
 	<div class="items-between flex h-full flex-1">

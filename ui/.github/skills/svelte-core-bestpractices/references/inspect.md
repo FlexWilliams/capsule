@@ -34,7 +34,6 @@ On updates, a stack trace will be printed, making it easy to find the origin of 
 
 	$inspect(count).with((type, count) => {
 		if (type === 'update') {
-			debugger; // or `console.trace`, or whatever you want
 		}
 	});
 </script>

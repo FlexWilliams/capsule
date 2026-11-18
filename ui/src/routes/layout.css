@@ -4,12 +4,16 @@
 	/* Default Theme (Light) */
 	:root {
 		--background: #fcfcfc;
+		--bg-highlight: #ff5722;
 		--text: #30374b;
+		--text-highlight: #ff5722;
 		--border: #30374b;
-		--button: #30374b;
-		--button-text: #fcfcfc;
-		--button-text-disabled: #90a1b9;
-		--audio-button: #ffb900;
+		--button: #fcfcfc;
+		--button-text: #30374b;
+		--button-bg-disabled: #ffbf46;
+		--button-text-disabled: #90a1b9d0;
+		--audio-button: #ffbf46;
+		--rss-dialog: #fcfcfc;
 		--rss-button: #fcfcfc;
 		--subscribe-button: #cad5e2;
 		--mute-button: #cad5e2;
@@ -17,14 +21,14 @@
 		--footer-button: #cad5e2;
 		--dialog: #fcfcfc;
 		--dialog-text: #30374b;
-		--dialog-button: #ffb900;
+		--dialog-button: #ffbf46;
 		--dialog-button-text: #30374b;
 		--card: #fcfcfc;
 		--card-text: #30374b;
-		--episode-play-button: #ffb900;
-		--episode-transcribe-button: #ffb900;
+		--episode-play-button: #ffbf46;
+		--episode-transcribe-button: #ffbf46;
 		--episode-transcribe-button-disabled: #cad5e2;
-		--episode-transcribe-close-button: #ffb900;
+		--episode-transcribe-close-button: #ffbf46;
 		--episode-transcription-text: #30374b;
 		--episode-transcription-text-bg: #cad5e2;
 		--episode-summary-bg: #cad5e2;
@@ -32,17 +36,24 @@
 		--progress-bar: #30374b;
 		--progress-bar-bg: #dadee6;
 		--progress-bar-text: #30374b;
+		--nav-bg: #fcfcfc;
+		--input-bg: #fcfcfc;
+		--input-text: #30374b;
 	}
 
 	/* Dark Theme */
 	.dark {
 		--background: #30374b;
+		--bg-highlight: #ffbf46;
 		--text: #fcfcfc;
+		--text-highlight: #ffbf46;
 		--border: #fcfcfc;
 		--button: #fcfcfc;
 		--button-text: #30374b;
-		--button-text-disabled: #90a1b9;
-		--audio-button: #ffb900;
+		--button-bg-disabled: #90a1b9;
+		--button-text-disabled: #30374bd0;
+		--audio-button: #ffbf46;
+		--rss-dialog: #533b4d;
 		--rss-button: #fcfcfc;
 		--subscribe-button: #cad5e2;
 		--mute-button: #cad5e2;
@@ -50,21 +61,24 @@
 		--footer-button: #cad5e2;
 		--dialog: #f0f0f0;
 		--dialog-text: #30374b;
-		--dialog-button: #ffb900;
+		--dialog-button: #ffbf46;
 		--dialog-button-text: #30374b;
-		--card: #f0f0f0;
-		--card-text: #30374b;
-		--episode-play-button: #ffb900;
-		--episode-transcribe-button: #ffb900;
+		--card: #533b4d;
+		--card-text: #fcfcfc;
+		--episode-play-button: #ffbf46;
+		--episode-transcribe-button: #ffbf46;
 		--episode-transcribe-button-disabled: #cad5e2;
-		--episode-transcribe-close-button: #ffb900;
+		--episode-transcribe-close-button: #ffbf46;
 		--episode-transcription-text: #fcfcfc;
 		--episode-transcription-text-bg: #30374b;
 		--episode-summary-bg: #cad5e2;
-		--episode-progress-bar-text: #30374b;
-		--progress-bar: #ffb900;
+		--episode-progress-bar-text: #fcfcfc;
+		--progress-bar: #ffbf46;
 		--progress-bar-bg: #dadee6;
 		--progress-bar-text: #fcfcfc;
+		--nav-bg: #30374b;
+		--input-bg: #fcfcfc;
+		--input-text: #30374b;
 	}
 }
 
@@ -74,8 +88,10 @@
 	--color-border: var(--border);
 	--color-button: var(--button);
 	--color-button-text: var(--button-text);
+	--color-button-bg-disabled: var(--button-bg-disabled);
 	--color-button-text-disabled: var(--button-text-disabled);
 	--color-audio-button: var(--audio-button);
+	--color-rss-dialog: var(--rss-dialog);
 	--color-rss-button: var(--rss-button);
 	--color-subscribe-button: var(--subscribe-button);
 	--color-mute-button: var(--mute-button);
@@ -97,4 +113,9 @@
 	--color-progress-bar: var(--progress-bar);
 	--color-progress-bar-bg: var(--progress-bar-bg);
 	--color-progress-bar-text: var(--progress-bar-text);
+	--color-nav-bg: var(--nav-bg);
+	--color-bg-highlight: var(--bg-highlight);
+	--color-text-highlight: var(--text-highlight);
+	--color-input-bg: var(--input-bg);
+	--color-input-text: var(--input-text);
 }

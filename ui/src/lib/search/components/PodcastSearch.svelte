@@ -78,7 +78,7 @@
 		<input
 			name="search"
 			type="search"
-			class="h-10 rounded-md border border-border px-2"
+			class="h-10 rounded-md border border-border bg-input-bg px-2 shadow-md"
 			oninput={handleInput}
 			autocomplete="off"
 		/>

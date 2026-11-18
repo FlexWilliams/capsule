@@ -30,20 +30,29 @@
 
 <nav
 	id="nav-menu"
-	class="transition-width fixed top-0 left-0 z-4 h-full w-0 overflow-x-hidden bg-slate-300 duration-500"
+	class="transition-width fixed top-0 left-0 z-4 h-full w-0 overflow-x-hidden bg-nav-bg shadow-[10px_0_15px_-3px_rgba(0,0,0,0.1)] duration-500"
 	class:w-60={navMenuOpen}
 	class:p-4={navMenuOpen}
 	tabindex="-1"
 >
-	<ul class:hidden={!navMenuOpen} class="">
-		<li class="h-10 text-center">
-			<a href={resolve('/')} class="block cursor-pointer">Home</a>
+	<ul class:hidden={!navMenuOpen} class="text-text">
+		<li class="h-16 text-center">
+			<a href={resolve('/')} class="block cursor-pointer hover:text-text-highlight">Home</a>
 		</li>
-		<li class="h-10 text-center">
-			<a href={resolve('/rss-feeds')} class="block cursor-pointer">My RSS Feeds</a>
+		<li class="h-16 text-center">
+			<a href={resolve('/my-podcasts')} class="block cursor-pointer hover:text-text-highlight"
+				>My Podcasts</a
+			>
 		</li>
-		<li class="h-10 text-center">
-			<a href={resolve('/settings')} class="block cursor-pointer">Settings</a>
+		<li class="h-16 text-center">
+			<a href={resolve('/my-favorites')} class="block cursor-pointer hover:text-text-highlight"
+				>My Favorites</a
+			>
+		</li>
+		<li class="h-16 text-center">
+			<a href={resolve('/settings')} class="block cursor-pointer hover:text-text-highlight"
+				>Settings</a
+			>
 		</li>
 	</ul>
 </nav>
