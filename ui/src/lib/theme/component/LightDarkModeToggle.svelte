@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
-	import { VibrationService } from '#lib/vibration/vibration-service.ts';
-	import { LightDakModeService } from '../service/light-dark-mode-service.svelte';
+
+	interface LightDarkModeToggleProps {
+		handleLightModeToggleClick(): void;
+	}
+
+	let { handleLightModeToggleClick }: LightDarkModeToggleProps = $props();
 
 	let lightMode = $derived(settingsState.lightMode);
-
-	function handleLightModeToggleClick(): void {
-		VibrationService.vibrate();
-
-		LightDakModeService.setLightDarkMode(!lightMode);
-	}
 </script>
 
 <button

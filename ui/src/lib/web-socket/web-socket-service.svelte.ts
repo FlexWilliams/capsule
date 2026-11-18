@@ -201,7 +201,7 @@ export class WebSocketService {
 		}
 
 		WssLogger.log(`Sending request to transcribe podcast: ${request.podcastUrl}...`);
-		debugger;
+
 		const message = JSON.stringify(request);
 
 		this.webSocket.send(message);

@@ -1,3 +1,5 @@
+import type { UserSettings } from './model';
+
 type SkipInterval = 30 | 60 | 90;
 type SkipAdInterval = 120 | 150 | 180;
 
@@ -7,13 +9,17 @@ export interface SettingsState {
 	skipAd: SkipAdInterval;
 	lightMode: boolean;
 	transcriptionLanguage: string;
+	loadingUserSettings: boolean;
+	savingUserSettings: boolean;
 }
 
 const initialSettingsState: SettingsState = {
 	skip: 30,
 	skipAd: 120,
 	lightMode: true,
-	transcriptionLanguage: 'en'
+	transcriptionLanguage: 'en',
+	loadingUserSettings: false,
+	savingUserSettings: false
 };
 
 export const settingsState = $state(initialSettingsState);
@@ -31,4 +37,19 @@ export function settingsState$$setLightMode(lightMode: boolean): void {
 
 export function settingsState$$setTranscriptionLanguage(transcriptionLanguage: string): void {
 	settingsState.transcriptionLanguage = transcriptionLanguage;
+}
+
+export function settingsState$$setUserSettings(userSettings: UserSettings): void {
+	const { lightMode, transcriptionLanguage } = userSettings;
+
+	settingsState.lightMode = lightMode;
+	settingsState.transcriptionLanguage = transcriptionLanguage;
+}
+
+export function settingsState$$setLoadingUserSettings(loadingUserSettings: boolean): void {
+	settingsState.loadingUserSettings = loadingUserSettings;
+}
+
+export function settingsState$$setSavingUserSettings(savingUserSettings: boolean): void {
+	settingsState.savingUserSettings = savingUserSettings;
 }
