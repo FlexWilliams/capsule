@@ -1,3 +1,4 @@
+import type { WorkerErrorResponse } from '#lib/worker/index.ts';
 import type { UserSettings } from '../model';
 
 export type SettingsSaveRequest = {
@@ -7,11 +8,6 @@ export type SettingsSaveRequest = {
 export type SettingsWorkerRequest = {
 	load?: boolean;
 	save?: SettingsSaveRequest;
-};
-
-export type WorkerErrorResponse = {
-	error: string;
-	cause?: string;
 };
 
 export type SettingsLoadResponse = {

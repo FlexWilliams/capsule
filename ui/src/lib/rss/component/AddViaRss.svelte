@@ -1,6 +1,7 @@
 <script lang="ts">
 	import podcastFeed from '#lib/assets/icons/ic--round-podcasts.svg';
-	import type { Podcast, PodcastRssMeta } from '#lib/podcast/model/podcast.ts';
+	import type { Podcast, PodcastMeta } from '#lib/podcast/model/podcast.ts';
+	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -30,7 +31,13 @@
 
 		fetching = true;
 
-		podcast = await fetchPodcast(rssUrl);
+		const rssPodcast = await fetchPodcast(rssUrl);
+
+		if (rssPodcast) {
+			PodcastService.saveToMyPodcasts(rssPodcast);
+		}
+
+		podcast = rssPodcast;
 
 		fetching = false;
 
@@ -51,6 +58,7 @@
 		if (response.ok) {
 			return (await response.json()) as Podcast;
 		} else {
+			// TODO: UX: inform user not found or to retry
 			return null;
 		}
 	}
@@ -82,7 +90,7 @@
 
 		dismissPopover();
 
-		goto(resolve(`/podcasts/[id]?viaRss=true`, { id: podcast?.id || 'EMPTY' }));
+		goto(resolve(`/podcasts/[id]`, { id: podcast?.id || 'EMPTY' }));
 	}
 
 	function resetForm(): void {
@@ -97,7 +105,7 @@
 	async function savePodcastUrl(podcast: Podcast): Promise<void> {
 		// TODO: update to use localforage
 
-		const newPod: PodcastRssMeta = {
+		const newPod: PodcastMeta = {
 			name: podcast.name,
 			id: podcast.id,
 			rssUrl: podcast.rssUrl,
@@ -106,7 +114,7 @@
 
 		const existing = localStorage.getItem('rss-podcasts');
 
-		const podcasts: PodcastRssMeta[] = existing ? (JSON.parse(existing) as PodcastRssMeta[]) : [];
+		const podcasts: PodcastMeta[] = existing ? (JSON.parse(existing) as PodcastMeta[]) : [];
 
 		if (podcasts.some((p) => p.rssUrl === newPod.rssUrl)) {
 			// Already saved
@@ -161,10 +169,10 @@
 		<div class="flex items-center justify-between">
 			<button
 				type="submit"
-				class="mt-2 w-20 rounded-md bg-dialog-button p-2 text-dialog-button-text shadow-md"
+				class="mt-2 w-20 cursor-pointer rounded-md bg-dialog-button p-2 text-dialog-button-text shadow-md"
 				disabled={fetching}>Add</button
 			>
-			<a href={resolve('/rss-feeds')} class="underline">Saved Feeds</a>
+			<a href={resolve('/my-podcasts')} class="underline">Saved Feeds</a>
 		</div>
 	</form>
 

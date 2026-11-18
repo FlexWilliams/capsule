@@ -16,6 +16,9 @@ export interface PodcastState {
 	episodeTranscriptionMap: Map<string, WhisperTranscription[]>;
 	episodeTranscriptionRequestMap: Map<string, TranscriptionResponse | null>;
 	showEpisodeTranscriptionMap: Map<string, boolean | null>;
+	myPodcasts: Podcast[];
+	loadingPodcast: boolean;
+	loadingMyPodcasts: boolean;
 }
 
 const initialPodcastState: PodcastState = {
@@ -26,7 +29,10 @@ const initialPodcastState: PodcastState = {
 	selectedPodcastTranscriptionUrl: null,
 	episodeTranscriptionMap: new Map<string, WhisperTranscription[]>(),
 	episodeTranscriptionRequestMap: new Map<string, TranscriptionResponse | null>(),
-	showEpisodeTranscriptionMap: new Map<string, boolean | null>()
+	showEpisodeTranscriptionMap: new Map<string, boolean | null>(),
+	myPodcasts: [],
+	loadingPodcast: false,
+	loadingMyPodcasts: false
 };
 
 export const podcastState = $state(initialPodcastState);
@@ -129,4 +135,16 @@ export function podcastState$$addEpisodeTranscriptions(
 	podcastState.episodeTranscriptionMap = new SvelteMap(
 		podcastState.episodeTranscriptionMap.entries()
 	);
+}
+
+export function podcastState$$setMyPodcasts(podcasts: Podcast[]): void {
+	podcastState.myPodcasts = podcasts;
+}
+
+export function podcastState$$setLoadingPodcast(loadingPodcast: boolean): void {
+	podcastState.loadingPodcast = loadingPodcast;
+}
+
+export function podcastState$$setLoadingMyPodcasts(loadingMyPodcasts: boolean): void {
+	podcastState.loadingMyPodcasts = loadingMyPodcasts;
 }

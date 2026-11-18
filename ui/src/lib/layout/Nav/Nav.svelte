@@ -40,7 +40,7 @@
 			<a href={resolve('/')} class="block cursor-pointer">Home</a>
 		</li>
 		<li class="h-10 text-center">
-			<a href={resolve('/rss-feeds')} class="block cursor-pointer">My RSS Feeds</a>
+			<a href={resolve('/my-podcasts')} class="block cursor-pointer">My Podcasts</a>
 		</li>
 		<li class="h-10 text-center">
 			<a href={resolve('/settings')} class="block cursor-pointer">Settings</a>

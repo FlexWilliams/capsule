@@ -24,7 +24,7 @@ export interface Podcast {
 	episodes?: PodcastEpisode[];
 }
 
-export interface PodcastRssMeta {
+export interface PodcastMeta {
 	name: string;
 	id: string;
 	rssUrl: string;

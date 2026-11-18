@@ -1,10 +1,10 @@
 <script lang="ts">
 	import LoadingIndicator from '#lib/loading/component/LoadingIndicator.svelte';
+	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import type { Podcast, PodcastEpisode, PodcastRssMeta } from '../../model/podcast';
-	import { PodcastService } from '../../service/podcast.service.svelte';
+	import type { Podcast, PodcastEpisode } from '../../model/podcast';
 	import { podcastState } from '../../state/podcast.state.svelte';
 	import PodcastAudioButtons from './PodcastAudioButtons.svelte';
 	import PodcastDetailHeader from './PodcastDetailHeader.svelte';
@@ -13,52 +13,9 @@
 
 	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
 
+	let loadingPodcast = $derived(podcastState.loadingPodcast);
+
 	let episode: PodcastEpisode | null = $derived(podcastState.episode);
-
-	let loading = $state(true);
-
-	async function fetchPodcastViaRss(podcastId: string): Promise<void> {
-		// TODO: update to use localforage
-		const existing = localStorage.getItem('rss-podcasts');
-		if (!existing) {
-			// TODO: display error
-			loading = false;
-
-			return;
-		}
-
-		const savedPodcasts = JSON.parse(existing) as PodcastRssMeta[];
-
-		const found = savedPodcasts.find((s) => s.id === podcastId);
-		if (!found) {
-			// TODO: display error
-			loading = false;
-
-			return;
-		}
-
-		const { rssUrl } = found;
-
-		try {
-			const response = await fetch(`/api/rss`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ rssUrl })
-			});
-
-			if (!response.ok) {
-				console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}`);
-			} else {
-				PodcastService.setSelectedPodcast((await response.json()) as Podcast);
-			}
-		} catch (e) {
-			console.error(`Unable to fetch podcast with rssUrl: ${rssUrl}.\n${JSON.stringify(e)}`);
-		} finally {
-			loading = false;
-		}
-	}
 
 	async function fetchPodcast(): Promise<void> {
 		const podcastId = page.params.id;
@@ -69,24 +26,7 @@
 			return;
 		}
 
-		const addViaRss = page.url.searchParams.get('viaRss') === 'true';
-		if (addViaRss) {
-			return fetchPodcastViaRss(podcastId);
-		}
-
-		try {
-			const response = await fetch(`/api/podcasts/${podcastId || ''}`);
-
-			if (!response.ok) {
-				console.error(`Unable to fetch podcast with id: ${podcastId}`);
-			} else {
-				PodcastService.setSelectedPodcast((await response.json()) as Podcast);
-			}
-		} catch (e) {
-			console.error(`Unable to fetch podcast with id: ${podcastId}.\n${JSON.stringify(e)}`);
-		} finally {
-			loading = false;
-		}
+		PodcastService.loadPodcast(podcastId);
 	}
 
 	onMount(async () => {
@@ -95,7 +35,7 @@
 </script>
 
 <article class="flex h-full flex-col items-center gap-4 py-4">
-	{#if loading}
+	{#if loadingPodcast}
 		<LoadingIndicator />
 	{:else}
 		{#if podcast}

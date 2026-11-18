@@ -22,7 +22,7 @@ export class SettingsService {
 
 			if (!success || error) {
 				// TODO: inform user to retry
-				Logger.error(`Unable to save user settings: ${JSON.stringify(e)}`);
+				Logger.error(`Unable to save user settings: ${JSON.stringify(error)}`);
 			} else {
 				Logger.debug(`Saved user settings.`);
 			}

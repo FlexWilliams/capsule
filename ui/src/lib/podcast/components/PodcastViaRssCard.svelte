@@ -2,10 +2,10 @@
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { PodcastRssMeta } from '../model/podcast';
+	import type { PodcastMeta } from '../model/podcast';
 
 	interface PodcastViaRssCardProps {
-		podcast: PodcastRssMeta;
+		podcast: PodcastMeta;
 	}
 
 	let { podcast }: PodcastViaRssCardProps = $props();
@@ -13,7 +13,7 @@
 	function goToPodcast(id: string): void {
 		VibrationService.vibrate();
 
-		goto(resolve(`/podcasts/[id]?viaRss=true`, { id: id || 'EMPTY' }));
+		goto(resolve(`/podcasts/[id]`, { id: id || 'EMPTY' }));
 	}
 </script>
 
@@ -24,7 +24,7 @@
 	class="absolute top-2/5 left-4 z-1 h-8/12 max-h-15 max-w-15 rounded-md"
 />
 <a
-	href={resolve(`/podcasts/[id]?viaRss=true`, { id: podcast?.id || 'EMPTY' })}
+	href={resolve(`/podcasts/[id]`, { id: podcast?.id || 'EMPTY' })}
 	class="absolute top-1/2 right-4 z-1 h-8/12 max-h-8/12 underline">Listen</a
 >
 <button
