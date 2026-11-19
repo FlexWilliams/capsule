@@ -22,6 +22,7 @@ export interface Podcast {
 	imageUrl?: string;
 	rssUrl: string;
 	episodes?: PodcastEpisode[];
+	totalEpisodes?: number;
 }
 
 export interface PodcastMeta {
@@ -29,4 +30,5 @@ export interface PodcastMeta {
 	id: string;
 	rssUrl: string;
 	imageUrl?: string;
+	lastVisit?: string;
 }

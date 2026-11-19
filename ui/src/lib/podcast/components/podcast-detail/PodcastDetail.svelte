@@ -3,13 +3,15 @@
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { Podcast, PodcastEpisode } from '../../model/podcast';
 	import { podcastState } from '../../state/podcast.state.svelte';
 	import PodcastAudioButtons from './PodcastAudioButtons.svelte';
 	import PodcastDetailHeader from './PodcastDetailHeader.svelte';
 	import PodcastEpisodeList from './PodcastEpisodeList.svelte';
 	import PodcastProgressBar from './PodcastProgressBar.svelte';
+
+	let podcastId = $derived(page.params.id || '');
 
 	let podcast: Podcast | null = $derived(podcastState.selectedPodcast);
 
@@ -18,8 +20,6 @@
 	let episode: PodcastEpisode | null = $derived(podcastState.episode);
 
 	async function fetchPodcast(): Promise<void> {
-		const podcastId = page.params.id;
-
 		if (!podcastId) {
 			console.error(`Unable to load podcast, no id provided!`);
 
@@ -29,8 +29,20 @@
 		PodcastService.loadPodcast(podcastId);
 	}
 
+	$effect(() => {
+		if (podcast) {
+			untrack(async () => {
+				console.log(`Playlist visited!`);
+
+				PodcastService.updatePodcastMetrics(podcastId);
+			});
+		}
+	});
+
 	onMount(async () => {
-		await fetchPodcast();
+		if (!podcast || podcast.id !== podcastId) {
+			await fetchPodcast();
+		}
 	});
 </script>
 

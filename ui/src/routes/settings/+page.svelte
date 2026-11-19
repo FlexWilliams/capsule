@@ -24,7 +24,7 @@
 	let exportingData = $derived(exportState.exporting);
 
 	// TODO: place in other constants or i18 file...
-	const languages = ['en', 'es', 'fr'];
+	const languages = ['auto', 'en', 'es', 'fr'];
 
 	async function saveUserSettings(): Promise<void> {
 		const settings: UserSettings = {

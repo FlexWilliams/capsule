@@ -1,4 +1,5 @@
 import { Logger } from '#lib/logging/logger.ts';
+import { SvelteDate } from 'svelte/reactivity';
 import type { Podcast } from '../model/podcast';
 import {
 	podcastState$$setLoadingMyPodcasts,
@@ -14,7 +15,7 @@ export class PodcastService {
 	private static worker: Worker | undefined = undefined;
 
 	private static handleWorkerResponse(e: MessageEvent<PodcastsWorkerResponse>): void {
-		const { saveToMyPodcasts, fetchPodcast, fetchMyPodcasts } = e.data;
+		const { saveToMyPodcasts, fetchPodcast, fetchMyPodcasts, updatePodcastMeta } = e.data;
 
 		if (saveToMyPodcasts) {
 			const { success, error } = saveToMyPodcasts;
@@ -46,6 +47,14 @@ export class PodcastService {
 			}
 
 			podcastState$$setLoadingMyPodcasts(false);
+		} else if (updatePodcastMeta) {
+			const { success, error } = updatePodcastMeta;
+
+			if (!success || error) {
+				Logger.error(`Unable to update podcast meta: ${JSON.stringify(error)}`);
+			} else {
+				Logger.debug(`Updated podcast meta.`);
+			}
 		}
 	}
 
@@ -80,6 +89,18 @@ export class PodcastService {
 
 		const request: PodcastsWorkerRequest = {
 			fetchMyPodcasts: true
+		};
+
+		this.worker?.postMessage(request);
+	}
+
+	public static async updatePodcastMetrics(podcastId: string): Promise<void> {
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		const request: PodcastsWorkerRequest = {
+			updatePodcastMeta: { podcastId, lastVisit: new SvelteDate().toISOString() }
 		};
 
 		this.worker?.postMessage(request);

@@ -6,10 +6,25 @@
 	import { podcastState } from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	let podcasts: PodcastMeta[] = $derived(podcastState.myPodcasts);
 
 	let loadingMyPodcasts = $derived(podcastState.loadingMyPodcasts);
+
+	let sortedPodcasts = $derived([...podcasts]?.sort(sortByLastVisitDate));
+
+	function sortByLastVisitDate(a: PodcastMeta, b: PodcastMeta) {
+		const aDate = new SvelteDate(a.lastVisit || new Date().toISOString()).getTime();
+		const bDate = new SvelteDate(b.lastVisit || new Date().toISOString()).getTime();
+		if (aDate < bDate) {
+			return 1;
+		}
+		if (aDate > bDate) {
+			return -1;
+		}
+		return 0;
+	}
 
 	onMount(async () => {
 		PodcastService.fetchMyPodcasts();
@@ -22,7 +37,7 @@
 	<LoadingIndicator />
 {:else}
 	<ul class="max-h-11/12 overflow-auto p-4">
-		{#each podcasts as podcast (podcast.id)}
+		{#each sortedPodcasts as podcast (podcast.id)}
 			<!-- TODO: REFACTOR: make into card component -->
 			<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 shadow-md">
 				<PodcastViaRssCard {podcast} />

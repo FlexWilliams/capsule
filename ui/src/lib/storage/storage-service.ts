@@ -86,7 +86,7 @@ export class StorageService {
 		try {
 			await localForage.setItem(storageKey, data || []).then(() => {});
 
-			StorageLogger.log(`Item (${storageKey}) removed`);
+			StorageLogger.log(`List (${storageKey}) saved`);
 
 			return true;
 		} catch (e) {
