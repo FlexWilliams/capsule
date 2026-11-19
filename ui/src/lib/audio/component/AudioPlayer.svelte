@@ -40,6 +40,8 @@
 
 	const audioPlayerId = 'audio-player';
 
+	const continueEpisodeDialogId = 'continue-episode';
+
 	let wssClientId = $derived(webSocketState.clientId);
 
 	let selectedPodcast = $derived(podcastState.selectedPodcast);
@@ -68,11 +70,15 @@
 
 	let transcriptionLanguage = $derived(settingsState.transcriptionLanguage);
 
+	let episodeActivity = $derived(podcastState.episodeActivity);
+
 	let textTracks: Map<string, TextTrack> = $state(new Map());
 
 	let activeTextTrack: string | null = $state(null);
 
 	let transcriptionSub: Subscription | null = $state(null);
+
+	let awaitingUserPrompt = $state(false);
 
 	function getAudioElement(): HTMLAudioElement | null {
 		const audioPlayer = document.getElementById(audioPlayerId) as HTMLAudioElement;
@@ -400,7 +406,7 @@
 	}
 
 	async function updateTimeLeftOffAt(): Promise<void> {
-		if (!isPlaying) {
+		if (!isPlaying || awaitingUserPrompt) {
 			return;
 		}
 
@@ -576,12 +582,80 @@
 		}
 	}
 
+	function handleCancelContinueEpisode(): void {
+		awaitingUserPrompt = false;
+
+		const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+		if (dialog) {
+			dialog.hidePopover();
+		}
+	}
+
+	function handleConfirmContinueEpisode(): void {
+		const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+		if (dialog) {
+			dialog.hidePopover();
+		}
+
+		if (!episodeActivity) {
+			console.error(`Error updating time left off at, no episodeActivity`);
+			return;
+		}
+
+		const { timeLeftOffAt } = episodeActivity;
+
+		const audioPlayer = getAudioElement();
+
+		if (!audioPlayer) {
+			console.error(`Error updating time left off at, no audio player`);
+
+			return;
+		}
+
+		audioPlayer.currentTime = timeLeftOffAt;
+
+		audioState$$setCurrentTime(timeLeftOffAt);
+
+		awaitingUserPrompt = false;
+	}
+
+	$effect(() => {
+		if (episodeActivity && selectedPodcastUrl) {
+			untrack(() => {
+				const { timeLeftOffAt } = episodeActivity;
+
+				if (timeLeftOffAt > currentTime) {
+					awaitingUserPrompt = true;
+
+					const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+					if (dialog) {
+						dialog.showPopover();
+					}
+				} else {
+					awaitingUserPrompt = false;
+				}
+			});
+		}
+	});
+
 	$effect(() => {
 		if (selectedPodcastUrl) {
 			untrack(() => {
 				console.log(
 					`Request for new podcast URL: ${selectedPodcastDirectUrl || selectedPodcastUrl}`
 				);
+
+				if (isPlaying) {
+					pause();
+				}
+
+				audioState$$setCurrentTime(0);
+
+				awaitingUserPrompt = true;
+
+				const podcastId = selectedPodcast?.id || '';
+				const episodeId = episode?.guid || '';
+				PodcastService.fetchEpisodeActivity(podcastId, episodeId);
 
 				createNewTextTrack();
 
@@ -639,3 +713,17 @@
 </script>
 
 <audio id={audioPlayerId}></audio>
+
+<dialog
+	id={continueEpisodeDialogId}
+	popover="auto"
+	class="relative m-auto h-6/12 w-9/12 rounded-md bg-rss-dialog p-8 text-text shadow-md"
+>
+	<h3 class="text-center text-lg font-semibold">Continue where you left off at?</h3>
+	<p class="text-center">{Math.floor((episodeActivity?.timeLeftOffAt || 0) / 60)}min mark</p>
+
+	<div class="flex justify-around">
+		<button onclick={handleCancelContinueEpisode}>No</button>
+		<button onclick={handleConfirmContinueEpisode}>Yes</button>
+	</div>
+</dialog>

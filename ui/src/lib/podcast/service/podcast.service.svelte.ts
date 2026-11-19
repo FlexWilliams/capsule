@@ -1,13 +1,16 @@
 import { Logger } from '#lib/logging/logger.ts';
 import { SvelteDate } from 'svelte/reactivity';
-import type { Podcast } from '../model/podcast';
+import type { Podcast, PodcastEpisodeActivity } from '../model/podcast';
 import {
+	podcastState$$setEpisodeActivity,
+	podcastState$$setLoadingEpisodeActivity,
 	podcastState$$setLoadingMyPodcasts,
 	podcastState$$setLoadingPodcast,
 	podcastState$$setMyPodcasts,
 	podcastState$$setSelectedPodcasDirectUrl,
 	podcastState$$setSelectedPodcast,
-	podcastState$$setSelectedPodcastUrl
+	podcastState$$setSelectedPodcastUrl,
+	podcastState$$setUpdatingEpisodeActivity
 } from '../state/podcast.state.svelte';
 import type { PodcastsWorkerRequest, PodcastsWorkerResponse } from '../workers';
 
@@ -15,8 +18,15 @@ export class PodcastService {
 	private static worker: Worker | undefined = undefined;
 
 	private static handleWorkerResponse(e: MessageEvent<PodcastsWorkerResponse>): void {
-		const { saveToMyPodcasts, fetchPodcast, fetchMyPodcasts, updatePodcastMeta, unsubscribe } =
-			e.data;
+		const {
+			saveToMyPodcasts,
+			fetchPodcast,
+			fetchMyPodcasts,
+			updatePodcastMeta,
+			unsubscribe,
+			fetchEpisodeActivity,
+			updateEpisodeActivity
+		} = e.data;
 
 		if (saveToMyPodcasts) {
 			const { success, error } = saveToMyPodcasts;
@@ -64,6 +74,28 @@ export class PodcastService {
 			} else {
 				Logger.debug(`Unsubscribed from podcast.`);
 			}
+		} else if (fetchEpisodeActivity) {
+			const { episodeActivity, error } = fetchEpisodeActivity;
+
+			if (error) {
+				Logger.error(`Unable to fetch episode activity: ${JSON.stringify(error)}`);
+			} else {
+				podcastState$$setEpisodeActivity(episodeActivity);
+
+				Logger.debug(`Fetched episode activity.`);
+			}
+
+			podcastState$$setLoadingEpisodeActivity(false);
+		} else if (updateEpisodeActivity) {
+			const { success, error } = updateEpisodeActivity;
+
+			if (!success || error) {
+				Logger.error(`Unable to update episode activity: ${JSON.stringify(error)}`);
+			} else {
+				Logger.debug(`Updated episode activity.`);
+			}
+
+			podcastState$$setUpdatingEpisodeActivity(false);
 		}
 	}
 
@@ -142,14 +174,17 @@ export class PodcastService {
 	}
 
 	public static async fetchEpisodeActivity(podcastId: string, episodeId: string): Promise<void> {
-		// if (!this.worker) {
-		// 	await this.loadWorker();
-		// }
-		// podcastState$$setLoadingPodcast(true);
-		// const request: PodcastsWorkerRequest = {
-		// 	fetchPodcast: { podcastId }
-		// };
-		// this.worker?.postMessage(request);
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		podcastState$$setLoadingEpisodeActivity(true);
+
+		const request: PodcastsWorkerRequest = {
+			fetchEpisodeActivity: { podcastId, episodeId }
+		};
+
+		this.worker?.postMessage(request);
 	}
 
 	public static async updateTimeLeftOffAt(
@@ -158,17 +193,21 @@ export class PodcastService {
 		timeLeftOffAt: number
 	): Promise<void> {
 		Logger.debug(`updating podcast timeleft off at: ${timeLeftOffAt}`);
-		// if (!this.worker) {
-		// 	await this.loadWorker();
-		// }
+		if (!this.worker) {
+			await this.loadWorker();
+		}
 
-		// podcastState$$setLoadingPodcast(true);
+		podcastState$$setUpdatingEpisodeActivity(true);
 
-		// const request: PodcastsWorkerRequest = {
-		// 	fetchPodcast: { podcastId }
-		// };
+		const episodeActivity: Partial<PodcastEpisodeActivity> = {
+			timeLeftOffAt
+		};
 
-		// this.worker?.postMessage(request);
+		const request: PodcastsWorkerRequest = {
+			updateEpisodeActivity: { podcastId, episodeId, episodeActivity }
+		};
+
+		this.worker?.postMessage(request);
 	}
 
 	public static setSelectedPodcast(podcast: Podcast | null): void {

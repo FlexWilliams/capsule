@@ -5,7 +5,7 @@ import {
 	type WhisperTranscription
 } from '#lib/transcription/transcription.ts';
 import { SvelteMap } from 'svelte/reactivity';
-import type { Podcast, PodcastEpisode } from '../model/podcast';
+import type { Podcast, PodcastEpisode, PodcastEpisodeActivity } from '../model/podcast';
 
 export interface PodcastState {
 	selectedPodcast: Podcast | null;
@@ -20,6 +20,9 @@ export interface PodcastState {
 	loadingPodcast: boolean;
 	loadingMyPodcasts: boolean;
 	loadingPodcastViaRss: boolean;
+	loadingEpisodeActivity: boolean;
+	episodeActivity: PodcastEpisodeActivity | null;
+	updatingEpisodeActivity: boolean;
 }
 
 const initialPodcastState: PodcastState = {
@@ -34,7 +37,9 @@ const initialPodcastState: PodcastState = {
 	myPodcasts: [],
 	loadingPodcast: false,
 	loadingMyPodcasts: false,
-	loadingPodcastViaRss: false
+	loadingPodcastViaRss: false,
+	episodeActivity: null,
+	updatingEpisodeActivity: false
 };
 
 export const podcastState = $state(initialPodcastState);
@@ -153,4 +158,18 @@ export function podcastState$$setLoadingMyPodcasts(loadingMyPodcasts: boolean): 
 
 export function podcastState$$setLoadingPodcastViaRss(loadingPodcastViaRss: boolean): void {
 	podcastState.loadingPodcastViaRss = loadingPodcastViaRss;
+}
+
+export function podcastState$$setLoadingEpisodeActivity(loadingEpisodeActivity: boolean): void {
+	podcastState.loadingEpisodeActivity = loadingEpisodeActivity;
+}
+
+export function podcastState$$setEpisodeActivity(
+	episodeActivity: PodcastEpisodeActivity | null
+): void {
+	podcastState.episodeActivity = episodeActivity;
+}
+
+export function podcastState$$setUpdatingEpisodeActivity(updatingEpisodeActivity: boolean): void {
+	podcastState.updatingEpisodeActivity = updatingEpisodeActivity;
 }

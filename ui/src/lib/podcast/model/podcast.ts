@@ -47,3 +47,15 @@ export interface PodcastEpisodeActivity {
 	listenCount: number;
 	markers: EpisodeMarker[];
 }
+
+export function getDefaultActivity(podcastId: string, episodeId: string): PodcastEpisodeActivity {
+	const defaultActivity: PodcastEpisodeActivity = {
+		podcastId,
+		episodeId,
+		timeLeftOffAt: 0,
+		listenCount: 0,
+		markers: []
+	};
+
+	return defaultActivity;
+}
