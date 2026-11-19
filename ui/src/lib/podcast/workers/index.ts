@@ -14,11 +14,16 @@ export type UpdatePodcastMetaRequest = {
 	lastVisit: string;
 };
 
+export type UnsubscribeRequest = {
+	podcastId: string;
+};
+
 export type PodcastsWorkerRequest = {
 	saveToMyPodcasts?: SaveToMyPodcastsRequest;
 	fetchPodcast?: FetchPodcastRequest;
 	fetchMyPodcasts?: boolean;
 	updatePodcastMeta?: UpdatePodcastMetaRequest;
+	unsubscribe?: UnsubscribeRequest;
 };
 
 export type SaveToMyPodcastsResponse = {
@@ -41,9 +46,15 @@ export type UpdatePodcastMetaResponse = {
 	error?: WorkerErrorResponse;
 };
 
+export type UnsubscribeResponse = {
+	success: boolean;
+	error?: WorkerErrorResponse;
+};
+
 export type PodcastsWorkerResponse = {
 	saveToMyPodcasts?: SaveToMyPodcastsResponse;
 	fetchPodcast?: FetchPodcastResponse;
 	fetchMyPodcasts?: FetchMyPodcastsResponse;
 	updatePodcastMeta?: UpdatePodcastMetaResponse;
+	unsubscribe?: UnsubscribeResponse;
 };

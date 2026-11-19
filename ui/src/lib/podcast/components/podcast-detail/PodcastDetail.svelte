@@ -19,6 +19,9 @@
 
 	let episode: PodcastEpisode | null = $derived(podcastState.episode);
 
+	// TODO: update once DB flow impld, currently all rss pods assumed "subscribed" to
+	let subscribed = $state(true);
+
 	async function fetchPodcast(): Promise<void> {
 		if (!podcastId) {
 			console.error(`Unable to load podcast, no id provided!`);
@@ -27,6 +30,12 @@
 		}
 
 		PodcastService.loadPodcast(podcastId);
+	}
+
+	function handleSubscribeToggle(): void {
+		PodcastService.unsubscribe(podcastId);
+
+		subscribed = false;
 	}
 
 	$effect(() => {
@@ -52,7 +61,7 @@
 	{:else}
 		{#if podcast}
 			<div class="flex w-full flex-1 flex-col items-center justify-center gap-4">
-				<PodcastDetailHeader {podcast} />
+				<PodcastDetailHeader {podcast} {subscribed} {handleSubscribeToggle} />
 
 				<PodcastAudioButtons {podcast} />
 

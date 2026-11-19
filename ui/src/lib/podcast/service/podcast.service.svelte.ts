@@ -15,7 +15,8 @@ export class PodcastService {
 	private static worker: Worker | undefined = undefined;
 
 	private static handleWorkerResponse(e: MessageEvent<PodcastsWorkerResponse>): void {
-		const { saveToMyPodcasts, fetchPodcast, fetchMyPodcasts, updatePodcastMeta } = e.data;
+		const { saveToMyPodcasts, fetchPodcast, fetchMyPodcasts, updatePodcastMeta, unsubscribe } =
+			e.data;
 
 		if (saveToMyPodcasts) {
 			const { success, error } = saveToMyPodcasts;
@@ -54,6 +55,14 @@ export class PodcastService {
 				Logger.error(`Unable to update podcast meta: ${JSON.stringify(error)}`);
 			} else {
 				Logger.debug(`Updated podcast meta.`);
+			}
+		} else if (unsubscribe) {
+			const { success, error } = unsubscribe;
+
+			if (!success || error) {
+				Logger.error(`Unable to unsubscribe from podcast: ${JSON.stringify(error)}`);
+			} else {
+				Logger.debug(`Unsubscribed from podcast.`);
 			}
 		}
 	}
@@ -101,6 +110,18 @@ export class PodcastService {
 
 		const request: PodcastsWorkerRequest = {
 			updatePodcastMeta: { podcastId, lastVisit: new SvelteDate().toISOString() }
+		};
+
+		this.worker?.postMessage(request);
+	}
+
+	public static async unsubscribe(podcastId: string): Promise<void> {
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		const request: PodcastsWorkerRequest = {
+			unsubscribe: { podcastId }
 		};
 
 		this.worker?.postMessage(request);

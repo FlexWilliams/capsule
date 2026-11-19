@@ -170,6 +170,42 @@ async function updatePodcastMeta(request: UpdatePodcastMetaRequest): Promise<voi
 	}
 }
 
+async function unsubscribe(podcastId: string): Promise<void> {
+	try {
+		let podcasts =
+			((await StorageService.getListFromStorage(myPodcastsStorageKey)) as PodcastMeta[]) || [];
+
+		podcasts = podcasts.filter((p) => p.id !== podcastId);
+
+		await StorageService.saveListToStorage(myPodcastsStorageKey, podcasts);
+
+		const response: PodcastsWorkerResponse = {
+			unsubscribe: {
+				success: true
+			}
+		};
+
+		postMessage(response);
+	} catch (e) {
+		const error = `${JSON.stringify(e)}`;
+
+		WorkerLogger.error(
+			`[PodcastsWorker] Error occured unsubscribing from podcast (${podcastId}): ${error}.`
+		);
+
+		const response: PodcastsWorkerResponse = {
+			unsubscribe: {
+				success: false,
+				error: {
+					error
+				}
+			}
+		};
+
+		postMessage(response);
+	}
+}
+
 async function fetchMyPodcasts(): Promise<void> {
 	try {
 		let podcasts = (await StorageService.getListFromStorage(myPodcastsStorageKey)) as PodcastMeta[];
@@ -206,7 +242,8 @@ onmessage = async (e: MessageEvent<PodcastsWorkerRequest>) => {
 		saveToMyPodcasts: _saveToMyPodcasts,
 		fetchPodcast: _fetchPodcast,
 		fetchMyPodcasts: _fetchMyPodcasts,
-		updatePodcastMeta: _updatePodcastMeta
+		updatePodcastMeta: _updatePodcastMeta,
+		unsubscribe: _unsubscribe
 	} = e.data;
 
 	await StorageService.init();
@@ -219,6 +256,8 @@ onmessage = async (e: MessageEvent<PodcastsWorkerRequest>) => {
 		await fetchMyPodcasts();
 	} else if (_updatePodcastMeta) {
 		await updatePodcastMeta(_updatePodcastMeta);
+	} else if (_unsubscribe) {
+		await unsubscribe(_unsubscribe.podcastId);
 	} else {
 		WorkerLogger.warn(`[PodcastsWorker] Invalid operation passed in.`);
 	}
