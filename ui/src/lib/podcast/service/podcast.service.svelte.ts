@@ -141,6 +141,36 @@ export class PodcastService {
 		this.worker?.postMessage(request);
 	}
 
+	public static async fetchEpisodeActivity(podcastId: string, episodeId: string): Promise<void> {
+		// if (!this.worker) {
+		// 	await this.loadWorker();
+		// }
+		// podcastState$$setLoadingPodcast(true);
+		// const request: PodcastsWorkerRequest = {
+		// 	fetchPodcast: { podcastId }
+		// };
+		// this.worker?.postMessage(request);
+	}
+
+	public static async updateTimeLeftOffAt(
+		podcastId: string,
+		episodeId: string,
+		timeLeftOffAt: number
+	): Promise<void> {
+		Logger.debug(`updating podcast timeleft off at: ${timeLeftOffAt}`);
+		// if (!this.worker) {
+		// 	await this.loadWorker();
+		// }
+
+		// podcastState$$setLoadingPodcast(true);
+
+		// const request: PodcastsWorkerRequest = {
+		// 	fetchPodcast: { podcastId }
+		// };
+
+		// this.worker?.postMessage(request);
+	}
+
 	public static setSelectedPodcast(podcast: Podcast | null): void {
 		podcastState$$setSelectedPodcast(podcast);
 	}

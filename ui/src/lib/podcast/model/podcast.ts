@@ -31,7 +31,6 @@ export interface PodcastMeta {
 	rssUrl: string;
 	imageUrl?: string;
 	lastVisit?: string;
-
 }
 
 export interface EpisodeMarker {
@@ -41,10 +40,10 @@ export interface EpisodeMarker {
 }
 
 export interface PodcastEpisodeActivity {
-	podcastId:string;
-	episodeId:string;
-	timeLeftOffAt:number;
-	lastListened?:string;
-	listenCount:number;
+	podcastId: string;
+	episodeId: string;
+	timeLeftOffAt: number;
+	lastListened?: string;
+	listenCount: number;
 	markers: EpisodeMarker[];
 }

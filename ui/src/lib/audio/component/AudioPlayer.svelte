@@ -50,6 +50,8 @@
 
 	let selectedPodcastTranscriptionUrl = $derived(podcastState.selectedPodcastTranscriptionUrl);
 
+	let episode = $derived(podcastState.episode);
+
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(selectedPodcastUrl || '') || null
 	);
@@ -226,6 +228,8 @@
 		console.log(`Rewinding ${skip} seconds...`);
 
 		audio.currentTime = Math.max(0, audio.currentTime - skip);
+
+		updateTimeLeftOffAt();
 	}
 
 	function fastForward(): void {
@@ -238,6 +242,8 @@
 		console.log(`Fast forwarding ${skip} seconds...`);
 
 		audio.currentTime = Math.min(audio.duration, audio.currentTime + skip);
+
+		updateTimeLeftOffAt();
 	}
 
 	function skipAd(): void {
@@ -250,6 +256,8 @@
 		console.log(`(SkipAd) Fast forwarding ${skipAdInterval} seconds...`);
 
 		audio.currentTime = Math.min(audio.duration, audio.currentTime + skipAdInterval);
+
+		updateTimeLeftOffAt();
 	}
 
 	function seekTo(to?: number): void {
@@ -266,6 +274,8 @@
 		}
 
 		audio.currentTime = to;
+
+		updateTimeLeftOffAt();
 	}
 
 	function mute(): void {
@@ -387,6 +397,27 @@
 
 	function listenForCurrentTime(): Subscription {
 		return interval(500).pipe(tap(updateAudioTime)).subscribe();
+	}
+
+	async function updateTimeLeftOffAt(): Promise<void> {
+		if (!isPlaying) {
+			return;
+		}
+
+		const audioPlayer = getAudioElement();
+
+		if (!audioPlayer) {
+			return logAudioPlayerError('updateTimeLeftOffAt');
+		}
+
+		const podcastId = selectedPodcast?.id || '';
+		const episodeId = episode?.guid || '';
+
+		PodcastService.updateTimeLeftOffAt(podcastId, episodeId, audioPlayer.currentTime);
+	}
+
+	function listenForTimeLeftOffAt(): Subscription {
+		return interval(5000).pipe(tap(updateTimeLeftOffAt)).subscribe();
 	}
 
 	async function handleBuffering(): Promise<void> {
@@ -599,6 +630,7 @@
 	onMount(() => {
 		subscriptions.push(listenForAudioEvents());
 		subscriptions.push(listenForCurrentTime());
+		subscriptions.push(listenForTimeLeftOffAt());
 	});
 
 	onDestroy(() => {
