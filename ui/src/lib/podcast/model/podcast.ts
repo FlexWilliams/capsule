@@ -31,4 +31,20 @@ export interface PodcastMeta {
 	rssUrl: string;
 	imageUrl?: string;
 	lastVisit?: string;
+
+}
+
+export interface EpisodeMarker {
+	start: number;
+	end?: number;
+	comments?: string[];
+}
+
+export interface PodcastEpisodeActivity {
+	podcastId:string;
+	episodeId:string;
+	timeLeftOffAt:number;
+	lastListened?:string;
+	listenCount:number;
+	markers: EpisodeMarker[];
 }
