@@ -18,9 +18,10 @@ test.describe('Home Page', () => {
 
 	test('Page has search form', async ({ page }) => {
 		await page.goto('/');
-		await expect(page.locator('p')).toBeVisible();
-		await expect(page.locator('p')).toContainText('Capsule');
-		await expect(page.locator('p')).toHaveAttribute('aria-hidden', 'true');
+		const p = page.locator('p').first();
+		await expect(p).toBeVisible();
+		await expect(p).toContainText('Capsule');
+		await expect(p).toHaveAttribute('aria-hidden', 'true');
 		expect(page.getByRole('form', { name: 'search-podcasts' })).toBeDefined();
 	});
 
