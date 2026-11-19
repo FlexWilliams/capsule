@@ -18,10 +18,10 @@
 		const aDate = new SvelteDate(a.lastVisit || new Date().toISOString()).getTime();
 		const bDate = new SvelteDate(b.lastVisit || new Date().toISOString()).getTime();
 		if (aDate < bDate) {
-			return 1;
+			return -1;
 		}
 		if (aDate > bDate) {
-			return -1;
+			return 1;
 		}
 		return 0;
 	}
