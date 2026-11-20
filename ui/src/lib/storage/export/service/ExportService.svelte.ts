@@ -1,9 +1,10 @@
-import type { Podcast, PodcastMeta } from '#lib/podcast/model/podcast.ts';
+import type { FavoriteEpisode, Podcast, PodcastMeta } from '#lib/podcast/model/podcast.ts';
 import { defaultUserSettings, type UserSettings } from '#lib/settings/model/index.ts';
 import { SvelteDate } from 'svelte/reactivity';
 import type { DataExport } from '..';
 import {
 	generatePodcastKey,
+	myFavoritesStorageKey,
 	myPodcastsStorageKey,
 	settingsStorageKey,
 	StorageService
@@ -30,12 +31,16 @@ export class ExportService {
 			}
 		}
 
+		const myFavorites =
+			(await StorageService.getListFromStorage<FavoriteEpisode>(myFavoritesStorageKey)) || [];
+
 		const settings =
 			((await StorageService.getObject(settingsStorageKey)) as UserSettings) || defaultUserSettings;
 
 		const exportData: DataExport = {
 			myPodcasts,
 			podcasts,
+			myFavorites,
 			settings
 		};
 
