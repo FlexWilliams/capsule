@@ -18,9 +18,10 @@
 
 	interface PodcastAudioButtons {
 		podcast: Podcast;
+		episodeView?: boolean;
 	}
 
-	let { podcast }: PodcastAudioButtons = $props();
+	let { podcast, episodeView }: PodcastAudioButtons = $props();
 
 	let isPlaying = $derived(audioState.isPlaying);
 
@@ -80,12 +81,14 @@
 </script>
 
 <div class="audio-buttons flex items-center justify-center">
-	<button
-		class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
-		aria-label="Previous episode"
-		onclick={handlePreviousButtonClick}
-		disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
-	>
+	{#if !episodeView}
+		<button
+			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			aria-label="Previous episode"
+			onclick={handlePreviousButtonClick}
+			disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
+		>
+	{/if}
 	<button
 		class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 		aria-label="Rewind audio"
@@ -97,7 +100,7 @@
 	<!-- TODO: also make the space bar toggle these buttons -->
 	{#if isPlaying}
 		<button
-			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="pause-button flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 			aria-label="Pause"
 			onclick={handlePauseButtonClick}
 			disabled={!podcast?.episodes}
@@ -110,7 +113,7 @@
 		</button>
 	{:else}
 		<button
-			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="play-button flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
 			aria-label="Play"
 			onclick={handlePlayButtonClick}
 			disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
@@ -122,12 +125,14 @@
 		onclick={handleFastForwardButtonClick}
 		disabled={!podcast?.episodes}><img src={fastForward} alt="Fast forward icon" /></button
 	>
-	<button
-		class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
-		aria-label="Next episode"
-		onclick={handleNextButtonClick}
-		disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button
-	>
+	{#if !episodeView}
+		<button
+			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			aria-label="Next episode"
+			onclick={handleNextButtonClick}
+			disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button
+		>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -142,21 +147,22 @@
 			min-width: 2.5rem;
 			width: 2.5rem;
 
-			&:nth-of-type(3) {
-				min-height: 3.5rem;
-				height: 3.5rem;
-				min-width: 3.5rem;
-				width: 3.5rem;
-
-				img {
-					width: 80%;
-					height: 80%;
-				}
-			}
-
 			img {
 				width: 100%;
 				height: 100%;
+			}
+		}
+
+		.play-button,
+		.pause-button {
+			min-height: 3.5rem;
+			height: 3.5rem;
+			min-width: 3.5rem;
+			width: 3.5rem;
+
+			img {
+				width: 80%;
+				height: 80%;
 			}
 		}
 	}

@@ -6,14 +6,15 @@
 	let episode = $derived(podcastState.episode);
 </script>
 
-<a
-	href={resolve('/podcasts/[id]/episode/[episodeId]', {
-		id: podcast?.id || '',
-		episodeId: episode?.guid || ''
-	})}
->
-	<section role="marquee" class="flex h-full w-11/12 items-center gap-2">
-		{#if podcast}
+<section role="marquee" class=" h-full w-11/12">
+	{#if podcast && episode}
+		<a
+			class="flex h-full w-full items-center gap-2"
+			href={resolve('/podcasts/[id]/episode/[episodeId]', {
+				id: podcast?.id || '1',
+				episodeId: episode?.guid || '1'
+			})}
+		>
 			<img src={podcast.imageUrl} alt="Podcast cover" class="h-10/12 rounded-full" />
 
 			<div class="marquee flex w-full max-w-12/12 gap-12 overflow-x-hidden">
@@ -24,9 +25,8 @@
 					<h3 class="marquee-text text-text">{podcast.name} - {episode?.title}</h3>
 				</div>
 			</div>
-		{/if}
-	</section>
-</a>
+		</a>{/if}
+</section>
 
 <style lang="scss">
 	@use '../../../styles//text.scss';
@@ -40,7 +40,7 @@
 		align-items: center;
 		flex: 0 0 auto;
 		animation-name: marquee;
-		animation-duration: 8s;
+		animation-duration: 12s;
 		animation-timing-function: linear;
 		animation-delay: 0s;
 		animation-iteration-count: infinite;
