@@ -1,10 +1,10 @@
 <script lang="ts">
 	import menuDark from '#lib/assets/icons/dark/stash--burger-classic.svg';
 	import menuLight from '#lib/assets/icons/light/stash--burger-classic.svg';
-	import AudioVisualizer from '#lib/audio/component/AudioVisualizer.svelte';
+	import EpisodeMarquee from '#lib/podcast/components/episode/EpisodeMarquee.svelte';
+	// import AudioVisualizer from '#lib/audio/component/AudioVisualizer.svelte';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
-	import { resolve } from '$app/paths';
 	import { layoutState$$toggleNavMenu } from '../layout-state.svelte';
 
 	let lightMode = $derived(settingsState.lightMode);
@@ -17,17 +17,17 @@
 </script>
 
 <header
-	class="rounded-b-mdshadow-sm relative flex h-1/12 max-h-1/12 w-full items-center shadow-slate-300"
+	class="rounded-b-mdshadow-sm flex h-1/12 max-h-1/12 w-full items-center justify-between shadow-slate-300"
 >
-	<a href={resolve('/')} class="absolute top-0 left-0 z-2 h-full w-full">
-		<h1 class="sr-only w-full text-center text-3xl">Capsule</h1>
-	</a>
-	<div class="absolute top-0 left-0 z-1 h-full w-full">
-		<AudioVisualizer />
+	<div class="flex-1"></div>
+	<div class="h-8/12 flex-3">
+		<!-- <AudioVisualizer /> -->
+
+		<EpisodeMarquee />
 	</div>
 	<button
 		aria-label="Open Menu"
-		class="absolute top-1/4 right-2 z-2 flex h-8 w-20 cursor-pointer items-center justify-center rounded-full"
+		class="h-8 w-20 flex-1 cursor-pointer items-center justify-center rounded-full"
 		onclick={toggleMenu}
 		><img src={lightMode ? menuLight : menuDark} alt="Open" class="h-10/12 w-6/12" /></button
 	>
