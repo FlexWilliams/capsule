@@ -3,7 +3,7 @@
 	import checkmark from '#lib/assets/icons/at-icons--checkmark.svg';
 	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
 
-	import arrowDown from '#lib/assets/icons/at-icons--cloud-arrow-down.svg';
+	import arrowDown from '#lib/assets/icons/at-icons--arrow-down-to-bracket.svg';
 	import close from '#lib/assets/icons/at-icons--cross.svg';
 	import info from '#lib/assets/icons/at-icons--info.svg';
 	import text from '#lib/assets/icons/at-icons--text.svg';
@@ -161,7 +161,7 @@
 	class="relative mb-6 h-40 overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
 	class:h-55={showTranscription}
 >
-	<header class="mt-6 h-7/12 max-h-7/12">
+	<header class="mt-8 h-7/12 max-h-7/12">
 		<h3 class="flex-1">
 			{episode?.title}
 		</h3>
@@ -237,7 +237,7 @@
 
 	<footer class="flex h-2/12 max-h-2/12 items-center justify-between">
 		<p class="text-sm">{pubDate}</p>
-		<div class="flex h-6 max-h-6 items-center gap-4">
+		<div class="flex h-6 max-h-6 items-center gap-6">
 			<button
 				aria-label={`Download episode "${episode?.title}"`}
 				class="flex h-6 w-6 items-center justify-center"

@@ -36,15 +36,15 @@
 	tabindex="-1"
 >
 	<ul class:hidden={!navMenuOpen} class="text-text">
-		<li class="h-10 text-center">
+		<li class="h-16 text-center">
 			<a href={resolve('/')} class="block cursor-pointer hover:text-text-highlight">Home</a>
 		</li>
-		<li class="h-10 text-center">
+		<li class="h-16 text-center">
 			<a href={resolve('/my-podcasts')} class="block cursor-pointer hover:text-text-highlight"
 				>My Podcasts</a
 			>
 		</li>
-		<li class="h-10 text-center">
+		<li class="h-16 text-center">
 			<a href={resolve('/settings')} class="block cursor-pointer hover:text-text-highlight"
 				>Settings</a
 			>

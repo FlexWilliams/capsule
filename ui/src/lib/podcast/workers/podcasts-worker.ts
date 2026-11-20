@@ -38,8 +38,10 @@ async function saveToMyPodcasts(podcast: Podcast): Promise<void> {
 			return;
 		}
 
+		// Save raw podcast extracted from rss
 		await StorageService.saveObject(generatePodcastKey(podcast.id), podcast);
 
+		// Then add to existing list of podcasts
 		let myPodcasts = (await StorageService.getListFromStorage(
 			myPodcastsStorageKey
 		)) as PodcastMeta[];
@@ -52,7 +54,8 @@ async function saveToMyPodcasts(podcast: Podcast): Promise<void> {
 			id,
 			name,
 			rssUrl,
-			imageUrl
+			imageUrl,
+			lastVisit: new Date().toISOString()
 		};
 
 		myPodcasts.push(podcastMeta);

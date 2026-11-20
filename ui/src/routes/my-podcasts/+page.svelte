@@ -15,14 +15,16 @@
 	let sortedPodcasts = $derived([...podcasts]?.sort(sortByLastVisitDate));
 
 	function sortByLastVisitDate(a: PodcastMeta, b: PodcastMeta) {
-		const aDate = new SvelteDate(a.lastVisit || new Date().toISOString()).getTime();
-		const bDate = new SvelteDate(b.lastVisit || new Date().toISOString()).getTime();
+		const aDate = new SvelteDate(a.lastVisit || new Date(1999, 12, 31).toISOString()).getTime();
+		const bDate = new SvelteDate(b.lastVisit || new Date(1999, 12, 31).toISOString()).getTime();
+
 		if (aDate < bDate) {
-			return -1;
-		}
-		if (aDate > bDate) {
 			return 1;
 		}
+		if (aDate > bDate) {
+			return -1;
+		}
+
 		return 0;
 	}
 
