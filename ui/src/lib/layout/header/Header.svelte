@@ -5,6 +5,7 @@
 	// import AudioVisualizer from '#lib/audio/component/AudioVisualizer.svelte';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
+	import { resolve } from '$app/paths';
 	import { layoutState$$toggleNavMenu } from '../layout-state.svelte';
 
 	let lightMode = $derived(settingsState.lightMode);
@@ -23,7 +24,12 @@
 	<div class="h-8/12 flex-3">
 		<!-- <AudioVisualizer /> -->
 
-		<EpisodeMarquee />
+		<div class="relative h-full w-full">
+			<a href={resolve('/')} class="absolute top-0 left-0 z-1 h-full w-full">
+				<h1 class="sr-only w-full text-center text-3xl">Capsule</h1>
+			</a>
+			<EpisodeMarquee />
+		</div>
 	</div>
 	<button
 		aria-label="Open Menu"

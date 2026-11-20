@@ -6,10 +6,10 @@
 	let episode = $derived(podcastState.episode);
 </script>
 
-<section role="marquee" class=" h-full w-11/12">
+<section role="marquee" class="relative h-full w-11/12">
 	{#if podcast && episode}
 		<a
-			class="flex h-full w-full items-center gap-2"
+			class=" relative z-2 flex h-full w-full items-center gap-2"
 			href={resolve('/podcasts/[id]/episode/[episodeId]', {
 				id: podcast?.id || '1',
 				episodeId: episode?.guid || '1'
@@ -25,7 +25,8 @@
 					<h3 class="marquee-text text-text">{podcast.name} - {episode?.title}</h3>
 				</div>
 			</div>
-		</a>{/if}
+		</a>
+	{/if}
 </section>
 
 <style lang="scss">
