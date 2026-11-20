@@ -58,6 +58,7 @@
 			transform: translateX(0%);
 		}
 		100% {
+			// 100% + 10% for the gap/padding (magic number, not perfect)
 			transform: translateX(-110%);
 		}
 	}
