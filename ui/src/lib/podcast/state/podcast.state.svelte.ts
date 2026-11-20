@@ -5,7 +5,12 @@ import {
 	type WhisperTranscription
 } from '#lib/transcription/transcription.ts';
 import { SvelteMap } from 'svelte/reactivity';
-import type { Podcast, PodcastEpisode, PodcastEpisodeActivity } from '../model/podcast';
+import type {
+	FavoriteEpisode,
+	Podcast,
+	PodcastEpisode,
+	PodcastEpisodeActivity
+} from '../model/podcast';
 
 export interface PodcastState {
 	selectedPodcast: Podcast | null;
@@ -23,6 +28,7 @@ export interface PodcastState {
 	loadingEpisodeActivity: boolean;
 	episodeActivity: PodcastEpisodeActivity | null;
 	updatingEpisodeActivity: boolean;
+	favorites: FavoriteEpisode[];
 }
 
 const initialPodcastState: PodcastState = {
@@ -39,7 +45,9 @@ const initialPodcastState: PodcastState = {
 	loadingMyPodcasts: false,
 	loadingPodcastViaRss: false,
 	episodeActivity: null,
-	updatingEpisodeActivity: false
+	loadingEpisodeActivity: false,
+	updatingEpisodeActivity: false,
+	favorites: []
 };
 
 export const podcastState = $state(initialPodcastState);
@@ -172,4 +180,8 @@ export function podcastState$$setEpisodeActivity(
 
 export function podcastState$$setUpdatingEpisodeActivity(updatingEpisodeActivity: boolean): void {
 	podcastState.updatingEpisodeActivity = updatingEpisodeActivity;
+}
+
+export function podcastState$$setFavorites(favorites: FavoriteEpisode[]): void {
+	podcastState.favorites = favorites;
 }

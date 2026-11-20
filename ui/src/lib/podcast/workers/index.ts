@@ -1,5 +1,10 @@
 import type { WorkerErrorResponse } from '#lib/worker/index.ts';
-import type { Podcast, PodcastEpisodeActivity, PodcastMeta } from '../model/podcast';
+import type {
+	FavoriteEpisode,
+	Podcast,
+	PodcastEpisodeActivity,
+	PodcastMeta
+} from '../model/podcast';
 
 export type SaveToMyPodcastsRequest = {
 	podcast: Podcast;
@@ -29,6 +34,19 @@ export type UpdateEpisodeActivityRequest = {
 	episodeActivity: Partial<PodcastEpisodeActivity>;
 };
 
+export type FavoriteEpisodeRequest = {
+	favoriteEpisode: FavoriteEpisode;
+};
+
+export type FetchMyFavoritesRequest = {
+	fetch: boolean;
+};
+
+export type RemoveFavoriteEpisodeRequest = {
+	podcastId: string;
+	episodeId: string;
+};
+
 export type PodcastsWorkerRequest = {
 	saveToMyPodcasts?: SaveToMyPodcastsRequest;
 	fetchPodcast?: FetchPodcastRequest;
@@ -37,6 +55,9 @@ export type PodcastsWorkerRequest = {
 	unsubscribe?: UnsubscribeRequest;
 	fetchEpisodeActivity?: FetchEpisodeActivityRequest;
 	updateEpisodeActivity?: UpdateEpisodeActivityRequest;
+	fetchMyFavorites?: FetchMyFavoritesRequest;
+	favoriteEpisode?: FavoriteEpisodeRequest;
+	removeFavoriteEpisode?: RemoveFavoriteEpisodeRequest;
 };
 
 export type SaveToMyPodcastsResponse = {
@@ -74,6 +95,21 @@ export type UpdateEpisodeActivityResponse = {
 	error?: WorkerErrorResponse;
 };
 
+export type FetchMyFavoritesResponse = {
+	favorites?: FavoriteEpisode[];
+	error?: WorkerErrorResponse;
+};
+
+export type FavoriteEpisodeResponse = {
+	favorites?: FavoriteEpisode[];
+	error?: WorkerErrorResponse;
+};
+
+export type RemoveFavoriteEpisodeResponse = {
+	favorites?: FavoriteEpisode[];
+	error?: WorkerErrorResponse;
+};
+
 export type PodcastsWorkerResponse = {
 	saveToMyPodcasts?: SaveToMyPodcastsResponse;
 	fetchPodcast?: FetchPodcastResponse;
@@ -82,4 +118,7 @@ export type PodcastsWorkerResponse = {
 	unsubscribe?: UnsubscribeResponse;
 	fetchEpisodeActivity?: FetchEpisodeActivityResponse;
 	updateEpisodeActivity?: UpdateEpisodeActivityResponse;
+	fetchMyFavorites?: FetchMyFavoritesResponse;
+	favoriteEpisode?: FavoriteEpisodeResponse;
+	removeFavoriteEpisode?: RemoveFavoriteEpisodeResponse;
 };

@@ -45,6 +45,11 @@
 			>
 		</li>
 		<li class="h-16 text-center">
+			<a href={resolve('/my-favorites')} class="block cursor-pointer hover:text-text-highlight"
+				>My Favorites</a
+			>
+		</li>
+		<li class="h-16 text-center">
 			<a href={resolve('/settings')} class="block cursor-pointer hover:text-text-highlight"
 				>Settings</a
 			>

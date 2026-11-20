@@ -76,7 +76,9 @@
 
 			<PodcastEpisodeList
 				episodes={podcast?.episodes}
+				{podcastId}
 				podcastTitle={podcast?.name || '[Unknown Podcast]'}
+				podcastImageUrl={podcast?.imageUrl || ''}
 			/>
 		{:else}
 			<p class="rounded-sm bg-amber-200 px-4 py-2 text-center">Podcast not found!</p>

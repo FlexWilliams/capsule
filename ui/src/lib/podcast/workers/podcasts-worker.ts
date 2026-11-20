@@ -2,6 +2,7 @@ import { WorkerLogger } from '#lib/logging/logger.ts';
 import {
 	generatePodcastEpisodeActivityKey,
 	generatePodcastKey,
+	myFavoritesStorageKey,
 	myPodcastsStorageKey
 } from '#lib/storage/keys.ts';
 import { StorageService } from '#lib/storage/storage-service.ts';
@@ -9,6 +10,7 @@ import { SvelteDate } from 'svelte/reactivity';
 import type { PodcastsWorkerRequest, PodcastsWorkerResponse, UpdatePodcastMetaRequest } from '.';
 import {
 	getDefaultActivity,
+	type FavoriteEpisode,
 	type Podcast,
 	type PodcastEpisodeActivity,
 	type PodcastMeta
@@ -249,6 +251,114 @@ async function fetchMyPodcasts(): Promise<void> {
 	}
 }
 
+async function fetchMyFavorites(): Promise<void> {
+	try {
+		let favorites = (await StorageService.getListFromStorage(
+			myFavoritesStorageKey
+		)) as FavoriteEpisode[];
+
+		favorites = favorites ? favorites : [];
+
+		const response: PodcastsWorkerResponse = {
+			fetchMyFavorites: {
+				favorites
+			}
+		};
+
+		postMessage(response);
+	} catch (e) {
+		const error = `${JSON.stringify(e)}`;
+
+		WorkerLogger.error(`[PodcastsWorker] Error occured fetching my favorites: ${error}.`);
+
+		const response: PodcastsWorkerResponse = {
+			fetchMyFavorites: {
+				error: {
+					error
+				}
+			}
+		};
+
+		postMessage(response);
+	}
+}
+
+async function favoriteEpisode(favoriteEpisode: FavoriteEpisode): Promise<void> {
+	try {
+		let favorites = (await StorageService.getListFromStorage(
+			myFavoritesStorageKey
+		)) as FavoriteEpisode[];
+
+		favorites = favorites ? favorites : [];
+
+		const { podcastId, episodeId } = favoriteEpisode;
+
+		if (!favorites.some((f) => f.podcastId === podcastId && f.episodeId === episodeId)) {
+			favorites.push(favoriteEpisode);
+
+			await StorageService.saveListToStorage(myFavoritesStorageKey, favorites);
+		}
+
+		const response: PodcastsWorkerResponse = {
+			favoriteEpisode: {
+				favorites
+			}
+		};
+
+		postMessage(response);
+	} catch (e) {
+		const error = `${JSON.stringify(e)}`;
+
+		WorkerLogger.error(`[PodcastsWorker] Error occured favoriting episode: ${error}.`);
+
+		const response: PodcastsWorkerResponse = {
+			favoriteEpisode: {
+				error: {
+					error
+				}
+			}
+		};
+
+		postMessage(response);
+	}
+}
+
+async function removeFavoriteEpisode(podcastId: string, episodeId: string): Promise<void> {
+	try {
+		let favorites = (await StorageService.getListFromStorage(
+			myFavoritesStorageKey
+		)) as FavoriteEpisode[];
+
+		favorites = favorites ? favorites : [];
+
+		favorites = favorites.filter((f) => !(f.podcastId === podcastId && f.episodeId === episodeId));
+
+		await StorageService.saveListToStorage(myFavoritesStorageKey, favorites);
+
+		const response: PodcastsWorkerResponse = {
+			removeFavoriteEpisode: {
+				favorites
+			}
+		};
+
+		postMessage(response);
+	} catch (e) {
+		const error = `${JSON.stringify(e)}`;
+
+		WorkerLogger.error(`[PodcastsWorker] Error removing favorite episode: ${error}.`);
+
+		const response: PodcastsWorkerResponse = {
+			removeFavoriteEpisode: {
+				error: {
+					error
+				}
+			}
+		};
+
+		postMessage(response);
+	}
+}
+
 async function updateEpisodeActivity(
 	podcastId: string,
 	episodeId: string,
@@ -341,7 +451,10 @@ onmessage = async (e: MessageEvent<PodcastsWorkerRequest>) => {
 		updatePodcastMeta: _updatePodcastMeta,
 		unsubscribe: _unsubscribe,
 		fetchEpisodeActivity: _fetchEpisodeActivity,
-		updateEpisodeActivity: _updateEpisodeActivity
+		updateEpisodeActivity: _updateEpisodeActivity,
+		fetchMyFavorites: _fetchMyFavorites,
+		favoriteEpisode: _favoriteEpisode,
+		removeFavoriteEpisode: _removeFavoriteEpisode
 	} = e.data;
 
 	await StorageService.init();
@@ -361,6 +474,14 @@ onmessage = async (e: MessageEvent<PodcastsWorkerRequest>) => {
 	} else if (_updateEpisodeActivity) {
 		const { podcastId, episodeId, episodeActivity } = _updateEpisodeActivity;
 		await updateEpisodeActivity(podcastId, episodeId, episodeActivity);
+	} else if (_fetchMyFavorites) {
+		await fetchMyFavorites();
+	} else if (_favoriteEpisode) {
+		const { favoriteEpisode: __favoriteEpisode } = _favoriteEpisode;
+		await favoriteEpisode(__favoriteEpisode);
+	} else if (_removeFavoriteEpisode) {
+		const { podcastId, episodeId } = _removeFavoriteEpisode;
+		await removeFavoriteEpisode(podcastId, episodeId);
 	} else {
 		WorkerLogger.warn(`[PodcastsWorker] Invalid operation passed in.`);
 	}

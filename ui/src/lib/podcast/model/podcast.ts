@@ -48,6 +48,16 @@ export interface PodcastEpisodeActivity {
 	markers: EpisodeMarker[];
 }
 
+export interface FavoriteEpisode {
+	podcastId: string;
+	episodeId: string;
+	podcastTitle: string;
+	episodeTitle: string;
+	rawUrl: string;
+	imageUrl?: string;
+	publishDate?: string;
+}
+
 export function getDefaultActivity(podcastId: string, episodeId: string): PodcastEpisodeActivity {
 	const defaultActivity: PodcastEpisodeActivity = {
 		podcastId,

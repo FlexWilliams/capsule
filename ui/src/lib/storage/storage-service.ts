@@ -79,7 +79,7 @@ export class StorageService {
 		return list;
 	}
 
-	public static async saveListToStorage<T extends BaseObject>(
+	public static async saveListToStorage<T extends BaseObject | object | string>(
 		storageKey: string,
 		data: T[]
 	): Promise<boolean> {

@@ -5,6 +5,7 @@
 	import Header from '#lib/layout/header/Header.svelte';
 	import Main from '#lib/layout/main/Main.svelte';
 	import Nav from '#lib/layout/Nav/Nav.svelte';
+	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import { SettingsService } from '#lib/settings/service/settings-service.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import { StorageService } from '#lib/storage/storage-service.ts';
@@ -32,6 +33,8 @@
 		await StorageService.init();
 
 		SettingsService.loadUserSettings();
+
+		PodcastService.fetchMyFavorites();
 	});
 </script>
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import spin from '#lib/assets/icons/at-icons--arrows-clockwise.svg';
+	import bookmark from '#lib/assets/icons/at-icons--bookmark.svg';
 	import checkmark from '#lib/assets/icons/at-icons--checkmark.svg';
 	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
 
@@ -16,7 +17,8 @@
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { webSocketState } from '#lib/web-socket/state/websocket.state.svelte.ts';
 	import { WebSocketService } from '#lib/web-socket/web-socket-service.svelte.ts';
-	import type { PodcastEpisode } from '../model/podcast';
+	import type { FavoriteEpisode, PodcastEpisode } from '../model/podcast';
+	import { PodcastService } from '../service/podcast.service.svelte';
 	import {
 		podcastState,
 		podcastState$$addEpisodeTranscriptionRequest,
@@ -27,11 +29,13 @@
 	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
 
 	interface PodcastEpisodeCardProps {
+		podcastId: string;
+		podcastImageUrl: string;
 		podcastTitle: string;
 		episode: PodcastEpisode;
 	}
 
-	let { podcastTitle, episode }: PodcastEpisodeCardProps = $props();
+	let { podcastId, podcastImageUrl, podcastTitle, episode }: PodcastEpisodeCardProps = $props();
 
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(episode?.url || '') || null
@@ -46,6 +50,10 @@
 	let summaryOpen = $state(false);
 
 	let downloading = $state(false);
+
+	let favorited = $derived(
+		podcastState.favorites.some((f) => f.podcastId === podcastId && f.episodeId === episode?.guid)
+	);
 
 	let wssClientId = $derived(webSocketState.clientId);
 
@@ -155,6 +163,23 @@
 
 		WebSocketService.sendMessage(msg);
 	}
+
+	function handleFavoriteToggle(): void {
+		if (favorited) {
+			PodcastService.removeFavoriteEpisode(podcastId, episode?.guid);
+		} else {
+			const favoriteEpisode: FavoriteEpisode = {
+				podcastId,
+				episodeId: episode?.guid,
+				podcastTitle,
+				episodeTitle: episode?.title,
+				rawUrl: episode?.url || '',
+				publishDate: episode?.publishDate,
+				imageUrl: podcastImageUrl || episode?.image
+			};
+			PodcastService.favoriteEpisode(favoriteEpisode);
+		}
+	}
 </script>
 
 <article
@@ -170,6 +195,13 @@
 	{#if transcriptionRequest?.status === TranscriptionStatus.Failed}
 		<p class="absolute top-4 right-22 text-sm text-red-400">Error occurred, please try again</p>
 	{/if}
+	<button
+		class="absolute top-4 right-24 z-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-1 shadow-md disabled:cursor-not-allowed disabled:bg-episode-transcribe-button-disabled"
+		class:bg-bg-highlight={favorited}
+		onclick={handleFavoriteToggle}
+	>
+		<img src={bookmark} alt="Favorite" class="h-9/12 w-9/12" />
+	</button>
 	<button
 		class="absolute top-4 right-14 z-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-button p-1 shadow-md disabled:cursor-not-allowed disabled:bg-episode-transcribe-button-disabled"
 		aria-label="Transcribe podcast"

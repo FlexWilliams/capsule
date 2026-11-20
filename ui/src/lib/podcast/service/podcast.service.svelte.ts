@@ -1,8 +1,9 @@
 import { Logger } from '#lib/logging/logger.ts';
 import { SvelteDate } from 'svelte/reactivity';
-import type { Podcast, PodcastEpisodeActivity } from '../model/podcast';
+import type { FavoriteEpisode, Podcast, PodcastEpisodeActivity } from '../model/podcast';
 import {
 	podcastState$$setEpisodeActivity,
+	podcastState$$setFavorites,
 	podcastState$$setLoadingEpisodeActivity,
 	podcastState$$setLoadingMyPodcasts,
 	podcastState$$setLoadingPodcast,
@@ -25,7 +26,10 @@ export class PodcastService {
 			updatePodcastMeta,
 			unsubscribe,
 			fetchEpisodeActivity,
-			updateEpisodeActivity
+			updateEpisodeActivity,
+			fetchMyFavorites,
+			favoriteEpisode,
+			removeFavoriteEpisode
 		} = e.data;
 
 		if (saveToMyPodcasts) {
@@ -96,6 +100,36 @@ export class PodcastService {
 			}
 
 			podcastState$$setUpdatingEpisodeActivity(false);
+		} else if (fetchMyFavorites) {
+			const { favorites, error } = fetchMyFavorites;
+
+			if (error) {
+				Logger.error(`Unable to fetch my favorites: ${JSON.stringify(error)}`);
+			} else if (favorites) {
+				podcastState$$setFavorites(favorites);
+
+				Logger.debug(`Fetched my favorites.`);
+			}
+		} else if (favoriteEpisode) {
+			const { favorites, error } = favoriteEpisode;
+
+			if (error) {
+				Logger.error(`Unable to favorite episode: ${JSON.stringify(error)}`);
+			} else if (favorites) {
+				podcastState$$setFavorites(favorites);
+
+				Logger.debug(`Added episode to favorites.`);
+			}
+		} else if (removeFavoriteEpisode) {
+			const { favorites, error } = removeFavoriteEpisode;
+
+			if (error) {
+				Logger.error(`Unable to remove favorite episode: ${JSON.stringify(error)}`);
+			} else if (favorites) {
+				podcastState$$setFavorites(favorites);
+
+				Logger.debug(`Removed episode from favorites.`);
+			}
 		}
 	}
 
@@ -205,6 +239,42 @@ export class PodcastService {
 
 		const request: PodcastsWorkerRequest = {
 			updateEpisodeActivity: { podcastId, episodeId, episodeActivity }
+		};
+
+		this.worker?.postMessage(request);
+	}
+
+	public static async fetchMyFavorites(): Promise<void> {
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		const request: PodcastsWorkerRequest = {
+			fetchMyFavorites: { fetch: true }
+		};
+
+		this.worker?.postMessage(request);
+	}
+
+	public static async favoriteEpisode(favoriteEpisode: FavoriteEpisode): Promise<void> {
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		const request: PodcastsWorkerRequest = {
+			favoriteEpisode: { favoriteEpisode }
+		};
+
+		this.worker?.postMessage(request);
+	}
+
+	public static async removeFavoriteEpisode(podcastId: string, episodeId: string): Promise<void> {
+		if (!this.worker) {
+			await this.loadWorker();
+		}
+
+		const request: PodcastsWorkerRequest = {
+			removeFavoriteEpisode: { podcastId, episodeId }
 		};
 
 		this.worker?.postMessage(request);
