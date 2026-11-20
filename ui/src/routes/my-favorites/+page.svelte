@@ -63,7 +63,7 @@
 		</li>
 	{:else}
 		<li class="flex h-full w-full flex-col items-center justify-center">
-			<p class="text-center">You don't have any favorites yet.</p>
+			<p class="text-center text-text">You don't have any favorites yet.</p>
 		</li>
 	{/each}
 </ul>
