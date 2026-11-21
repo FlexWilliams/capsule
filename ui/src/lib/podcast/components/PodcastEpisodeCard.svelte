@@ -198,6 +198,7 @@
 	<button
 		class="absolute top-4 right-24 z-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-1 shadow-md disabled:cursor-not-allowed disabled:bg-episode-transcribe-button-disabled"
 		class:bg-bg-highlight={favorited}
+		class:bg-button={!favorited}
 		onclick={handleFavoriteToggle}
 	>
 		<img src={bookmark} alt="Favorite" class="h-9/12 w-9/12" />
@@ -272,7 +273,7 @@
 		<div class="flex h-6 max-h-6 items-center gap-6">
 			<button
 				aria-label={`Download episode "${episode?.title}"`}
-				class="flex h-6 w-6 items-center justify-center"
+				class="flex h-6 w-6 items-center justify-center rounded-full bg-button p-1 shadow-md"
 				disabled={downloading}
 				onclick={() => handleDownloadPlayButtonClick(episode?.url, episode?.directUrl)}
 			>

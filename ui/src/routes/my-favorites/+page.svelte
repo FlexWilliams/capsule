@@ -24,7 +24,7 @@
 <ul class="h-full p-4">
 	<!-- TODO: show loading indicator-->
 	{#each favorites as fav (`${fav.podcastId}-${fav.episodeId}`)}
-		<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 shadow-md">
+		<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 text-text shadow-md">
 			<!-- TODO: make into component -->
 			<article class="relative flex h-full w-full flex-col">
 				<div class="flex h-10/12 w-full items-center gap-4">

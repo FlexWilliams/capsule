@@ -41,7 +41,7 @@
 	<ul class="max-h-11/12 overflow-auto p-4">
 		{#each sortedPodcasts as podcast (podcast.id)}
 			<!-- TODO: REFACTOR: make into card component -->
-			<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 shadow-md">
+			<li class="relative mb-4 flex h-35 flex-col rounded-md bg-card p-4 text-text shadow-md">
 				<PodcastViaRssCard {podcast} />
 			</li>
 		{:else}
