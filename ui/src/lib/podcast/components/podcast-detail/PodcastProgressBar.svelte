@@ -22,6 +22,8 @@
 
 	let selectedPodcastUrl = $derived(podcastState.selectedPodcastUrl);
 
+	let episodeStarted = $derived(podcastState.episodeStarted);
+
 	let currentTime = $derived(audioState.currentTime);
 
 	let duration = $derived(audioState.duration || explicitDuration || 0);
@@ -32,7 +34,7 @@
 
 	let easingBoundValue = $state(0);
 
-	let progressBarValue = $derived(easingProgress ? easingValue : currentTime);
+	let progressBarValue = $derived(easingProgress ? easingValue : episodeStarted ? currentTime : 0);
 
 	function getProgressBar(): HTMLProgressElement | null {
 		return document.getElementById(progressBarId) as HTMLProgressElement;
@@ -107,8 +109,8 @@
 		AudioService.seekTo(seekTo);
 	}
 
-	function formatTime(timeInSeconds: number): string {
-		timeInSeconds = Math.floor(timeInSeconds);
+	function formatTime(timeInSeconds: number, episodeStarted: boolean = true): string {
+		timeInSeconds = !episodeStarted ? 0 : Math.floor(timeInSeconds);
 
 		const seconds = timeInSeconds % 60;
 		const minutes = Math.floor(timeInSeconds / 60) % 60;
@@ -145,7 +147,8 @@
 			<span
 				class="text-xs"
 				class:text-progress-bar-text={!withinTranscribeCard}
-				class:text-episode-progress-bar-text={withinTranscribeCard}>{formatTime(currentTime)}</span
+				class:text-episode-progress-bar-text={withinTranscribeCard}
+				>{formatTime(currentTime, episodeStarted)}</span
 			>
 			<span
 				class="text-xs"

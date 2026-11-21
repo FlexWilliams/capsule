@@ -19,6 +19,8 @@
 	}
 </script>
 
+<h2 class="text-center text-2xl text-text">My Favorites</h2>
+
 <ul class="h-full p-4">
 	<!-- TODO: show loading indicator-->
 	{#each favorites as fav (`${fav.podcastId}-${fav.episodeId}`)}

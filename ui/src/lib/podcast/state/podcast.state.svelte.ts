@@ -16,6 +16,7 @@ export interface PodcastState {
 	selectedPodcast: Podcast | null;
 	selectedPodcastUrl: string | null;
 	episode: PodcastEpisode | null;
+	episodeStarted: boolean;
 	selectedPodcastDirectUrl: string | null;
 	selectedPodcastTranscriptionUrl: string | null;
 	episodeTranscriptionMap: Map<string, WhisperTranscription[]>;
@@ -35,6 +36,7 @@ const initialPodcastState: PodcastState = {
 	selectedPodcast: null,
 	selectedPodcastUrl: null,
 	episode: null,
+	episodeStarted: false,
 	selectedPodcastDirectUrl: null,
 	selectedPodcastTranscriptionUrl: null,
 	episodeTranscriptionMap: new Map<string, WhisperTranscription[]>(),
@@ -62,6 +64,10 @@ export function podcastState$$setSelectedPodcastUrl(url: string | null): void {
 
 export function podcastState$$setListeningEpisode(episode: PodcastEpisode | null): void {
 	podcastState.episode = episode;
+}
+
+export function podcastState$$setEpisodeStarted(episodeStarted: boolean): void {
+	podcastState.episodeStarted = episodeStarted;
 }
 
 export function podcastState$$setSelectedPodcastTranscriptionUrl(url: string | null): void {

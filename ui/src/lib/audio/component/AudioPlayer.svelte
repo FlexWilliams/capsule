@@ -4,7 +4,8 @@
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import {
 		podcastState,
-		podcastState$$addEpisodeTranscriptionRequest
+		podcastState$$addEpisodeTranscriptionRequest,
+		podcastState$$setEpisodeStarted
 	} from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import {
@@ -71,6 +72,8 @@
 	let transcriptionLanguage = $derived(settingsState.transcriptionLanguage);
 
 	let episodeActivity = $derived(podcastState.episodeActivity);
+
+	let episodeStarted = $derived(podcastState.episodeStarted);
 
 	let textTracks: Map<string, TextTrack> = $state(new Map());
 
@@ -384,7 +387,9 @@
 			return;
 		}
 
-		await MediaSessionService.updateMediaSession(selectedPodcast, current, currentTime, duration);
+		const _currentTime = episodeStarted ? currentTime : 0;
+
+		await MediaSessionService.updateMediaSession(selectedPodcast, current, _currentTime, duration);
 	}
 
 	async function updateAudioTime(): Promise<void> {
@@ -462,6 +467,8 @@
 		await audioPlayer.play();
 
 		audioState$$setLoading(false);
+
+		podcastState$$setEpisodeStarted(true);
 
 		console.log(`Podcast now playing...`);
 
@@ -650,6 +657,8 @@
 				}
 
 				audioState$$setCurrentTime(0);
+
+				podcastState$$setEpisodeStarted(false);
 
 				awaitingUserPrompt = true;
 

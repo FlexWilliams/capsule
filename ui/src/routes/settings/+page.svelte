@@ -1,4 +1,5 @@
 <script lang="ts">
+	import download from '#lib/assets/icons/at-icons--arrow-down-to-bracket.svg';
 	import { layoutState$$setNavMenuOpen } from '#lib/layout/layout-state.svelte.ts';
 	import type { UserSettings } from '#lib/settings/model/index.ts';
 	import { SettingsService } from '#lib/settings/service/settings-service.svelte.ts';
@@ -54,12 +55,14 @@
 	}
 </script>
 
-<div class="flex flex-col gap-6">
-	<label class="flex max-w-8/12 flex-col text-text">
+<h2 class="text-center text-2xl text-text">Settings</h2>
+
+<div class="mt-4 flex w-full flex-col gap-6">
+	<label class="flex flex-col text-text">
 		<span>Transcription Language:</span>
 		<select
 			name="transcription-language"
-			class="h-8 rounded-md border bg-input-bg text-input-text"
+			class="h-10 rounded-full border bg-input-bg text-center text-input-text"
 			bind:value={transcriptionLanguage}
 			oninput={handleTranscriptionLanguageChange}
 		>
@@ -72,8 +75,13 @@
 	<LightDarkModeToggle {handleLightModeToggleClick} />
 
 	<button
-		class="h-10 w-30 cursor-pointer rounded-full bg-button text-button-text shadow-md"
+		class="h-10 max-h-10 w-full cursor-pointer rounded-full bg-button text-button-text shadow-md"
 		onclick={ExportService.handleExportData}
-		disabled={exportingData}>Export Data</button
+		disabled={exportingData}
 	>
+		<div class="flex h-full items-center justify-center gap-2 px-2">
+			<img src={download} alt="Export" class="h-6/12" />
+			<span>Export Data</span>
+		</div>
+	</button>
 </div>
