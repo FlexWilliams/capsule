@@ -19,9 +19,10 @@
 	interface PodcastAudioButtons {
 		podcast: Podcast;
 		episodeView?: boolean;
+		disableButtons?: boolean;
 	}
 
-	let { podcast, episodeView }: PodcastAudioButtons = $props();
+	let { podcast, episodeView, disableButtons }: PodcastAudioButtons = $props();
 
 	let isPlaying = $derived(audioState.isPlaying);
 
@@ -83,27 +84,34 @@
 <div class="audio-buttons flex items-center justify-center">
 	{#if !episodeView}
 		<button
-			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
 			aria-label="Previous episode"
 			onclick={handlePreviousButtonClick}
-			disabled={!podcast?.episodes}><img src={previous} alt="Previous icon" /></button
+			disabled={!podcast?.episodes || disableButtons}
+			><img src={previous} alt="Previous icon" /></button
 		>
 	{/if}
 	<button
-		class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+		class:cursor-pointer={!disableButtons}
+		class:cursor-not-allowed={disableButtons}
 		aria-label="Rewind audio"
 		onclick={handleRewindButtonClick}
-		disabled={!podcast?.episodes}><img src={rewind} alt="Rewind icon" /></button
+		disabled={!podcast?.episodes || disableButtons}><img src={rewind} alt="Rewind icon" /></button
 	>
 
 	<!-- TODO: make into button group for better a11y -->
 	<!-- TODO: also make the space bar toggle these buttons -->
 	{#if isPlaying}
 		<button
-			class="pause-button flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="pause-button flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
 			aria-label="Pause"
 			onclick={handlePauseButtonClick}
-			disabled={!podcast?.episodes}
+			disabled={!podcast?.episodes || disableButtons}
 		>
 			{#if podcastLoading || isBuffering}
 				<img src={spin} alt="Loading icon" class="spin" />
@@ -113,24 +121,31 @@
 		</button>
 	{:else}
 		<button
-			class="play-button flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="play-button flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
 			aria-label="Play"
 			onclick={handlePlayButtonClick}
-			disabled={!podcast?.episodes}><img src={play} alt="Play icon" /></button
+			disabled={!podcast?.episodes || disableButtons}><img src={play} alt="Play icon" /></button
 		>
 	{/if}
 	<button
-		class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+		class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+		class:cursor-pointer={!disableButtons}
+		class:cursor-not-allowed={disableButtons}
 		aria-label="Fast forward audio"
 		onclick={handleFastForwardButtonClick}
-		disabled={!podcast?.episodes}><img src={fastForward} alt="Fast forward icon" /></button
+		disabled={!podcast?.episodes || disableButtons}
+		><img src={fastForward} alt="Fast forward icon" /></button
 	>
 	{#if !episodeView}
 		<button
-			class="flex cursor-pointer items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class="flex items-center justify-center rounded-4xl bg-audio-button p-2 shadow-md"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
 			aria-label="Next episode"
 			onclick={handleNextButtonClick}
-			disabled={!podcast?.episodes}><img src={next} alt="Next icon" /></button
+			disabled={!podcast?.episodes || disableButtons}><img src={next} alt="Next icon" /></button
 		>
 	{/if}
 </div>

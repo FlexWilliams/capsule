@@ -8,12 +8,14 @@
 		explicitDuration?: number;
 		showProgressBarTimeStamps?: boolean;
 		withinTranscribeCard?: boolean;
+		disableButtons?: boolean;
 	}
 
 	let {
 		explicitDuration,
 		showProgressBarTimeStamps,
-		withinTranscribeCard
+		withinTranscribeCard,
+		disableButtons
 	}: PodcastProgressBarProps = $props();
 
 	const progressBarId = 'progress-bar';
@@ -128,7 +130,13 @@
 			value={progressBarValue}
 			class="w-full rounded-md bg-audio-button"
 		></progress>
-		<button class="absolute h-full w-full" aria-label="Seek to" onclick={handleProgressBarClick}
+		<button
+			class="absolute h-full w-full"
+			class:cursor-pointer={!disableButtons}
+			class:cursor-not-allowed={disableButtons}
+			aria-label="Seek to"
+			onclick={handleProgressBarClick}
+			disabled={disableButtons}
 		></button>
 	</div>
 
