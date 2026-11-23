@@ -13,7 +13,8 @@
 		percentageComplete?: number;
 		status?: TranscriptionStatus;
 		episode: PodcastEpisode;
-		handleCloseEpisodeTranscription: () => void;
+		episodeView?: boolean;
+		handleCloseEpisodeTranscription?: () => void;
 	}
 
 	let {
@@ -21,6 +22,7 @@
 		percentageComplete,
 		status,
 		episode,
+		episodeView,
 		handleCloseEpisodeTranscription
 	}: PodcastEpisodeTranscriptionProps = $props();
 
@@ -30,7 +32,9 @@
 </script>
 
 <article
-	class="absolute top-0 left-0 z-3 flex h-full w-full flex-col justify-between gap-0.5 bg-white p-4"
+	class="absolute top-0 left-0 z-3 flex h-full w-full flex-col justify-between gap-0.5 bg-card p-4"
+	class:rounded-md={episodeView}
+	class:shadow-md={episodeView}
 >
 	<header class="flex justify-between">
 		<h3>Podcast transcription:</h3>
@@ -48,13 +52,15 @@
 				<div class="h-2 w-2 rounded-full bg-red-500"></div>
 			{/if}
 		</div>
-		<button
-			class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-close-button p-1"
-			aria-label="Close Transcription Panel"
-			onclick={handleCloseEpisodeTranscription}
-		>
-			<img src={close} alt="Close Icon" class="h-full w-full" />
-		</button>
+		{#if !episodeView}
+			<button
+				class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-close-button p-1"
+				aria-label="Close Transcription Panel"
+				onclick={handleCloseEpisodeTranscription}
+			>
+				<img src={close} alt="Close Icon" class="h-full w-full" />
+			</button>
+		{/if}
 	</header>
 
 	<div
@@ -68,14 +74,16 @@
 	</div>
 
 	<footer class="flex w-full items-center justify-between">
-		<div class="flex h-full w-7/12 items-center md:w-9/12">
-			<PodcastProgressBar
-				explicitDuration={duration}
-				showProgressBarTimeStamps={true}
-				withinTranscribeCard={true}
-			/>
-		</div>
+		{#if !episodeView}
+			<div class="flex h-full w-7/12 items-center md:w-9/12">
+				<PodcastProgressBar
+					explicitDuration={duration}
+					showProgressBarTimeStamps={true}
+					withinTranscribeCard={true}
+				/>
+			</div>
 
-		<PodcastEpisodeCardAudioButton {episode} />
+			<PodcastEpisodeCardAudioButton {episode} />
+		{/if}
 	</footer>
 </article>

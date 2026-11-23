@@ -1,7 +1,19 @@
+// TODO: deprecate
 @mixin textOverflowEllipses {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+
+@mixin textOverflowEllipses1Line {
+	// Via: https://stackoverflow.com/questions/5269713/css-ellipsis-on-second-line
+	display: -webkit-box;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+
+	/* Optional: Standard property for future-proofing */
+	line-clamp: 1;
 }
 
 @mixin textOverflowEllipses2Lines {
@@ -13,4 +25,15 @@
 
 	/* Optional: Standard property for future-proofing */
 	line-clamp: 2;
+}
+
+@mixin textOverflowEllipses3Lines {
+	// Via: https://stackoverflow.com/questions/5269713/css-ellipsis-on-second-line
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+
+	/* Optional: Standard property for future-proofing */
+	line-clamp: 3;
 }

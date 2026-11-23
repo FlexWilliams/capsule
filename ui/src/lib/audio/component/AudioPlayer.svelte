@@ -4,7 +4,8 @@
 	import { PodcastService } from '#lib/podcast/service/podcast.service.svelte.ts';
 	import {
 		podcastState,
-		podcastState$$addEpisodeTranscriptionRequest
+		podcastState$$addEpisodeTranscriptionRequest,
+		podcastState$$setEpisodeStarted
 	} from '#lib/podcast/state/podcast.state.svelte.ts';
 	import { settingsState } from '#lib/settings/settings.state.svelte.ts';
 	import {
@@ -40,6 +41,8 @@
 
 	const audioPlayerId = 'audio-player';
 
+	const continueEpisodeDialogId = 'continue-episode';
+
 	let wssClientId = $derived(webSocketState.clientId);
 
 	let selectedPodcast = $derived(podcastState.selectedPodcast);
@@ -49,6 +52,8 @@
 	let selectedPodcastDirectUrl = $derived(podcastState.selectedPodcastDirectUrl);
 
 	let selectedPodcastTranscriptionUrl = $derived(podcastState.selectedPodcastTranscriptionUrl);
+
+	let episode = $derived(podcastState.episode);
 
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(selectedPodcastUrl || '') || null
@@ -66,11 +71,17 @@
 
 	let transcriptionLanguage = $derived(settingsState.transcriptionLanguage);
 
+	let episodeActivity = $derived(podcastState.episodeActivity);
+
+	let episodeStarted = $derived(podcastState.episodeStarted);
+
 	let textTracks: Map<string, TextTrack> = $state(new Map());
 
 	let activeTextTrack: string | null = $state(null);
 
 	let transcriptionSub: Subscription | null = $state(null);
+
+	let awaitingUserPrompt = $state(false);
 
 	function getAudioElement(): HTMLAudioElement | null {
 		const audioPlayer = document.getElementById(audioPlayerId) as HTMLAudioElement;
@@ -226,6 +237,8 @@
 		console.log(`Rewinding ${skip} seconds...`);
 
 		audio.currentTime = Math.max(0, audio.currentTime - skip);
+
+		updateTimeLeftOffAt();
 	}
 
 	function fastForward(): void {
@@ -238,6 +251,8 @@
 		console.log(`Fast forwarding ${skip} seconds...`);
 
 		audio.currentTime = Math.min(audio.duration, audio.currentTime + skip);
+
+		updateTimeLeftOffAt();
 	}
 
 	function skipAd(): void {
@@ -250,6 +265,8 @@
 		console.log(`(SkipAd) Fast forwarding ${skipAdInterval} seconds...`);
 
 		audio.currentTime = Math.min(audio.duration, audio.currentTime + skipAdInterval);
+
+		updateTimeLeftOffAt();
 	}
 
 	function seekTo(to?: number): void {
@@ -266,6 +283,8 @@
 		}
 
 		audio.currentTime = to;
+
+		updateTimeLeftOffAt();
 	}
 
 	function mute(): void {
@@ -368,7 +387,9 @@
 			return;
 		}
 
-		await MediaSessionService.updateMediaSession(selectedPodcast, current, currentTime, duration);
+		const _currentTime = episodeStarted ? currentTime : 0;
+
+		await MediaSessionService.updateMediaSession(selectedPodcast, current, _currentTime, duration);
 	}
 
 	async function updateAudioTime(): Promise<void> {
@@ -387,6 +408,27 @@
 
 	function listenForCurrentTime(): Subscription {
 		return interval(500).pipe(tap(updateAudioTime)).subscribe();
+	}
+
+	async function updateTimeLeftOffAt(): Promise<void> {
+		if (!isPlaying || awaitingUserPrompt) {
+			return;
+		}
+
+		const audioPlayer = getAudioElement();
+
+		if (!audioPlayer) {
+			return logAudioPlayerError('updateTimeLeftOffAt');
+		}
+
+		const podcastId = selectedPodcast?.id || '';
+		const episodeId = episode?.guid || '';
+
+		PodcastService.updateTimeLeftOffAt(podcastId, episodeId, audioPlayer.currentTime);
+	}
+
+	function listenForTimeLeftOffAt(): Subscription {
+		return interval(5000).pipe(tap(updateTimeLeftOffAt)).subscribe();
 	}
 
 	async function handleBuffering(): Promise<void> {
@@ -425,6 +467,8 @@
 		await audioPlayer.play();
 
 		audioState$$setLoading(false);
+
+		podcastState$$setEpisodeStarted(true);
 
 		console.log(`Podcast now playing...`);
 
@@ -545,12 +589,82 @@
 		}
 	}
 
+	function handleCancelContinueEpisode(): void {
+		awaitingUserPrompt = false;
+
+		const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+		if (dialog) {
+			dialog.hidePopover();
+		}
+	}
+
+	function handleConfirmContinueEpisode(): void {
+		const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+		if (dialog) {
+			dialog.hidePopover();
+		}
+
+		if (!episodeActivity) {
+			console.error(`Error updating time left off at, no episodeActivity`);
+			return;
+		}
+
+		const { timeLeftOffAt } = episodeActivity;
+
+		const audioPlayer = getAudioElement();
+
+		if (!audioPlayer) {
+			console.error(`Error updating time left off at, no audio player`);
+
+			return;
+		}
+
+		audioPlayer.currentTime = timeLeftOffAt;
+
+		audioState$$setCurrentTime(timeLeftOffAt);
+
+		awaitingUserPrompt = false;
+	}
+
+	$effect(() => {
+		if (episodeActivity && selectedPodcastUrl) {
+			untrack(() => {
+				const { timeLeftOffAt } = episodeActivity;
+
+				if (timeLeftOffAt > currentTime) {
+					awaitingUserPrompt = true;
+
+					const dialog = document.getElementById(continueEpisodeDialogId) as HTMLDialogElement;
+					if (dialog) {
+						dialog.showPopover();
+					}
+				} else {
+					awaitingUserPrompt = false;
+				}
+			});
+		}
+	});
+
 	$effect(() => {
 		if (selectedPodcastUrl) {
 			untrack(() => {
 				console.log(
 					`Request for new podcast URL: ${selectedPodcastDirectUrl || selectedPodcastUrl}`
 				);
+
+				if (isPlaying) {
+					pause();
+				}
+
+				audioState$$setCurrentTime(0);
+
+				podcastState$$setEpisodeStarted(false);
+
+				awaitingUserPrompt = true;
+
+				const podcastId = selectedPodcast?.id || '';
+				const episodeId = episode?.guid || '';
+				PodcastService.fetchEpisodeActivity(podcastId, episodeId);
 
 				createNewTextTrack();
 
@@ -599,6 +713,7 @@
 	onMount(() => {
 		subscriptions.push(listenForAudioEvents());
 		subscriptions.push(listenForCurrentTime());
+		subscriptions.push(listenForTimeLeftOffAt());
 	});
 
 	onDestroy(() => {
@@ -607,3 +722,17 @@
 </script>
 
 <audio id={audioPlayerId}></audio>
+
+<dialog
+	id={continueEpisodeDialogId}
+	popover="auto"
+	class="relative m-auto h-6/12 w-9/12 rounded-md bg-rss-dialog p-8 text-text shadow-md"
+>
+	<h3 class="text-center text-lg font-semibold">Continue where you left off at?</h3>
+	<p class="text-center">{Math.floor((episodeActivity?.timeLeftOffAt || 0) / 60)}min mark</p>
+
+	<div class="flex justify-around">
+		<button onclick={handleCancelContinueEpisode}>No</button>
+		<button onclick={handleConfirmContinueEpisode}>Yes</button>
+	</div>
+</dialog>

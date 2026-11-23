@@ -1,9 +1,10 @@
 <script lang="ts">
 	import spin from '#lib/assets/icons/at-icons--arrows-clockwise.svg';
+	import bookmark from '#lib/assets/icons/at-icons--bookmark.svg';
 	import checkmark from '#lib/assets/icons/at-icons--checkmark.svg';
 	import { SPEECH_TO_TEXT_API_URL } from '$app/env/public';
 
-	import arrowDown from '#lib/assets/icons/at-icons--cloud-arrow-down.svg';
+	import arrowDown from '#lib/assets/icons/at-icons--arrow-down-to-bracket.svg';
 	import close from '#lib/assets/icons/at-icons--cross.svg';
 	import info from '#lib/assets/icons/at-icons--info.svg';
 	import text from '#lib/assets/icons/at-icons--text.svg';
@@ -16,7 +17,8 @@
 	import { VibrationService } from '#lib/vibration/vibration-service.ts';
 	import { webSocketState } from '#lib/web-socket/state/websocket.state.svelte.ts';
 	import { WebSocketService } from '#lib/web-socket/web-socket-service.svelte.ts';
-	import type { PodcastEpisode } from '../model/podcast';
+	import type { FavoriteEpisode, PodcastEpisode } from '../model/podcast';
+	import { PodcastService } from '../service/podcast.service.svelte';
 	import {
 		podcastState,
 		podcastState$$addEpisodeTranscriptionRequest,
@@ -27,11 +29,13 @@
 	import PodcastEpisodeCardAudioButton from './podcast-detail/PodcastEpisodeCardAudioButton.svelte';
 
 	interface PodcastEpisodeCardProps {
+		podcastId: string;
+		podcastImageUrl: string;
 		podcastTitle: string;
 		episode: PodcastEpisode;
 	}
 
-	let { podcastTitle, episode }: PodcastEpisodeCardProps = $props();
+	let { podcastId, podcastImageUrl, podcastTitle, episode }: PodcastEpisodeCardProps = $props();
 
 	let transcriptionRequest = $derived(
 		podcastState.episodeTranscriptionRequestMap.get(episode?.url || '') || null
@@ -46,6 +50,10 @@
 	let summaryOpen = $state(false);
 
 	let downloading = $state(false);
+
+	let favorited = $derived(
+		podcastState.favorites.some((f) => f.podcastId === podcastId && f.episodeId === episode?.guid)
+	);
 
 	let wssClientId = $derived(webSocketState.clientId);
 
@@ -155,13 +163,30 @@
 
 		WebSocketService.sendMessage(msg);
 	}
+
+	function handleFavoriteToggle(): void {
+		if (favorited) {
+			PodcastService.removeFavoriteEpisode(podcastId, episode?.guid);
+		} else {
+			const favoriteEpisode: FavoriteEpisode = {
+				podcastId,
+				episodeId: episode?.guid,
+				podcastTitle,
+				episodeTitle: episode?.title,
+				rawUrl: episode?.url || '',
+				publishDate: episode?.publishDate,
+				imageUrl: podcastImageUrl || episode?.image
+			};
+			PodcastService.favoriteEpisode(favoriteEpisode);
+		}
+	}
 </script>
 
 <article
 	class="relative mb-6 h-40 overflow-hidden rounded-sm bg-card p-4 text-card-text shadow-md"
 	class:h-55={showTranscription}
 >
-	<header class="mt-6 h-7/12 max-h-7/12">
+	<header class="mt-8 h-7/12 max-h-7/12">
 		<h3 class="flex-1">
 			{episode?.title}
 		</h3>
@@ -170,6 +195,14 @@
 	{#if transcriptionRequest?.status === TranscriptionStatus.Failed}
 		<p class="absolute top-4 right-22 text-sm text-red-400">Error occurred, please try again</p>
 	{/if}
+	<button
+		class="absolute top-4 right-24 z-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full p-1 shadow-md disabled:cursor-not-allowed disabled:bg-episode-transcribe-button-disabled"
+		class:bg-bg-highlight={favorited}
+		class:bg-button={!favorited}
+		onclick={handleFavoriteToggle}
+	>
+		<img src={bookmark} alt="Favorite" class="h-9/12 w-9/12" />
+	</button>
 	<button
 		class="absolute top-4 right-14 z-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-episode-transcribe-button p-1 shadow-md disabled:cursor-not-allowed disabled:bg-episode-transcribe-button-disabled"
 		aria-label="Transcribe podcast"
@@ -237,10 +270,10 @@
 
 	<footer class="flex h-2/12 max-h-2/12 items-center justify-between">
 		<p class="text-sm">{pubDate}</p>
-		<div class="flex h-6 max-h-6 items-center gap-4">
+		<div class="flex h-6 max-h-6 items-center gap-6">
 			<button
 				aria-label={`Download episode "${episode?.title}"`}
-				class="flex h-6 w-6 items-center justify-center"
+				class="flex h-6 w-6 items-center justify-center rounded-full bg-button p-1 shadow-md"
 				disabled={downloading}
 				onclick={() => handleDownloadPlayButtonClick(episode?.url, episode?.directUrl)}
 			>

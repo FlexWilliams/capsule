@@ -22,11 +22,50 @@ export interface Podcast {
 	imageUrl?: string;
 	rssUrl: string;
 	episodes?: PodcastEpisode[];
+	totalEpisodes?: number;
 }
 
-export interface PodcastRssMeta {
+export interface PodcastMeta {
 	name: string;
 	id: string;
 	rssUrl: string;
 	imageUrl?: string;
+	lastVisit?: string;
+}
+
+export interface EpisodeMarker {
+	start: number;
+	end?: number;
+	comments?: string[];
+}
+
+export interface PodcastEpisodeActivity {
+	podcastId: string;
+	episodeId: string;
+	timeLeftOffAt: number;
+	lastListened?: string;
+	listenCount: number;
+	markers: EpisodeMarker[];
+}
+
+export interface FavoriteEpisode {
+	podcastId: string;
+	episodeId: string;
+	podcastTitle: string;
+	episodeTitle: string;
+	rawUrl: string;
+	imageUrl?: string;
+	publishDate?: string;
+}
+
+export function getDefaultActivity(podcastId: string, episodeId: string): PodcastEpisodeActivity {
+	const defaultActivity: PodcastEpisodeActivity = {
+		podcastId,
+		episodeId,
+		timeLeftOffAt: 0,
+		listenCount: 0,
+		markers: []
+	};
+
+	return defaultActivity;
 }

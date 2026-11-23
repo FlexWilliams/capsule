@@ -13,6 +13,5 @@ export function layoutState$$setNavMenuOpen(navMenuOpen: boolean): void {
 }
 
 export function layoutState$$toggleNavMenu(): void {
-	debugger;
 	layoutState.navMenuOpen = !layoutState.navMenuOpen;
 }

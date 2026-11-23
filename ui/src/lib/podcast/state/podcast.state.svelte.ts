@@ -5,28 +5,51 @@ import {
 	type WhisperTranscription
 } from '#lib/transcription/transcription.ts';
 import { SvelteMap } from 'svelte/reactivity';
-import type { Podcast, PodcastEpisode } from '../model/podcast';
+import type {
+	FavoriteEpisode,
+	Podcast,
+	PodcastEpisode,
+	PodcastEpisodeActivity
+} from '../model/podcast';
 
 export interface PodcastState {
 	selectedPodcast: Podcast | null;
 	selectedPodcastUrl: string | null;
 	episode: PodcastEpisode | null;
+	episodeStarted: boolean;
 	selectedPodcastDirectUrl: string | null;
 	selectedPodcastTranscriptionUrl: string | null;
 	episodeTranscriptionMap: Map<string, WhisperTranscription[]>;
 	episodeTranscriptionRequestMap: Map<string, TranscriptionResponse | null>;
 	showEpisodeTranscriptionMap: Map<string, boolean | null>;
+	myPodcasts: Podcast[];
+	loadingPodcast: boolean;
+	loadingMyPodcasts: boolean;
+	loadingPodcastViaRss: boolean;
+	loadingEpisodeActivity: boolean;
+	episodeActivity: PodcastEpisodeActivity | null;
+	updatingEpisodeActivity: boolean;
+	favorites: FavoriteEpisode[];
 }
 
 const initialPodcastState: PodcastState = {
 	selectedPodcast: null,
 	selectedPodcastUrl: null,
 	episode: null,
+	episodeStarted: false,
 	selectedPodcastDirectUrl: null,
 	selectedPodcastTranscriptionUrl: null,
 	episodeTranscriptionMap: new Map<string, WhisperTranscription[]>(),
 	episodeTranscriptionRequestMap: new Map<string, TranscriptionResponse | null>(),
-	showEpisodeTranscriptionMap: new Map<string, boolean | null>()
+	showEpisodeTranscriptionMap: new Map<string, boolean | null>(),
+	myPodcasts: [],
+	loadingPodcast: false,
+	loadingMyPodcasts: false,
+	loadingPodcastViaRss: false,
+	episodeActivity: null,
+	loadingEpisodeActivity: false,
+	updatingEpisodeActivity: false,
+	favorites: []
 };
 
 export const podcastState = $state(initialPodcastState);
@@ -41,6 +64,10 @@ export function podcastState$$setSelectedPodcastUrl(url: string | null): void {
 
 export function podcastState$$setListeningEpisode(episode: PodcastEpisode | null): void {
 	podcastState.episode = episode;
+}
+
+export function podcastState$$setEpisodeStarted(episodeStarted: boolean): void {
+	podcastState.episodeStarted = episodeStarted;
 }
 
 export function podcastState$$setSelectedPodcastTranscriptionUrl(url: string | null): void {
@@ -129,4 +156,38 @@ export function podcastState$$addEpisodeTranscriptions(
 	podcastState.episodeTranscriptionMap = new SvelteMap(
 		podcastState.episodeTranscriptionMap.entries()
 	);
+}
+
+export function podcastState$$setMyPodcasts(podcasts: Podcast[]): void {
+	podcastState.myPodcasts = podcasts;
+}
+
+export function podcastState$$setLoadingPodcast(loadingPodcast: boolean): void {
+	podcastState.loadingPodcast = loadingPodcast;
+}
+
+export function podcastState$$setLoadingMyPodcasts(loadingMyPodcasts: boolean): void {
+	podcastState.loadingMyPodcasts = loadingMyPodcasts;
+}
+
+export function podcastState$$setLoadingPodcastViaRss(loadingPodcastViaRss: boolean): void {
+	podcastState.loadingPodcastViaRss = loadingPodcastViaRss;
+}
+
+export function podcastState$$setLoadingEpisodeActivity(loadingEpisodeActivity: boolean): void {
+	podcastState.loadingEpisodeActivity = loadingEpisodeActivity;
+}
+
+export function podcastState$$setEpisodeActivity(
+	episodeActivity: PodcastEpisodeActivity | null
+): void {
+	podcastState.episodeActivity = episodeActivity;
+}
+
+export function podcastState$$setUpdatingEpisodeActivity(updatingEpisodeActivity: boolean): void {
+	podcastState.updatingEpisodeActivity = updatingEpisodeActivity;
+}
+
+export function podcastState$$setFavorites(favorites: FavoriteEpisode[]): void {
+	podcastState.favorites = favorites;
 }
