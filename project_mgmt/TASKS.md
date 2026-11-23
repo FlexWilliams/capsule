@@ -101,13 +101,15 @@ Verified By cube on: 10/23/26
 
 <br>
 
-## CAP-006 - Add to portfolio site
+## (COMPLETE) CAP-006 - Add to portfolio site
 
 ### Description:
 
+🚨 No prod link until [API hardening story done](./TASKS.md#cap-011---api-hardening)
+
 ### Acceptance Criteria:
 
-Verified By <> on:
+Verified By cube on: 11/23/26
 
 <br>
 
@@ -164,7 +166,7 @@ Verified By cube on: 10/23/26
 
 <br>
 
-## CAP-009 - Pick Up Where You Left Off At, Favorites, Comments, & Import/Export
+## (COMPLETE) CAP-009 - Pick Up Where You Left Off At, Favorites, Comments, & Import/Export
 
 ### Description:
 
@@ -180,7 +182,7 @@ Verified By cube on: 11/23/26
 
 <br>
 
-## CAP-010 - Transcription Cleanup
+## (COMPLETE) CAP-010 - Transcription Cleanup
 
 ### Description:
 
@@ -196,7 +198,7 @@ Verified By cube on: 11/23/26
 
 (DONE-ISH) - To be handled/reviewed during CAP-012 - v1 Review
 
-Verified By <> on:
+Verified By cube on: 11/23/26
 
 <br>
 
@@ -209,9 +211,12 @@ Verified By <> on:
 - fix skipped tests and add more api tests
 - multi-vendor support or DB download and self-host
 - rate limiting
+- cors
 - (DONE) downloading
   - done on ui side.
 - auth??
+
+🚨 Once done, add prod link to portfolio site
 
 Verified By <> on:
 
@@ -225,6 +230,7 @@ Verified By <> on:
 
 - a11y
 - security
+- health check post-deployment
   1. cors!
 - perf
 - etc.
